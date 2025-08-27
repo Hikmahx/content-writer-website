@@ -34,7 +34,7 @@ export function Header() {
             SARAH YOUSUPH
           </Link>
 
-          <div className='hidden md:!flex items-center space-x-8'>
+          <div className='hidden md:flex items-center space-x-8'>
             <Link
               href='/'
               className={`transition-colors font-sans ${
@@ -86,7 +86,7 @@ export function Header() {
 
           <button
             onClick={toggleMenu}
-            className='md:!hidden relative z-50 w-8 h-8 flex flex-col justify-center items-center space-y-1 group'
+            className='md:hidden relative z-50 w-8 h-8 flex flex-col justify-center items-center space-y-1 group'
             aria-label='Toggle menu'
           >
             <span
