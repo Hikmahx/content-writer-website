@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export function Hero() {
   return (
-    <section className='relative lg:h-[75vh] overflow-hidden flex flex-col md:grid grid-cols-2 2xl:max-w-7xl mx-auto'>
+    <section className='relative xl:h-[80vh] overflow-hidden flex flex-col md:grid grid-cols-2 2xl:max-w-7xl mx-auto'>
       {/* Decorative shapes */}
       {/* <div className='absolute top-20 right-0 w-64 h-64 bg-gray-800 rounded-full transform translate-x-32'></div>
       <div className='absolute bottom-0 left-0 w-96 h-96 bg-gray-200 rounded-full transform -translate-x-48 translate-y-48'></div>
@@ -14,12 +14,14 @@ export function Hero() {
       <div className='relative z-10 max-w-7xl mx-auto px-6 lg:pr-12 lg:pl-0 lg:py-20'>
         {/* <div className='grid-lg:grid-cols-2 gap-12 items-center'> */}
         <div className='flex flex-col lg:px-10 xl:pl-12 2xl:pl-0 space-y-4 lg:space-y-6 text-center md:text-left'>
-          <div className='flex flex-col space-y-3'>
+          <div className='flex flex-col space-y-4'>
             <p className='text-lg'>Hello, I'm</p>
-            <h1 className='text-5xl font-medium font-serif text-foreground tracking-wider'>
-              SARAH YOUSUPH
-            </h1>
-            <p className='text-xl'>Professional Content Writer</p>
+            <div className=''>
+              <h1 className='text-5xl lg:text-6xl font-medium font-serif text-foreground tracking-wider mb-3'>
+                SARAH YOUSUPH
+              </h1>
+              <p className='text-xl'>Professional Content Writer</p>
+            </div>
             <p className='text-base text-muted-foreground max-w-md lg:max-w-lg leading-relaxed'>
               I help brands and individuals turn their ideas into compelling
               narratives. I focus on maintaining clarity and emotional impact in
@@ -51,7 +53,14 @@ export function Hero() {
         alt='Sarah Yousuph'
         width={320}
         height={320}
-        className='w-[750px] h-[400px] md:h-[500px] lg:h-[600px] xl:h-[720px] object-cover object-left z-10 relative lg:absolute 2xl:relative lg:top-[-15%] right-[-20%] md:right-[-18%]'
+        className='w-[750px] h-[400px] md:h-[500px] lg:h-[640px] xl:h-[750px] object-cover object-left z-10 relative lg:absolute xl:relative lg:top-[-15%] xl:top-[-12%] right-[-20%] md:right-[-18%]'
+      />
+      <Image
+        src='/hero-bottom.svg'
+        alt='hero bottom icon'
+        width={253}
+        height={200}
+        className='absolute bottom-0 left-0 hidden xl:block'
       />
       {/* <div className='w-[70px] h-[70px] border-2 border-black absolute top-[72%] xlleft-[42.5%] rounded-full'></div> */}
       {/* </div> */}
