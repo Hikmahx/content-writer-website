@@ -11,7 +11,7 @@ export function Hero() {
       <div className='absolute top-1/2 right-1/4 w-4 h-4 bg-gray-400 rounded-full'></div>
       <div className='absolute bottom-1/3 right-1/3 w-32 h-32 border border-gray-300 rounded-full'></div> */}
 
-      <div className='relative z-10 max-w-7xl mx-auto px-6 lg:pr-12 lg:pl-0 lg:py-20'>
+      <div className='relative z-10 max-w-7xl mx-auto px-6 lg:pr-12 lg:pl-0 lg:py-20 xl:py-28'>
         {/* <div className='grid-lg:grid-cols-2 gap-12 items-center'> */}
         <div className='flex flex-col lg:px-10 xl:pl-12 2xl:pl-0 space-y-4 lg:space-y-6 text-center md:text-left'>
           <div className='flex flex-col space-y-4'>
