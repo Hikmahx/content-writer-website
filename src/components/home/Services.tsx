@@ -1,4 +1,7 @@
+'use client'
+
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 
 export function Services() {
   const services = [
@@ -23,7 +26,9 @@ export function Services() {
   ]
 
   return (
-    <section className='py-40 relative min-h-screen'>
+    <section
+      className='py-40 relative min-h-screen'
+    >
       <Image
         src='/services-top.svg'
         alt='wavy bg'
@@ -38,7 +43,19 @@ export function Services() {
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-12'>
           {services.map((service, index) => (
-            <div key={index} className='text-center'>
+            <motion.div
+              key={index}
+              custom={index}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{
+                duration: 0.7,
+                delay: index * 0.25,
+                ease: 'easeOut',
+              }}
+              className='text-center'
+            >
               <div className='flex justify-center mb-8'>
                 <Image
                   src={service.icon}
@@ -54,7 +71,7 @@ export function Services() {
               <p className='text-sm text-muted-foreground leading-relaxed'>
                 {service.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

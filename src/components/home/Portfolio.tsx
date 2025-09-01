@@ -1,6 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { motion } from 'framer-motion'
 
 const portfolioItems = [
   {
@@ -48,25 +51,33 @@ export function Portfolio() {
 
         <div className='space-y-8 mb-12'>
           {portfolioItems.map((item, index) => (
-            <Link
+            <motion.div
               key={index}
-              href={item.href}
-              target='_blank'
-              rel='noopener noreferrer'
+              custom={index}
+              initial={{ opacity: 0, x: '-50%' }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{
+                delay: index * 0.25,
+                duration: 0.7,
+                type: 'spring',
+              }}
               className='group block border-b border-gray-600 pb-8 last:border-b-0 hover:border-gray-500 transition-colors duration-300'
             >
-              <div className='flex items-start justify-between gap-4'>
-                <div className='flex-1'>
-                  <h3 className='font-serif text-xl md:text-2xl mb-3 group-hover:text-beige transition-colors duration-300 text-pretty'>
-                    {item.title}
-                  </h3>
-                  <p className='font-sans text-gray-400 text-base md:text-lg leading-relaxed group-hover:text-gray-300 transition-colors duration-300'>
-                    {item.description}
-                  </p>
+              <Link href={item.href} target='_blank' rel='noopener noreferrer'>
+                <div className='flex items-start justify-between gap-4'>
+                  <div className='flex-1'>
+                    <h3 className='font-serif text-xl md:text-2xl mb-3 group-hover:text-beige transition-colors duration-300 text-pretty'>
+                      {item.title}
+                    </h3>
+                    <p className='font-sans text-gray-400 text-base md:text-lg leading-relaxed group-hover:text-gray-300 transition-colors duration-300'>
+                      {item.description}
+                    </p>
+                  </div>
+                  <ArrowRight className='w-6 h-6 md:w-8 md:h-8 text-white group-hover:translate-x-1 group-hover:text-beige transition-transform duration-300 flex-shrink-0 mt-1' />
                 </div>
-                <ArrowRight className='w-6 h-6 md:w-8 md:h-8 text-white group-hover:translate-x-1 group-hover:text-beige transition-transform duration-300 flex-shrink-0 mt-1' />
-              </div>
-            </Link>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
