@@ -1,33 +1,51 @@
-import { Instagram, Linkedin, Mail } from 'lucide-react'
+import Link from 'next/link'
+import { FaEnvelope, FaInstagram, FaLinkedinIn } from 'react-icons/fa'
+import { FaMedium } from 'react-icons/fa6'
+
+const socialLinks = [
+  {
+    href: 'https://www.instagram.com/sarahs.odysseys/',
+    icon: FaInstagram,
+    label: 'Instagram',
+  },
+  {
+    href: 'https://ng.linkedin.com/in/sarah-yousuph-8891a3237',
+    icon: FaLinkedinIn,
+    label: 'LinkedIn',
+  },
+  {
+    href: 'mailto:adenikeangel.sy@gmail.com',
+    icon: FaEnvelope,
+    label: 'Email',
+  },
+  {
+    href: 'https://medium.com/@sarahyousuph.sy',
+    icon: FaMedium,
+    label: 'Medium',
+  },
+]
 
 export function Footer() {
   return (
-    <footer className='w-full py-8 px-6 lg:px-12 border-t'>
-      <div className='max-w-7xl mx-auto flex items-center justify-between'>
+    <footer className='w-full pb-12'>
+      <div className='max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8'>
         <p className='text-sm text-muted-foreground'>
           © 2025 Sarah Yousuph, all rights reserved. | Site by Hikmah
         </p>
 
         <div className='flex items-center space-x-4'>
-          <a
-            href='#'
-            className='text-muted-foreground hover:text-foreground transition-colors'
-          >
-            <Instagram className='w-5 h-5' />
-          </a>
-          <a
-            href='#'
-            className='text-muted-foreground hover:text-foreground transition-colors'
-          >
-            <Linkedin className='w-5 h-5' />
-          </a>
-          <a
-            href='#'
-            className='text-muted-foreground hover:text-foreground transition-colors'
-          >
-            <Mail className='w-5 h-5' />
-          </a>
-          <span className='text-muted-foreground text-lg font-bold'>M</span>
+          {socialLinks.map(({ href, icon: Icon, label }) => (
+            <Link
+              key={label}
+              href={href}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-gray-800 hover:text-beige transition-colors'
+            >
+              <Icon className='w-5 h-5' />
+              <span className='sr-only'>{label}</span>
+            </Link>
+          ))}
         </div>
       </div>
     </footer>

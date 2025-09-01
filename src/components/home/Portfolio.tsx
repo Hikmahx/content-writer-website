@@ -40,7 +40,7 @@ const portfolioItems = [
 
 export function Portfolio() {
   return (
-    <section className='bg-[#3A3C43] text-white py-16 px-4 sm:px-6 lg:px-8'>
+    <section className='bg-[#3A3C43] text-white py-20 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-7xl mx-auto'>
         <h2 className='font-serif text-4xl md:text-5xl text-center mb-16 text-balance'>
           My Works

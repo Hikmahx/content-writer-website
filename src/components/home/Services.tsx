@@ -19,11 +19,11 @@ export function Services() {
       title: 'Creative Strategy',
       description:
         'Great content begins with vision and direction. I shape ideas into clear strategies that keep goals in focus. Each plan ensures your message is purposeful, impactful, and consistent.',
-    }
+    },
   ]
 
   return (
-    <section className='py-40 bg-gray-50 relative min-h-screen'>
+    <section className='py-40 relative min-h-screen'>
       <Image
         src='/services-top.svg'
         alt='wavy bg'
@@ -31,15 +31,7 @@ export function Services() {
         height={310}
         className='absolute top-0 right-0'
       />
-      <Image
-        src='/services-bottom.svg'
-        alt='wavy bg'
-        width={128}
-        height={505}
-        className='absolute bottom-0 left-0'
-      />
-
-      <div className='relative z-10 max-w-7xl mx-auto px-6 lg:px-12'>
+      <div className='relative z-10 max-w-md md:max-w-7xl mx-auto px-6 lg:px-12'>
         <h2 className='text-4xl font-bold font-serif text-center text-foreground mb-16'>
           Services
         </h2>
@@ -53,7 +45,7 @@ export function Services() {
                   alt={service.title}
                   width={140}
                   height={136}
-                  className='w-full h-[100px] text-gray-600 bg-cover'
+                  className='w-full h-[100px] text-gray-200 bg-cover opacity-70'
                 />
               </div>
               <h3 className='text-xl font-semibold text-foreground mb-4'>
@@ -66,6 +58,13 @@ export function Services() {
           ))}
         </div>
       </div>
+      <Image
+        src='/services-bottom.svg'
+        alt='wavy bg'
+        width={128}
+        height={505}
+        className='relative w-18 lg:w-auto -ml-4 mt-[-5rem] mb-[-22rem] lg:my-0 lg:absolute bottom-0 left-0'
+      />
     </section>
   )
 }

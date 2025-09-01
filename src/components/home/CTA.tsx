@@ -16,7 +16,7 @@ export function CTA() {
         <div className='relative px-6 lg:px-12'>
           <div className='grid lg:grid-cols-2 gap-12 items-center'>
             <div className='space-y-6'>
-              <h2 className='text-4xl lg:text-5xl font-bold leading-tight'>
+              <h2 className='text-4xl lg:text-5xl font-bold leading-tight text-center lg:text-start'>
                 Interested in working with me?
               </h2>
             </div>

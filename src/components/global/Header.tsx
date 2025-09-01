@@ -79,9 +79,11 @@ export function Header() {
             >
               Resume
             </Link>
-            <Button className='bg-black text-white hover:bg-gray-800 px-6 font-sans'>
-              Contact
-            </Button>
+            <Link href='/contact'>
+              <Button className='bg-black text-white hover:bg-beige hover:text-black transition-all px-6 font-sans text-base'>
+                CONTACT
+              </Button>
+            </Link>
           </div>
 
           <button
@@ -154,7 +156,7 @@ export function Header() {
             ))}
 
             <Button
-              className={`bg-black text-white hover:bg-gray-800 px-6 font-sans w-fit mt-8 transition-all duration-300 ease-in-out transform ${
+              className={`bg-black text-white hover:bg-beige hover:text-black px-6 font-sans w-fit mt-8 transition-all duration-300 ease-in-out transform ${
                 isOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
               }`}
               style={{
@@ -162,7 +164,7 @@ export function Header() {
               }}
               onClick={() => setIsOpen(false)}
             >
-              Contact
+              <Link href='/contact'>CONTACT</Link>
             </Button>
           </nav>
         </div>
