@@ -73,8 +73,6 @@ export function Portfolio() {
         <div className='text-center'>
           <Link href='/portfolio'>
             <Button
-              asChild
-              variant='secondary'
               size='lg'
               className='bg-white text-gray-800 hover:bg-beige transition-all font-sans font-medium px-8 py-3 text-base'
             >
