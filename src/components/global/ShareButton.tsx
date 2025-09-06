@@ -13,8 +13,8 @@ function ShareArticle() {
   const pathname = usePathname()
   const [copied, setCopied] = useState(false)
   const articleLink = `${window.location.origin}${pathname}`
-  const text = `Checkout the latest article on GitRoll: \n \n`
-  const hashtags = 'GitRoll'
+  const text = `Checkout Sarah Yousuph's latest article: \n \n`
+  const hashtags = 'Sarah Yousuph'
   const twitterShareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     text
   )}&hashtags=${encodeURIComponent(hashtags)}&url=${encodeURIComponent(

@@ -54,7 +54,7 @@
 
 .tiptap {
   p {
-    @apply my-4 first:mt-0 last:mb-0 text-base leading-relaxed outline-gray-50 min-h-[40px] py-4 px-2;
+    @apply first:mt-0 last:mb-0 text-base leading-relaxed py-0 px-2;
   }
 
   h1 {
@@ -67,6 +67,21 @@
 }
 
 .ProseMirror-focused {
+  @apply focus-visible:outline-gray-50 focus:border-gray-50;
+}
 
-  @apply focus-visible:outline-gray-50;
+.bubble-menu {
+  @apply bg-white shadow-md rounded-md p-2 flex space-x-2;
+
+  button {
+    @apply p-2 rounded-md hover:bg-gray-100 text-xs;
+
+    &.is-active {
+      @apply bg-gray-200;
+    }
+
+    &.hover {
+      @apply bg-gray-100;
+    }
+  }
 }

@@ -22,9 +22,13 @@ import {
   ImageIcon,
   Link as LinkIcon,
   Upload,
+  Strikethrough,
 } from 'lucide-react'
 import type { Post } from '@/lib/types'
+import TextAlign from '@tiptap/extension-text-align'
+import Highlight from '@tiptap/extension-highlight'
 import { Placeholder } from '@tiptap/extensions'
+import { BubbleMenu } from '@tiptap/react/menus'
 
 interface RichPostEditorProps {
   post: Partial<Post>
@@ -43,7 +47,22 @@ export default function RichPostEditor({
 }: RichPostEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: 'list-disc ml-3',
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: 'list-decimal ml-3',
+          },
+        },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Highlight,
       Image,
       Placeholder.configure({
         // Use a placeholder:
@@ -62,10 +81,16 @@ export default function RichPostEditor({
       // }),
     ],
     content: post.content || '',
+    editorProps: {
+      attributes: {
+        class: 'min-h-[50vh] rounded-md py-4 px-3',
+      },
+    },
     onUpdate: ({ editor }) => {
+      console.log(editor.getHTML());
       onChange({ ...post, content: editor.getHTML() })
     },
-    immediatelyRender: false, // 👈 this prevents hydration issues in Next.js
+    immediatelyRender: false,
   })
 
   // Tags
@@ -122,6 +147,8 @@ export default function RichPostEditor({
       setShowImageUpload(false)
     }
   }
+
+  const [showMenu, setShowMenu] = useState(true)
 
   return (
     <div className='space-y-6'>
@@ -203,8 +230,43 @@ export default function RichPostEditor({
           </Button>
         </div>
       </div>
+      {/* Bubble Menu */}
+      {editor && showMenu && (
+        <BubbleMenu
+          editor={editor}
+          options={{ placement: 'bottom', offset: 8 }}
+        >
+          <div className='bubble-menu'>
+            <button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={editor.isActive('bold') ? 'is-active' : ''}
+              type='button'
+            >
+              <span className='sr-only'>Bold</span>
+              <Bold className='w-4 h-4' />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={editor.isActive('italic') ? 'is-active' : ''}
+              type='button'
+            >
+              <span className='sr-only'>Italic</span>
+              <Italic className='w-4 h-4' />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              className={editor.isActive('strike') ? 'is-active' : ''}
+              type='button'
+            >
+              <span className='sr-only'>Strike through</span>
+              <Strikethrough className='w-4 h-4' />
+            </button>
+          </div>
+        </BubbleMenu>
+      )}
+
       {/* TipTap Editor */}
-      <div className='min-h-[400px] text-lg leading-relaxed focus:outline-none prose prose-lg max-w-none'>
+      <div className='min-h-[400px] text-lg leading-relaxed outline-none prose prose-lg max-w-none'>
         <EditorContent editor={editor} className='min-h-[50vh]' />
       </div>
       {/* Tags */}
