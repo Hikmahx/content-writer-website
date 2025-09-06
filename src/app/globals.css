@@ -51,3 +51,22 @@
     /* Firefox */
   }
 }
+
+.tiptap {
+  p {
+    @apply my-4 first:mt-0 last:mb-0 text-base leading-relaxed outline-gray-50 min-h-[40px] py-4 px-2;
+  }
+
+  h1 {
+    @apply text-3xl font-bold mt-8 mb-4 first:mt-0 last:mb-0;
+  }
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  @apply text-gray-400 content-[attr(data-placeholder)] text-start h-0 pointer-events-none;
+}
+
+.ProseMirror-focused {
+
+  @apply focus-visible:outline-gray-50;
+}
