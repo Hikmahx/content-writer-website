@@ -5,6 +5,7 @@ import { Open_Sans } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/global/Header'
 import { Footer } from '@/components/global/Footer'
+import AuthProvider from '@/providers/AuthProvider'
 
 const lora = Lora({
   subsets: ['latin'],
@@ -35,9 +36,11 @@ export default function RootLayout({
       className={`${lora.variable} ${openSans.variable} antialiased`}
     >
       <body className='min-h-screen flex flex-col bg-white font-sans'>
-        <Header />
-        <main className='flex-1'>{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className='flex-1'>{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   )
