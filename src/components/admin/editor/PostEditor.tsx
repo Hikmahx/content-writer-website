@@ -23,18 +23,23 @@ export default function PostEditor({ postId }: PostEditorProps) {
   const [showImageUpload, setShowImageUpload] = useState(false)
 
   useEffect(() => {
-    if (postId) {
-      setLoading(true)
-      fetch(`/api/posts/${postId}`)
-        .then((response) => response.ok ? response.json() : null)
-        .then((data) => {
-          if (data) setPost(data)
-        })
-        .catch((error) => {
+    const fetchPost = async () => {
+      if (postId) {
+        setLoading(true)
+        try {
+          const response = await fetch(`/api/posts/${postId}`)
+          if (response.ok) {
+            const data = await response.json()
+            setPost(data)
+          }
+        } catch (error) {
           console.error('Failed to fetch post:', error)
-        })
-        .finally(() => setLoading(false))
+        } finally {
+          setLoading(false)
+        }
+      }
     }
+    fetchPost()
   }, [postId])
 
   const handleSave = async (status: PostStatus = post.status || 'DRAFT') => {
@@ -44,6 +49,14 @@ export default function PostEditor({ postId }: PostEditorProps) {
       const postData = {
         ...post,
         status,
+        slug:
+          post.title
+            ?.toLowerCase()
+            ?.trim()
+            ?.replace(/\s+/g, '-')
+            ?.replace(/[^\w-]+/g, '')
+            ?.replace(/-+/g, '-')
+            ?.replace(/^-+|-+$/g, '') ?? '',
         published: status === 'PUBLISHED',
       }
 

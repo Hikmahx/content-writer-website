@@ -9,14 +9,16 @@ export default function LoginPage() {
   const { data: session, status } = useSession()
   console.log(session, status)
 
-  // if (session) {
-  //   return (
-  //     <>
-  //       Signed in as {session.user.email} <br />
-  //       <button onClick={() => signOut()}>Sign out</button>
-  //     </>
-  //   )
-  // }
+  if (session) {
+    return (
+      <div className='h-[50vh] flex flex-col gap-4 items-center justify-center'>
+        <p>
+          Signed in as {session.user.email}
+        </p>
+        <Button variant='outline' onClick={() => signOut()}>Sign out</Button>
+      </div>
+    )
+  }
   return (
     <div className='h-[50vh] flex items-center justify-center'>
       <Button

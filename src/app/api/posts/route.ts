@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/utils/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
@@ -14,11 +15,23 @@ export async function GET() {
   }
 }
 
+// CREATE NEW POST
 export async function POST(request: NextRequest) {
+  const user = await requireAdmin()
+
   try {
-    // const { title, content, published } = await request.json()
-    // console.log({ title, content, published })
-    // return NextResponse.json({ success: true })
+    const body = await request.json()
+
+    const newPost = await prisma.post.create({
+      data: { ...body, published: body.published || false, authorId: user.id },
+      include: {
+        author: {
+          select: { name: true, image: true },
+        },
+      },
+    })
+
+    return NextResponse.json(newPost)
   } catch (err) {
     console.log(err)
     return NextResponse.json({ message: 'Something went wrong', status: 500 })
