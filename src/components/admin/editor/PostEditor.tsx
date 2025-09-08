@@ -40,17 +40,30 @@ export default function PostEditor({ postId }: PostEditorProps) {
   const handleSave = async (status: PostStatus = post.status || 'DRAFT') => {
     setSaving(true)
     try {
+      // Prepare the post data for saving
+      const postData = {
+        ...post,
+        status,
+        published: status === 'PUBLISHED',
+      }
+
+      // Log the post data in JSON format to console
+      console.log('Saving post:', JSON.stringify(postData, null, 2))
+
       const method = postId ? 'PUT' : 'POST'
       const url = postId ? `/api/posts/${postId}` : '/api/posts'
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...post, status }),
+        body: JSON.stringify(postData),
       })
       if (response.ok) {
         const savedPost = await response.json()
         setPost(savedPost)
+        console.log('Post saved successfully:', savedPost)
         // Show success message
+      } else {
+        console.error('Failed to save post:', response.statusText)
       }
     } catch (error) {
       console.error('Failed to save post:', error)
@@ -63,6 +76,7 @@ export default function PostEditor({ postId }: PostEditorProps) {
     setPost((prev) => ({
       ...prev,
       // TipTap handles image insertion, so no need to update content here
+      // img: imageUrl,
     }))
     setShowImageUpload(false)
   }
