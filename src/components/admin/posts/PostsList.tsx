@@ -3,32 +3,46 @@
 import { useState, useEffect } from 'react'
 import PostCard from './PostCard'
 import type { Post, PostStatus } from '@/lib/types'
+import { useSession } from 'next-auth/react'
+import CardPost from '@/components/blog/CardPost'
 
 interface PostsListProps {
   status: PostStatus
 }
 
 export default function PostsList({ status }: PostsListProps) {
+  const { data: session } = useSession()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(`/api/posts?status=${status}`)
-        if (response.ok) {
-          const data = await response.json()
-          setPosts(data.posts)
-        }
-      } catch (error) {
-        console.error('Failed to fetch posts:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchPosts()
-  }, [status])
+  }, [])
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/posts', {
+        cache: 'no-store'
+      })
+      const data = await response.json()
+      const posts = await data.posts
+      // console.log(posts)
+      setPosts(posts)
+    } catch (error) {
+      console.error('Failed to fetch posts:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const isAdmin = session?.user?.role === 'ADMIN'
+
+  if (!isAdmin && !loading) {
+    return (
+      <div className='flex h-[50vh] items-center'>
+        <p className=''>Unauthorized Access</p>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -59,20 +73,15 @@ export default function PostsList({ status }: PostsListProps) {
             ? 'Start writing and publish your first story to share with the world.'
             : 'Create a draft to start working on your next story.'}
         </p>
-        {/* <Link href='/admin/new'>
-          <Button className='bg-primary text-primary-foreground hover:bg-primary/90'>
-            <Plus className='w-4 h-4 mr-2' />
-            Write your first story
-          </Button>
-        </Link> */}
       </div>
     )
   }
 
   return (
     <div className='space-y-4'>
-      {posts.map((post) => (
+      {posts.length > 0 && posts.map((post) => (
         <PostCard key={post.id} post={post} />
+        // <CardPost key={post.id} post={post} />
       ))}
     </div>
   )
