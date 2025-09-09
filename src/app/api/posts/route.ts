@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/utils/auth'
+import { validateSlugUniqueness } from '@/lib/utils/post'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -58,8 +59,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
+    await validateSlugUniqueness(body.slug)
+
     const newPost = await prisma.post.create({
-      data: { ...body, published: body.published || false, authorId: user.id },
+      data: {
+        ...body,
+        published: body.published || false,
+        authorId: user.id,
+        slug: body.slug,
+      },
       include: {
         author: {
           select: { name: true, image: true },
@@ -67,9 +75,18 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(newPost)
-  } catch (err) {
-    console.log(err)
-    return NextResponse.json({ message: 'Something went wrong', status: 500 })
+    return NextResponse.json(newPost, { status: 201 })
+  } catch (err: any) {
+    if (err.message === 'Title should be unique always') {
+      console.log(err.message)
+      return NextResponse.json({ error: err.message }, { status: 409 })
+    }
+    if (err.message === 'Authentication required') {
+      console.log(err.message)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    console.error('Failed to create post:', err)
+    return NextResponse.json({ err: 'Failed to create post' }, { status: 500 })
   }
 }
