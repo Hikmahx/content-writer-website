@@ -35,13 +35,13 @@ export default function RootLayout({
       lang='en'
       className={`${lora.variable} ${openSans.variable} antialiased`}
     >
-      <body className='min-h-screen flex flex-col bg-white font-sans'>
-        <AuthProvider>
+      <AuthProvider>
+        <body className='min-h-screen flex flex-col bg-white font-sans'>
           <Header />
           <main className='flex-1'>{children}</main>
           <Footer />
-        </AuthProvider>
-      </body>
+        </body>
+      </AuthProvider>
     </html>
   )
 }

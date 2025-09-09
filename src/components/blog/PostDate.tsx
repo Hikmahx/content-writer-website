@@ -2,7 +2,7 @@
 import { useMemo } from 'react'
 
 
-export default function PostDate({ time }: Readonly<{ time: number }>) {
+export default function PostDate({ time }: Readonly<{ time: Date }>) {
   const [ timeStr, humanTimeStr ] = useMemo(() => {
     const _time = new Date(time)
     return [

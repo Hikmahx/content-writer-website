@@ -9,12 +9,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
-import type { Post, PostStatus } from '@/lib/types'
+import type { Post } from '@/lib/types'
 
 interface EditorHeaderProps {
   post: Partial<Post>
   saving: boolean
-  onSave: (status?: PostStatus) => void
+  onSave: (published: boolean) => void
 }
 
 export default function EditorHeader({
@@ -34,11 +34,7 @@ export default function EditorHeader({
           </Link>
 
           <div className='text-sm text-muted-foreground'>
-            {saving
-              ? 'Saving...'
-              : post.status === 'PUBLISHED'
-              ? 'Published'
-              : 'Draft'}
+            {saving ? 'Saving...' : post.published ? 'Published' : 'Draft'}
           </div>
         </div>
 
@@ -46,7 +42,7 @@ export default function EditorHeader({
           <Button
             variant='outline'
             size='sm'
-            onClick={() => onSave('DRAFT')}
+            onClick={() => onSave(false)}
             disabled={saving}
           >
             <Save className='w-4 h-4 mr-2' />
@@ -56,15 +52,15 @@ export default function EditorHeader({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size='sm' disabled={saving}>
-                {post.status === 'PUBLISHED' ? 'Update' : 'Publish'}
+                {post.published ? 'Update' : 'Publish'}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
-              <DropdownMenuItem onClick={() => onSave('PUBLISHED')}>
+              <DropdownMenuItem onClick={() => onSave(true)}>
                 <Eye className='w-4 h-4 mr-2' />
                 Publish now
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onSave('DRAFT')}>
+              <DropdownMenuItem onClick={() => onSave(false)}>
                 <Save className='w-4 h-4 mr-2' />
                 Save as draft
               </DropdownMenuItem>

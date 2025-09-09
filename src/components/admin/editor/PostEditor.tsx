@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import RichPostEditor from './RichPostEditor'
 import EditorHeader from './EditorHeader'
-import type { Post, PostStatus } from '@/lib/types'
+import type { Post } from '@/lib/types'
 
 interface PostEditorProps {
   postId?: string
@@ -15,7 +15,7 @@ export default function PostEditor({ postId }: PostEditorProps) {
     description: '',
     content: '',
     hashtags: [],
-    status: 'DRAFT' as PostStatus,
+    published: false,
     img: '',
   })
   const [loading, setLoading] = useState(!!postId)
@@ -42,13 +42,13 @@ export default function PostEditor({ postId }: PostEditorProps) {
     fetchPost()
   }, [postId])
 
-  const handleSave = async (status: PostStatus = post.status || 'DRAFT') => {
+  const handleSave = async (published: boolean) => {
     setSaving(true)
     try {
       // Prepare the post data for saving
       const postData = {
         ...post,
-        status,
+        published,
         slug:
           post.title
             ?.toLowerCase()
@@ -57,7 +57,6 @@ export default function PostEditor({ postId }: PostEditorProps) {
             ?.replace(/[^\w-]+/g, '')
             ?.replace(/-+/g, '-')
             ?.replace(/^-+|-+$/g, '') ?? '',
-        published: status === 'PUBLISHED',
       }
 
       // Log the post data in JSON format to console
@@ -76,7 +75,7 @@ export default function PostEditor({ postId }: PostEditorProps) {
         console.log('Post saved successfully:', savedPost)
         // Show success message
       } else {
-        console.error('Failed to save post:', response.statusText)
+        console.error('Failed to save post:', response)
       }
     } catch (error) {
       console.error('Failed to save post:', error)

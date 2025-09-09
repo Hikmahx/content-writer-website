@@ -29,7 +29,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import Highlight from '@tiptap/extension-highlight'
 import { Placeholder } from '@tiptap/extensions'
 import { BubbleMenu } from '@tiptap/react/menus'
-
+import type { Level } from '@tiptap/extension-heading'
 interface RichPostEditorProps {
   post: Partial<Post>
   onChange: (post: Partial<Post>) => void
@@ -87,7 +87,7 @@ export default function RichPostEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      console.log(editor.getHTML());
+      console.log(editor.getHTML())
       onChange({ ...post, content: editor.getHTML() })
     },
     immediatelyRender: false,
@@ -113,7 +113,7 @@ export default function RichPostEditor({
   // Toolbar actions
   const setBold = () => editor?.chain().focus().toggleBold().run()
   const setItalic = () => editor?.chain().focus().toggleItalic().run()
-  const setHeading = (level: number) =>
+  const setHeading = (level: Level) =>
     editor?.chain().focus().toggleHeading({ level }).run()
   const setBulletList = () => editor?.chain().focus().toggleBulletList().run()
   const setLink = () => {

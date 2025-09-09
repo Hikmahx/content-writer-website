@@ -82,7 +82,7 @@ export default function PostCard({ post }: PostCardProps) {
                   Edit
                 </Link>
               </DropdownMenuItem>
-              {post.status === 'PUBLISHED' && (
+              {post.published && (
                 <DropdownMenuItem asChild>
                   <Link href={`/blog/${post.slug}`}>
                     <Eye className='h-4 w-4 mr-2' />

@@ -1,4 +1,4 @@
-import type { PostMeta } from '@/models/blogs/types'
+import type { Post } from '@/lib/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -12,7 +12,7 @@ import {
 import PostDate from './PostDate'
 
 
-export default function CardPost({ post }: { post: PostMeta }) {
+export default function CardPost({ post }: { post: Post }) {
   const createdAt = useMemo(() => new Date(post.createdAt), [ post.createdAt ])
   return (
     <Card className='w-full prose prose-slate max-w-none relative rounded-none shadow-none flex flex-col md:flex-row items-center justify-between border-white border-b border-b-gray-300 first:border-t first:border-t-gray-300 gap-x-4'>
@@ -23,7 +23,7 @@ export default function CardPost({ post }: { post: PostMeta }) {
             <div className='py-5'>
               <Image
                 className='w-10 h-10 border border-gray-100 rounded-full my-2'
-                src={post.author.avatar}
+                src={post.author.image}
                 alt='placeholder'
                 width={40}
                 height={40}
@@ -61,7 +61,7 @@ export default function CardPost({ post }: { post: PostMeta }) {
           <>
             <Image
               className='w-full h-auto m-0 rounded-lg'
-              src={post.img}
+              src={post.img || ''}
               alt='placeholder'
               width={300}
               height={120}

@@ -97,7 +97,6 @@ model Post {
   content     String
   img         String?
   hashtags    String[]
-  status      String    @default("user")
   published   Boolean   @default(false)
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
