@@ -4,17 +4,17 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { id } = await params
+    const { slug } = await params
     const user = await getCurrentUser()
 
     const isAdmin = user?.role === 'ADMIN'
 
     const post = await prisma.post.findUnique({
       // No access to draft post if the user is not an admin
-      where: isAdmin ? { id } : { id, published: true },
+      where: isAdmin ? { slug } : { slug, published: true },
       include: {
         author: {
           select: { name: true, image: true },

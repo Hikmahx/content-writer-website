@@ -6,10 +6,10 @@ import EditorHeader from './EditorHeader'
 import type { Post } from '@/lib/types'
 
 interface PostEditorProps {
-  postId?: string
+  postSlug?: string
 }
 
-export default function PostEditor({ postId }: PostEditorProps) {
+export default function PostEditor({ postSlug }: PostEditorProps) {
   const [post, setPost] = useState<Partial<Post>>({
     title: '',
     description: '',
@@ -18,16 +18,16 @@ export default function PostEditor({ postId }: PostEditorProps) {
     published: false,
     img: '',
   })
-  const [loading, setLoading] = useState(!!postId)
+  const [loading, setLoading] = useState(!!postSlug)
   const [saving, setSaving] = useState(false)
   const [showImageUpload, setShowImageUpload] = useState(false)
 
   useEffect(() => {
     const fetchPost = async () => {
-      if (postId) {
+      if (postSlug) {
         setLoading(true)
         try {
-          const response = await fetch(`/api/posts/${postId}`)
+          const response = await fetch(`/api/posts/${postSlug}`)
           if (response.ok) {
             const data = await response.json()
             setPost(data)
@@ -40,7 +40,7 @@ export default function PostEditor({ postId }: PostEditorProps) {
       }
     }
     fetchPost()
-  }, [postId])
+  }, [postSlug])
 
   const handleSave = async (published: boolean) => {
     setSaving(true)
@@ -62,8 +62,8 @@ export default function PostEditor({ postId }: PostEditorProps) {
       // Log the post data in JSON format to console
       console.log('Saving post:', JSON.stringify(postData, null, 2))
 
-      const method = postId ? 'PUT' : 'POST'
-      const url = postId ? `/api/posts/${postId}` : '/api/posts'
+      const method = postSlug ? 'PUT' : 'POST'
+      const url = postSlug ? `/api/posts/${postSlug}` : '/api/posts'
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
