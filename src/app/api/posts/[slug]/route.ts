@@ -105,3 +105,37 @@ export async function PUT(
     )
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    await requireAdmin()
+    const { slug } = await params
+
+    const post = await prisma.post.findUnique({
+      where: { slug },
+    })
+
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
+
+    await prisma.post.delete({ where: { slug } })
+
+    return NextResponse.json({
+      message: 'Post successfully deleted',
+    })
+  } catch (err: any) {
+    if (err.message === 'Admin access required') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    console.error('Failed to delete post:', err)
+    return NextResponse.json(
+      { error: 'Failed to delete post' },
+      { status: 500 }
+    )
+  }
+}

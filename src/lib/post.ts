@@ -45,3 +45,18 @@ export async function fetchPosts(
     throw error
   }
 }
+
+export async function deletePost(postId: string): Promise<void> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${postId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to delete post')
+    }
+  } catch (error) {
+    console.error('Failed to delete post:', error)
+    throw error
+  }
+}

@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
+import { MoreHorizontal, Edit, Eye } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +11,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import type { Post } from '@/lib/types'
+import DeletePostModal from './DeletePostModal'
 
 interface PostCardProps {
   post: Post
+  onDelete?: (postSlug: string) => Promise<void>
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, onDelete }: PostCardProps) {
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -90,10 +92,11 @@ export default function PostCard({ post }: PostCardProps) {
                   </Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem className='text-destructive'>
-                <Trash2 className='h-4 w-4 mr-2' />
-                Delete
-              </DropdownMenuItem>
+              <DeletePostModal
+                postSlug={post.slug}
+                postTitle={post.title}
+                onDelete={onDelete}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

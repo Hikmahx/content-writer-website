@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import PostCard from './PostCard'
 import type { Post } from '@/lib/types'
 import { useSession } from 'next-auth/react'
-import { fetchPosts } from '@/lib/post'
+import { fetchPosts, deletePost } from '@/lib/post'
 
 interface PostsListProps {
   published: boolean
@@ -16,6 +16,17 @@ export default function PostsList({ published }: PostsListProps) {
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const handleDeletePost = async (postSlug: string) => {
+    try {
+      await deletePost(postSlug)
+      setPosts(posts.filter((post) => post.slug !== postSlug))
+      console.log('Post deleted')
+    } catch (err) {
+      console.error('Failed to delete post:', err)
+      throw err
+    }
+  }
 
   useEffect(() => {
     loadPosts()
@@ -66,7 +77,7 @@ export default function PostsList({ published }: PostsListProps) {
       </div>
     )
   }
-  
+
   if (error) {
     return (
       <div className='text-center py-10'>
@@ -96,7 +107,7 @@ export default function PostsList({ published }: PostsListProps) {
   return (
     <div className='space-y-4'>
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
       ))}
     </div>
   )
