@@ -36,7 +36,7 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
       <CardContent className='p-6'>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
-            <Link href={`/admin/edit/${post.id}`}>
+            <Link href={`/admin/edit/${post.slug}`}>
               <h3 className='text-lg font-semibold text-card-foreground hover:text-primary cursor-pointer mb-2'>
                 {post.title}
               </h3>
