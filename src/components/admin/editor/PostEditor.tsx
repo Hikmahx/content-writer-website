@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import RichPostEditor from './RichPostEditor'
 import EditorHeader from './EditorHeader'
 import type { Post } from '@/lib/types'
+import { useRouter } from 'next/navigation'
 
 interface PostEditorProps {
   postSlug?: string
@@ -21,6 +22,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   const [loading, setLoading] = useState(!!postSlug)
   const [saving, setSaving] = useState(false)
   const [showImageUpload, setShowImageUpload] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -45,7 +47,6 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   const handleSave = async (published: boolean) => {
     setSaving(true)
     try {
-      // Prepare the post data for saving
       const postData = {
         ...post,
         published,
@@ -59,26 +60,26 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
             ?.replace(/^-+|-+$/g, '') ?? '',
       }
 
-      // Log the post data in JSON format to console
-      console.log('Saving post:', JSON.stringify(postData, null, 2))
-
       const method = postSlug ? 'PUT' : 'POST'
       const url = postSlug ? `/api/posts/${postSlug}` : '/api/posts'
+      
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData),
       })
-      if (response.ok) {
-        const savedPost = await response.json()
-        setPost(savedPost)
-        console.log('Post saved successfully:', savedPost)
-        // Show success message
-      } else {
-        console.error('Failed to save post:', response)
+      
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save post')
       }
-    } catch (error) {
-      console.error('Failed to save post:', error)
+
+      // Success case
+      setPost(data)
+      console.log('Post saved successfully:', data)
+      router.push('/admin')
+    } catch (error: any) {
+      console.error('Failed to save post:', error.message)
     } finally {
       setSaving(false)
     }

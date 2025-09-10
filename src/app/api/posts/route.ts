@@ -54,9 +54,8 @@ export async function GET(req: NextRequest) {
 
 // CREATE NEW POST
 export async function POST(request: NextRequest) {
-  const user = await requireAdmin()
-
   try {
+    const user = await requireAdmin()
     const body = await request.json()
 
     await validateSlugUniqueness(body.slug)
@@ -86,7 +85,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.error('Failed to create post:', err)
+    console.error('Failed to create post:', err.message)
     return NextResponse.json({ err: 'Failed to create post' }, { status: 500 })
   }
 }

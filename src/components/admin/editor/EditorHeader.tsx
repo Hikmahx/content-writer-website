@@ -22,6 +22,9 @@ export default function EditorHeader({
   saving,
   onSave,
 }: EditorHeaderProps) {
+  // Check if post has an id (ie already exists in db)
+  const isEditMode = !!post.id
+
   return (
     <header className='sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-4 py-3'>
       <div className='flex items-center justify-between'>
@@ -35,6 +38,7 @@ export default function EditorHeader({
 
           <div className='text-sm text-muted-foreground'>
             {saving ? 'Saving...' : post.published ? 'Published' : 'Draft'}
+            {isEditMode && ' • Editing'}
           </div>
         </div>
 
@@ -46,14 +50,25 @@ export default function EditorHeader({
             disabled={saving}
           >
             <Save className='w-4 h-4 mr-2' />
-            Save Draft
+            {isEditMode
+              ? post.published
+                ? 'Update Draft'
+                : 'Update Post'
+              : 'Save Draft'}
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size='sm' disabled={saving}>
-                {post.published ? 'Update' : 'Publish'}
-              </Button>
+              {(!isEditMode || !post.published) && (
+                <Button
+                  size='sm'
+                  onClick={() => onSave(true)}
+                  disabled={saving}
+                >
+                  <Eye className='w-4 h-4 mr-2' />
+                  {isEditMode ? 'Publish Now' : 'Publish'}
+                </Button>
+              )}
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuItem onClick={() => onSave(true)}>
