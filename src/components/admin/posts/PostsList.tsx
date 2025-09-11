@@ -5,6 +5,7 @@ import PostCard from './PostCard'
 import type { Post } from '@/lib/types'
 import { useSession } from 'next-auth/react'
 import { fetchPosts, deletePost } from '@/lib/post'
+import Pagination from '@/components/global/Pagination'
 
 interface PostsListProps {
   published: boolean
@@ -17,10 +18,15 @@ export default function PostsList({ published }: PostsListProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(5)
+  const[pageCount, setPageCount] = useState(1)
+
   const handleDeletePost = async (postSlug: string) => {
     try {
       await deletePost(postSlug)
       setPosts(posts.filter((post) => post.slug !== postSlug))
+      setTotalCount(totalCount - 1)
       console.log('Post deleted')
     } catch (err) {
       console.error('Failed to delete post:', err)
@@ -30,20 +36,22 @@ export default function PostsList({ published }: PostsListProps) {
 
   useEffect(() => {
     loadPosts()
-  }, [published])
+  }, [published, pageIndex, pageSize])
 
   const loadPosts = async () => {
     try {
       setLoading(true)
       setError(null)
-      const { posts: fetchedPosts, totalCount: count } = await fetchPosts(
+      const { posts: fetchedPosts, totalCount, totalPages } = await fetchPosts(
         'date',
-        '1',
+        (pageIndex + 1).toString(),
         '',
-        published
+        published,
+        pageSize
       )
       setPosts(fetchedPosts)
-      setTotalCount(count)
+      setTotalCount(totalCount)
+      setPageCount(Math.ceil(totalCount / pageSize))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load posts')
       console.error('Failed to fetch posts:', err)
@@ -89,26 +97,41 @@ export default function PostsList({ published }: PostsListProps) {
     )
   }
 
-  if (posts.length === 0) {
-    return (
-      <div className='text-center py-12'>
-        <h3 className='text-lg font-semibold text-foreground mb-2'>
-          {published ? 'No published stories yet' : 'No drafts yet'}
-        </h3>
-        <p className='text-muted-foreground mb-6 max-w-sm mx-auto'>
-          {published
-            ? 'Start writing and publish your first story to share with the world.'
-            : 'Create a draft to start working on your next story.'}
-        </p>
-      </div>
-    )
-  }
-
   return (
-    <div className='space-y-4'>
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
-      ))}
+    <div className='space-y-6'>
+      <div className='space-y-4'>
+        {posts.length === 0 ? (
+          <div className='text-center py-12'>
+            <h3 className='text-lg font-semibold text-foreground mb-2'>
+              {published ? 'No published stories yet' : 'No drafts yet'}
+            </h3>
+            <p className='text-muted-foreground mb-6 max-w-sm mx-auto'>
+              {published
+                ? 'Start writing and publish your first story to share with the world.'
+                : 'Create a draft to start working on your next story.'}
+            </p>
+          </div>
+        ) : (
+          posts.map((post) => (
+            <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
+          ))
+        )}
+      </div>
+      {/* {pageCount > 1 && ( */}
+      <div className='flex justify-center pt-4 border-t'>
+        <Pagination
+          pagination={{
+            pageIndex,
+            setPageIndex,
+            pageSize,
+            setPageSize,
+            pageCount,
+            loading,
+          }}
+          scrollTo={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        />
+      </div>
+      {/* )} */}
     </div>
   )
 }

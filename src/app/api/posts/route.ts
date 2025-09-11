@@ -8,10 +8,9 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1')
   const sortBy = searchParams.get('sortBy') || 'date'
   const searchTerm = searchParams.get('search') || ''
-  const published = searchParams.get('published') || true
+  const published = searchParams.get('published') || 'true'
 
-  const POST_PER_PAGE = 2
-
+  const itemsPerPage = parseInt(searchParams.get('itemsPerPage') || '10')
   const orderBy =
     sortBy === 'title'
       ? { title: 'asc' as const }
@@ -19,8 +18,8 @@ export async function GET(req: NextRequest) {
   const publishedBool = published === 'true'
 
   const query = {
-    take: POST_PER_PAGE,
-    skip: POST_PER_PAGE * (page - 1),
+    take: itemsPerPage,
+    skip: itemsPerPage * (page - 1),
     orderBy,
     where: {
       published: publishedBool,
@@ -45,7 +44,12 @@ export async function GET(req: NextRequest) {
       prisma.post.count({ where: query.where }),
     ])
     console.log(posts, count)
-    return NextResponse.json({ posts, count, status: 200 })
+    return NextResponse.json({
+      posts,
+      totalCount: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / itemsPerPage),
+    })
   } catch (err) {
     console.log(err)
     return NextResponse.json({ message: 'Something went wrong', status: 500 })

@@ -15,8 +15,9 @@ export async function fetchPosts(
   sortBy?: string,
   page?: string,
   search?: string,
-  published?: boolean
-): Promise<{ posts: Post[]; totalCount: number }> {
+  published?: boolean,
+  itemsPerPage?: number
+): Promise<{ posts: Post[]; totalCount: number; totalPages: number }> {
   try {
     const queryParams = new URLSearchParams()
     if (sortBy) queryParams.append('sortBy', sortBy)
@@ -24,15 +25,15 @@ export async function fetchPosts(
     if (search) queryParams.append('search', search)
     if (published !== undefined)
       queryParams.append('published', published.toString())
+    if (itemsPerPage)
+      queryParams.append('itemsPerPage', itemsPerPage.toString())
 
     const queryString = queryParams.toString()
     const url = queryString
       ? `${getApiBaseUrl()}/posts?${queryString}`
       : `${getApiBaseUrl()}/posts`
 
-    const response = await fetch(url, {
-      cache: 'no-store',
-    })
+    const response = await fetch(url, { cache: 'no-store' })
 
     if (!response.ok) {
       throw new Error(`Failed to fetch posts: ${response}`)
