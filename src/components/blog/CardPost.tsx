@@ -57,11 +57,11 @@ export default function CardPost({ post }: { post: Post }) {
         </CardFooter>
       </div>
       <div className='overflow-hidden mt-4 md:mt-0 md:order-1'>
-        {post.img !== null ? (
+        {post.img ? (
           <>
             <Image
               className='w-full h-auto m-0 rounded-lg'
-              src={post.img || ''}
+              src={post.img}
               alt='placeholder'
               width={300}
               height={120}
