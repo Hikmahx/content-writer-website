@@ -1,5 +1,5 @@
 'use client'
-import type { PostMeta } from '@/models/blogs/types'
+import type { Post } from '@/lib/types'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import Pagination, { PaginationState } from '../global/Pagination'
@@ -7,9 +7,8 @@ import CardPost from './CardPost'
 import Search from './Search'
 import SortSelect from './SortSelect'
 
-
 type Props = Readonly<{
-  posts: PostMeta[]
+  posts: Post[]
   currentPage: number
   pageCount: number
   searchTerm: string
@@ -21,7 +20,7 @@ export default function Posts({
   currentPage,
   pageCount,
   searchTerm,
-  limit
+  limit,
 }: Props) {
   const [pageIndex, setPageIndex] = useState(currentPage - 1)
   const [pageSize, setPageSize] = useState(limit)
@@ -46,7 +45,11 @@ export default function Posts({
 
     replace(params.size ? `/${basePath}?${params.toString()}` : basePath)
     // eslint-disable-next-line
-  }, [pageIndex, pageSize])
+  }, [
+    pageIndex,
+    pageSize,
+    // , basePath, searchParams, replace
+  ])
 
   const pagination = useMemo<PaginationState>(
     () => ({
@@ -55,7 +58,7 @@ export default function Posts({
       pageSize,
       setPageSize,
       pageCount,
-      loading: false
+      loading: false,
     }),
     [pageIndex, pageCount, pageSize]
   )
@@ -64,7 +67,7 @@ export default function Posts({
     <main className='flex min-h-screen flex-col px-4 xl:px-0 py-8 container mx-auto lg:max-w-7xl'>
       <Search searchTerm={searchTerm} />
       <div className='w-full flex justify-between mb-4 mt-8'>
-        <h1 className='text-2xl font-bold tracking-tight prose-h1'>Articles</h1>
+        <h1 className='text-2xl font-bold tracking-tight'>Articles</h1>
         <SortSelect />
       </div>
       <div className='flex flex-col mx-auto gap-x-6 gap-y-4 lg:gap-y-2 w-full'>
@@ -72,18 +75,24 @@ export default function Posts({
           <div className='flex justify-center'>No Post Yet.</div>
         )}
         {posts.length < 1 && searchTerm !== '' && (
-          <h2 className='text-xl tracking-tight prose-h2 text-center mt-4'>
-            No title found matching {`'${searchTerm}'`}. Please update your
-            search term
-          </h2>
+          <div className='text-center py-12'>
+            <h2 className='text-xl font-semibold mb-2'>
+              No posts found matching &ldquo;{searchTerm}&rdquo;
+            </h2>
+            <p className='text-muted-foreground'>
+              Try adjusting your search terms or browse all posts.
+            </p>
+          </div>
         )}
-        {posts.map(post => (
+        {posts.map((post) => (
           <CardPost key={post.id} post={post} />
         ))}
       </div>
+      {/* {pageCount > 1 && ( */}
       <div className='py-9 flex items-center justify-center'>
         <Pagination pagination={pagination} />
       </div>
+      {/* )} */}
     </main>
   )
 }

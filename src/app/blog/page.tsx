@@ -1,26 +1,10 @@
+// app/blog/page.tsx
+import { Metadata } from 'next'
 import Posts from '@/components/blog/Posts'
-import { getPosts } from '@/models/blogs/data'
-import { z } from 'zod'
+import { fetchPosts } from '@/lib/post'
 import { metadata, jsonLd } from './seo'
 
-export const revalidate = 12 * 3600
 export { metadata }
-
-const SearchParamData = z.object({
-  sortBy: z.union([z.literal('date'), z.literal('title')]).optional(),
-  page: z
-    .string()
-    .optional()
-    .transform((str) => (str ? parseInt(str) : undefined)),
-  search: z.string().optional(),
-  limit: z
-    .string()
-    .optional()
-    .transform((str) => (str ? parseInt(str) : undefined)),
-})
-
-type SearchParamData = z.infer<typeof SearchParamData>
-
 export default async function Page({
   searchParams,
 }: {
@@ -28,26 +12,20 @@ export default async function Page({
     sortBy?: string
     page?: string
     search?: string
-    limit?: number
+    // limit?: number
   }
 }) {
   const params = await searchParams
-  const parseRes = SearchParamData.safeParse(params)
-  const {
+  const sortBy = params?.sortBy || 'date'
+  const currentPage = Math.max(1, parseInt(params?.page || '1') || 1)
+  const searchTerm = params?.search || ''
+
+  const data = await fetchPosts(
     sortBy,
-    page = 1,
-    search = '',
-    limit = 10,
-  } = parseRes.success ? parseRes.data : ({} as Partial<SearchParamData>)
-  // Sanitize
-  const _page = page < 1 || !isFinite(page) ? 1 : page
-  const _limit = limit < 1 || !isFinite(limit) ? 1 : limit
-  const keyword = search.substring(0, 100)
-  const { posts, currentPage, pageCount } = getPosts(
-    sortBy,
-    _page,
-    keyword,
-    _limit
+    currentPage.toString(),
+    searchTerm,
+    // true,
+    // 10
   )
 
   return (
@@ -58,11 +36,11 @@ export default async function Page({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Posts
-        posts={posts}
+        posts={data.posts}
         currentPage={currentPage}
-        pageCount={pageCount}
-        searchTerm={search}
-        limit={limit}
+        pageCount={data.totalPages}
+        searchTerm={searchTerm}
+        limit={10}
       />
     </>
   )

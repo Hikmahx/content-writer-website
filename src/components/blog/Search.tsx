@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-
+import { Button } from '@/components/ui/button'
+import { SearchIcon, X } from 'lucide-react'
 
 export default function Search({ searchTerm }: { searchTerm: string }) {
   const [searchInput, setSearchInput] = useState(searchTerm)
@@ -15,8 +16,8 @@ export default function Search({ searchTerm }: { searchTerm: string }) {
     e.preventDefault()
     const params = new URLSearchParams(searchParams.toString())
 
-    if (searchInput !== '') {
-      params.set('search', searchInput)
+    if (searchInput.trim() !== '') {
+      params.set('search', searchInput.trim())
       params.delete('page')
       params.delete('sortBy')
     } else {
@@ -26,30 +27,35 @@ export default function Search({ searchTerm }: { searchTerm: string }) {
     replace(`/${basePath}?${params.toString()}`)
   }
 
-  function handleClearSearch(e: React.ChangeEvent<HTMLInputElement>) {
-    e.preventDefault()
-
-    setSearchInput(e.target.value)
-
-    if (e.target.value === '') {
-      const params = new URLSearchParams(searchParams.toString())
-      params.delete('search')
-      params.delete('page')
-      params.delete('sortBy')
-
-      replace(`/${basePath}?${params.toString()}`)
-    }
+  function handleClear() {
+    setSearchInput('')
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('search')
+    params.delete('page')
+    replace(`${pathname}?${params.toString()}`)
   }
-
   return (
     <form onSubmit={(e) => handleSearch(e)}>
-      <Input
-        type='text'
-        placeholder='Search'
-        className='max-w-xs'
-        value={searchInput}
-        onChange={(e) => handleClearSearch(e)}
-      />
+      <div className='relative max-w-xs'>
+        <Input
+          type='text'
+          placeholder='Search...'
+          className='max-w-xs'
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+        {searchInput && (
+          <Button
+            type='button'
+            variant='ghost'
+            size='icon'
+            className='absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7'
+            onClick={handleClear}
+          >
+            <X className='h-4 w-4' />
+          </Button>
+        )}
+      </div>
     </form>
   )
 }

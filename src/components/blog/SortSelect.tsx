@@ -6,17 +6,16 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '../ui/select'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-
 
 export default function SortSelect() {
   const pathname = usePathname()
   const basePath = pathname.split('/')[1]
   const { replace } = useRouter()
-
   const searchParams = useSearchParams()
+  const currentSort = searchParams.get('sortBy') || 'date'
 
   const handleChange = (sortBy: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -27,15 +26,21 @@ export default function SortSelect() {
       params.set('sortBy', sortBy)
     }
 
+    // Reset to first page when changing sort
+    params.delete('page')
+
     replace(`/${basePath}?${params.toString()}`)
   }
 
   return (
-    <Select onValueChange={(value: string) => handleChange(value)}>
+    <Select
+      value={currentSort}
+      onValueChange={(value: string) => handleChange(value)}
+    >
       <SelectTrigger className='w-[180px]'>
         <SelectValue placeholder='Sort By' />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className='relative z-20'>
         <SelectGroup>
           <SelectLabel>Sort By</SelectLabel>
           <SelectItem value='date'>Created At</SelectItem>
