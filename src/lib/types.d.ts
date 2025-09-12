@@ -1,9 +1,9 @@
 // import type { Post, PostStatus } from "@prisma/client"
 
 
-import type { Post, PostStatus } from "@prisma/client"
+// import type { Post, PostStatus } from "@prisma/client"
 
-export type { Post, PostStatus }
+// export type { Post, PostStatus }
 
 export interface PostWithRelated extends Post {
   relatedPosts: Post[]
@@ -23,16 +23,11 @@ export interface CreatePostData {
   content: string
   img?: string
   hashtags: string[]
-  status: PostStatus
 }
 
 export interface UpdatePostData extends Partial<CreatePostData> {
   id: string
 }
-
-
-// lib/types.ts
-export type PostStatus = 'DRAFT' | 'PUBLISHED';
 
 export interface Post {
   id: string;
@@ -42,9 +37,12 @@ export interface Post {
   content: string;
   img?: string;
   hashtags: string[];
-  status: PostStatus;
   published: boolean;
   authorId: string;
   createdAt: Date;
   updatedAt: Date;
+  author: {
+    name:string;
+    image: string
+  }
 }
