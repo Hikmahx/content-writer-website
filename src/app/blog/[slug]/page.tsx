@@ -7,11 +7,10 @@ import Image from 'next/image'
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   try {
     const { slug } = await params
-
     const post = await getPost(slug)
 
     if (!post) {
@@ -38,7 +37,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const post = await getPost(slug)
 

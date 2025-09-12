@@ -1,20 +1,22 @@
-// app/blog/page.tsx
 import { Metadata } from 'next'
 import Posts from '@/components/blog/Posts'
 import { fetchPosts } from '@/lib/post'
 import { metadata, jsonLd } from './seo'
+import { connection } from 'next/server'
 
 export { metadata }
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     sortBy?: string
     page?: string
     search?: string
     // limit?: number
-  }
+  }>
 }) {
+  await connection()
+
   const params = await searchParams
   const sortBy = params?.sortBy || 'date'
   const currentPage = Math.max(1, parseInt(params?.page || '1') || 1)
@@ -23,7 +25,7 @@ export default async function Page({
   const data = await fetchPosts(
     sortBy,
     currentPage.toString(),
-    searchTerm,
+    searchTerm
     // true,
     // 10
   )
