@@ -47,6 +47,25 @@ export async function fetchPosts(
   }
 }
 
+export async function getPost(slug: string): Promise<Post | null> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/posts/${slug}`, {
+      cache: 'no-store'
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) return null
+      throw new Error(`Failed to fetch post: ${response.status}`)
+    }
+    
+    const post = await response.json()
+    return post
+  } catch (error) {
+    console.error('Failed to fetch post:', error)
+    return null
+  }
+}
+
 export async function deletePost(postId: string): Promise<void> {
   try {
     const response = await fetch(`${getApiBaseUrl()}/posts/${postId}`, {
