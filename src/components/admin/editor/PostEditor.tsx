@@ -21,7 +21,6 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   })
   const [loading, setLoading] = useState(!!postSlug)
   const [saving, setSaving] = useState(false)
-  const [showImageUpload, setShowImageUpload] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -62,13 +61,13 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
 
       const method = postSlug ? 'PUT' : 'POST'
       const url = postSlug ? `/api/posts/${postSlug}` : '/api/posts'
-      
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData),
       })
-      
+
       const data = await response.json()
       if (!response.ok) {
         throw new Error(data.error || 'Failed to save post')
@@ -85,15 +84,6 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
     }
   }
 
-  const handleImageInsert = (imageUrl: string) => {
-    setPost((prev) => ({
-      ...prev,
-      // TipTap handles image insertion, so no need to update content here
-      // img: imageUrl,
-    }))
-    setShowImageUpload(false)
-  }
-
   if (loading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
@@ -106,13 +96,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
     <div className='max-w-4xl mx-auto'>
       <EditorHeader post={post} saving={saving} onSave={handleSave} />
       <div className='px-4 pb-8'>
-        <RichPostEditor
-          post={post}
-          onChange={setPost}
-          showImageUpload={showImageUpload}
-          setShowImageUpload={setShowImageUpload}
-          onImageInsert={handleImageInsert}
-        />
+        <RichPostEditor post={post} onChange={setPost} />
       </div>
     </div>
   )
