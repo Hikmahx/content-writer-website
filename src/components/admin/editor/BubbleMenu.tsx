@@ -12,8 +12,8 @@ import {
   ListOrdered,
   CheckSquare,
   Quote,
-  Palette,
   Type,
+  Highlighter,
 } from 'lucide-react'
 import { BubbleMenu as TiptapBubbleMenu } from '@tiptap/react/menus'
 import { Button } from '@/components/ui/button'
@@ -118,45 +118,50 @@ export default function BubbleMenu({ editor }: BubbleMenuProps) {
     },
   ]
 
-  const colorItems = [
+  const highlightItems = [
     {
       label: 'Purple',
-      onClick: () => editor.chain().focus().setColor('#958DF1').run(),
+      onClick: () =>
+        editor.chain().focus().toggleHighlight({ color: '#958DF1' }).run(),
       icon: <div className='w-4 h-4 rounded-full bg-[#958DF1]' />,
     },
-    {
-      label: 'Red',
-      onClick: () => editor.chain().focus().setColor('#F98181').run(),
-      icon: <div className='w-4 h-4 rounded-full bg-[#F98181]' />,
-    },
+
     {
       label: 'Orange',
-      onClick: () => editor.chain().focus().setColor('#FBBC88').run(),
+      onClick: () =>
+        editor.chain().focus().toggleHighlight({ color: '#FBBC88' }).run(),
       icon: <div className='w-4 h-4 rounded-full bg-[#FBBC88]' />,
     },
     {
       label: 'Yellow',
-      onClick: () => editor.chain().focus().setColor('#FAF594').run(),
-      icon: <div className='w-4 h-4 rounded-full bg-[#FAF594]' />,
+      onClick: () =>
+        editor.chain().focus().toggleHighlight({ color: '#FAF594' }).run(),
+      icon: (
+        <div className='w-4 h-4 rounded-full bg-[#FAF594] border border-gray-300' />
+      ),
     },
+
     {
       label: 'Blue',
-      onClick: () => editor.chain().focus().setColor('#70CFF8').run(),
+      onClick: () =>
+        editor.chain().focus().toggleHighlight({ color: '#70CFF8' }).run(),
       icon: <div className='w-4 h-4 rounded-full bg-[#70CFF8]' />,
     },
     {
-      label: 'Teal',
-      onClick: () => editor.chain().focus().setColor('#94FADB').run(),
+      label: 'Green',
+      onClick: () =>
+        editor.chain().focus().toggleHighlight({ color: '#94FADB' }).run(),
       icon: <div className='w-4 h-4 rounded-full bg-[#94FADB]' />,
     },
     {
-      label: 'Green',
-      onClick: () => editor.chain().focus().setColor('#B9F18D').run(),
-      icon: <div className='w-4 h-4 rounded-full bg-[#B9F18D]' />,
+      label: 'Pink',
+      onClick: () =>
+        editor.chain().focus().toggleHighlight({ color: '#F082A7' }).run(),
+      icon: <div className='w-4 h-4 rounded-full bg-[#F082A7]' />,
     },
     {
-      label: 'Reset Color',
-      onClick: () => editor.chain().focus().unsetColor().run(),
+      label: 'Remove Highlight',
+      onClick: () => editor.chain().focus().unsetHighlight().run(),
     },
   ]
 
@@ -197,8 +202,8 @@ export default function BubbleMenu({ editor }: BubbleMenuProps) {
 
         {/* Color Picker Dropdown */}
         <Dropdown
-          trigger={<Palette className='w-4 h-4' />}
-          items={colorItems}
+          trigger={<Highlighter className='w-4 h-4' />}
+          items={highlightItems}
           align='start'
         />
       </div>

@@ -113,6 +113,9 @@ export default function RichPostEditor({
       Placeholder.configure({
         placeholder: 'Write your article here...',
       }),
+      Highlight.configure({
+        multicolor: true,
+      }),
     ],
     content: post.content || '',
     editorProps: {
