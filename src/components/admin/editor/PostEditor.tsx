@@ -6,6 +6,7 @@ import EditorHeader from './EditorHeader'
 import type { Post } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { getPost, savePost } from '@/lib/post'
+import { extractTextFromHTML } from '@/lib/utils/post'
 
 interface PostEditorProps {
   postSlug?: string
@@ -46,6 +47,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       const postData = {
         ...post,
         published,
+        description: extractTextFromHTML(post.content || ''),
         slug:
           post.title
             ?.toLowerCase()

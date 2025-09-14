@@ -20,3 +20,29 @@ export async function validateSlugUniqueness(
     throw new Error('Title should be unique always')
   }
 }
+
+/**
+ * Extracts plain text from an HTML string and returns a trimmed snippet.
+ * - Removes all HTML tags (e.g. <p>, <b>, <img>)
+ * - Returns only text content
+ * - Slices to the given limit (default 200 chars)
+ *
+ * @param html - The HTML string
+ * @param limit - The max number of characters (default 200)
+ * @returns A plain text snippet
+ */
+export function extractTextFromHTML(html: string, limit = 300): string {
+  if (!html) return ''
+
+  // If running in the browser, use DOMParser
+  if (typeof window !== 'undefined') {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    const text = doc.body.textContent || ''
+    return text.slice(0, limit).trim()
+  }
+
+  // Server-side fallback (regex strips tags)
+  const text = html.replace(/<[^>]*>/g, '')
+  return text.slice(0, limit).trim()
+}

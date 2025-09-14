@@ -148,13 +148,6 @@ export default function RichPostEditor({
         className='text-4xl font-bold border-0 px-0 py-4 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0'
         style={{ fontSize: '2.25rem', lineHeight: '2.5rem' }}
       />
-      {/* Description */}
-      <Input
-        placeholder='Write a brief description...'
-        value={post.description || ''}
-        onChange={(e) => onChange({ ...post, description: e.target.value })}
-        className='text-lg border-0 px-0 py-2 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 resize-none'
-      />
       {/* Toolbar */}
       <Toolbar editor={editor} onImageUpload={() => setShowImageUpload(true)} />
 
