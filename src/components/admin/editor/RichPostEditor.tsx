@@ -27,9 +27,16 @@ import {
 import type { Post } from '@/lib/types'
 import TextAlign from '@tiptap/extension-text-align'
 import Highlight from '@tiptap/extension-highlight'
-import { Placeholder } from '@tiptap/extensions'
-import { BubbleMenu } from '@tiptap/react/menus'
+import { Placeholder, Dropcursor } from '@tiptap/extensions'
+import Underline from '@tiptap/extension-underline'
+import Color from '@tiptap/extension-color'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Blockquote from '@tiptap/extension-blockquote'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import type { Level } from '@tiptap/extension-heading'
+import BubbleMenu from './BubbleMenu'
 interface RichPostEditorProps {
   post: Partial<Post>
   onChange: (post: Partial<Post>) => void
@@ -50,44 +57,82 @@ export default function RichPostEditor({
       StarterKit.configure({
         bulletList: {
           HTMLAttributes: {
-            class: 'list-disc ml-3',
+            class: 'list-disc ml-6',
           },
         },
         orderedList: {
           HTMLAttributes: {
-            class: 'list-decimal ml-3',
+            class: 'list-decimal ml-6',
           },
+        },
+        heading: {
+          levels: [1, 2, 3],
         },
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
-      Highlight,
-      Image,
-      Placeholder.configure({
-        // Use a placeholder:
-        // placeholder: 'Write something …',
-        // Use different placeholders depending on the node type:
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return 'What’s the title?'
-          }
-
-          return 'Write your article here...'
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Underline,
+      Color.configure({
+        types: ['textStyle'],
+      }),
+      TextStyle,
+      Blockquote.configure({
+        HTMLAttributes: {
+          class: 'border-l-4 border-gray-300 pl-4 my-4',
         },
       }),
-      // Markdown.configure({
-      //   html: false,
-      // }),
+      TaskList.configure({
+        HTMLAttributes: {
+          class: 'list-none ml-6',
+        },
+      }),
+      TaskItem.configure({
+        HTMLAttributes: {
+          class: 'flex items-start',
+        },
+        nested: true,
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full',
+        },
+      }),
+      HorizontalRule.configure({
+        HTMLAttributes: {
+          class: 'my-8 border-t border-gray-300',
+        },
+      }),
+      Dropcursor.configure({
+        width: 2,
+        color: '#958DF1',
+      }),
+      Placeholder.configure({
+        placeholder: 'Write your article here...',
+      }),
     ],
     content: post.content || '',
     editorProps: {
       attributes: {
-        class: 'min-h-[50vh] rounded-md py-4 px-3',
+        class: 'min-h-[50vh] rounded-md py-4 px-3 prose prose-lg max-w-none',
+      },
+      // HTML parsing on paste
+      transformPastedHTML(html) {
+        return html
+      },
+      // Optional: Handle dropped content too
+      transformPastedText(text) {
+        return text
       },
     },
+    // Enable parsing of HTML content
+    parseOptions: {
+      preserveWhitespace: 'full',
+    },
     onUpdate: ({ editor }) => {
-      console.log(editor.getHTML())
       onChange({ ...post, content: editor.getHTML() })
     },
     immediatelyRender: false,
@@ -230,43 +275,9 @@ export default function RichPostEditor({
           </Button>
         </div>
       </div>
-      {/* Bubble Menu */}
-      {editor && showMenu && (
-        <BubbleMenu
-          editor={editor}
-          options={{ placement: 'bottom', offset: 8 }}
-        >
-          <div className='bubble-menu'>
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={editor.isActive('bold') ? 'is-active' : ''}
-              type='button'
-            >
-              <span className='sr-only'>Bold</span>
-              <Bold className='w-4 h-4' />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={editor.isActive('italic') ? 'is-active' : ''}
-              type='button'
-            >
-              <span className='sr-only'>Italic</span>
-              <Italic className='w-4 h-4' />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={editor.isActive('strike') ? 'is-active' : ''}
-              type='button'
-            >
-              <span className='sr-only'>Strike through</span>
-              <Strikethrough className='w-4 h-4' />
-            </button>
-          </div>
-        </BubbleMenu>
-      )}
-
+      {editor && <BubbleMenu editor={editor} />}
       {/* TipTap Editor */}
-      <div className='min-h-[400px] text-lg leading-relaxed outline-none prose prose-lg max-w-none'>
+      <div className='min-h-[400px] text-lg leading-relaxed outline-none'>
         <EditorContent editor={editor} className='min-h-[50vh]' />
       </div>
       {/* Tags */}
