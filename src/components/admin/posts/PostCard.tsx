@@ -79,7 +79,7 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuItem asChild>
-                <Link href={`admin/edit/${post.id}`}>
+                <Link href={`admin/edit/${post.slug}`}>
                   <Edit className='h-4 w-4 mr-2' />
                   Edit
                 </Link>

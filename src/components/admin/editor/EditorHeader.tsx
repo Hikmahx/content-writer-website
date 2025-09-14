@@ -2,12 +2,6 @@
 
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import type { Post } from '@/lib/types'
 
@@ -46,41 +40,22 @@ export default function EditorHeader({
           <Button
             variant='outline'
             size='sm'
-            onClick={() => onSave(false)}
+            onClick={() => onSave(post.published ? true : false)}
             disabled={saving}
           >
             <Save className='w-4 h-4 mr-2' />
             {isEditMode
               ? post.published
-                ? 'Update Draft'
-                : 'Update Post'
+                ? 'Update Post'
+                : 'Update Draft'
               : 'Save Draft'}
           </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              {(!isEditMode || !post.published) && (
-                <Button
-                  size='sm'
-                  onClick={() => onSave(true)}
-                  disabled={saving}
-                >
-                  <Eye className='w-4 h-4 mr-2' />
-                  {isEditMode ? 'Publish Now' : 'Publish'}
-                </Button>
-              )}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem onClick={() => onSave(true)}>
-                <Eye className='w-4 h-4 mr-2' />
-                Publish now
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onSave(false)}>
-                <Save className='w-4 h-4 mr-2' />
-                Save as draft
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {(!isEditMode || !post.published) && (
+            <Button size='sm' onClick={() => onSave(true)} disabled={saving}>
+              <Eye className='w-4 h-4 mr-2' />
+              {isEditMode ? 'Publish Now' : 'Publish'}
+            </Button>
+          )}
         </div>
       </div>
     </header>
