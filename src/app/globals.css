@@ -85,3 +85,7 @@
     }
   }
 }
+
+.tiptap p a {
+  @apply border-b border-gray-500 text-gray-500 font-medium cursor-pointer;
+}
