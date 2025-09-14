@@ -80,3 +80,28 @@ export async function deletePost(postId: string): Promise<void> {
     throw error
   }
 }
+
+export async function savePost(
+  postData: Partial<Post>,
+  postSlug?: string
+): Promise<Post> {
+  const method = postSlug ? 'PUT' : 'POST'
+  const url = postSlug
+    ? `${getApiBaseUrl()}/posts/${postSlug}`
+    : `${getApiBaseUrl()}/posts`
+
+  const response = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(postData),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to save post')
+  }
+
+  return data
+}
+
