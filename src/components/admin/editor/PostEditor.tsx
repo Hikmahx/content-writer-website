@@ -58,6 +58,11 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
             ?.replace(/^-+|-+$/g, '') ?? '',
       }
 
+      // No image in post
+      if (!postData.img) {
+        console.log('Warning: Post will be published without an image')
+      }
+
       const savedPost = await savePost(postData, postSlug)
       setPost(savedPost)
       router.push('/admin')
