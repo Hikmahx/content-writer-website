@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
@@ -31,6 +31,14 @@ export default function RichPostEditor({
   onChange,
 }: RichPostEditorProps) {
   const [showImageUpload, setShowImageUpload] = useState(false)
+
+  // Extract first image from content for the post img field
+  const extractFirstImage = useCallback((html: string) => {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    const firstImg = doc.querySelector('img')
+    return firstImg?.src || ''
+  }, [])
 
   const editor = useEditor({
     extensions: [
@@ -110,7 +118,14 @@ export default function RichPostEditor({
       preserveWhitespace: 'full',
     },
     onUpdate: ({ editor }) => {
-      onChange({ ...post, content: editor.getHTML() })
+      const content = editor.getHTML()
+      const firstImage = extractFirstImage(content)
+      
+      onChange({ 
+        ...post, 
+        content,
+        img: firstImage // Set the first image as the post image/thumbnail
+      })
     },
     immediatelyRender: false,
   })
@@ -134,7 +149,7 @@ export default function RichPostEditor({
   }
 
   const handleImageInsert = (url: string) => {
-    // Handle image insertion logic if needed
+    // The image is automatically set as the first image in onUpdate
     console.log('Image inserted:', url)
   }
 

@@ -46,3 +46,10 @@ export function extractTextFromHTML(html: string, limit = 300): string {
   const text = html.replace(/<[^>]*>/g, '')
   return text.slice(0, limit).trim()
 }
+
+export function extractFirstImageFromHTML(html: string): string | null {
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = html
+  const firstImg = tempDiv.querySelector('img')
+  return firstImg ? firstImg.src : null
+}

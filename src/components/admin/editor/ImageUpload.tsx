@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Upload } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Image as ImageIcon, Upload, X } from 'lucide-react'
 
 interface ImageUploadProps {
   open: boolean
@@ -24,85 +25,120 @@ export default function ImageUpload({
   onImageInsert,
   editor,
 }: ImageUploadProps) {
-  const [imageUrl, setImageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploadedImage, setUploadedImage] = useState<{
+    url: string
+    publicId: string
+  } | null>(null)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
     try {
-      // Create a temporary URL for the file
-      const url = URL.createObjectURL(file)
-      onImageInsert(url)
-      
-      // Insert image into editor
-      editor?.chain().focus().setImage({ src: url }).run()
-      onOpenChange(false)
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      setUploadedImage({ url: data.secure_url, publicId: data.public_id })
     } catch (error) {
-      console.error('Failed to upload image:', error)
+      console.error('Upload error:', error)
+      alert('Failed to upload image')
     } finally {
       setUploading(false)
     }
   }
 
-  const handleUrlInsert = () => {
-    if (imageUrl.trim()) {
-      onImageInsert(imageUrl.trim())
-      editor?.chain().focus().setImage({ src: imageUrl.trim() }).run()
+  const handleInsert = () => {
+    if (uploadedImage && editor) {
+      editor.chain().focus().setImage({ src: uploadedImage.url }).run()
+      onImageInsert(uploadedImage.url)
       onOpenChange(false)
+      setUploadedImage(null)
     }
+  }
+
+  const handleDelete = async () => {
+    if (uploadedImage?.publicId) {
+      try {
+        await fetch(`/api/upload?publicId=${uploadedImage.publicId}`, {
+          method: 'DELETE',
+        })
+      } catch (error) {
+        console.error('Delete error:', error)
+      }
+    }
+    setUploadedImage(null)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>Add Image</DialogTitle>
+          <DialogTitle>Upload Image</DialogTitle>
         </DialogHeader>
         <div className='space-y-4'>
-          <div className='space-y-2'>
-            <label className='text-sm font-medium'>
-              Upload from device
-            </label>
-            <div className='border-2 border-dashed border-border rounded-lg p-6 text-center'>
-              <Upload className='w-8 h-8 mx-auto mb-2 text-muted-foreground' />
-              <p className='text-sm text-muted-foreground mb-2'>
-                Drag and drop an image, or click to browse
-              </p>
-              <input
+          {!uploadedImage ? (
+            <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center'>
+              <Input
                 type='file'
+                id='image-upload'
                 accept='image/*'
                 onChange={handleFileUpload}
                 className='hidden'
-                id='image-upload'
-                disabled={uploading}
+              />
+              <Label htmlFor='image-upload' className='cursor-pointer'>
+                <div className='flex flex-col items-center justify-center space-y-2'>
+                  <Upload className='h-8 w-8 text-gray-400' />
+                  <span className='text-sm text-gray-500'>
+                    {uploading ? 'Uploading...' : 'Click to upload an image'}
+                  </span>
+                </div>
+              </Label>
+            </div>
+          ) : (
+            <div className='relative'>
+              <img
+                src={uploadedImage.url}
+                alt='Uploaded'
+                className='w-full h-48 object-cover rounded-lg'
               />
               <Button
-                variant='outline'
-                size='sm'
-                onClick={() => document.getElementById('image-upload')?.click()}
-                disabled={uploading}
+                variant='destructive'
+                size='icon'
+                className='absolute top-2 right-2 h-6 w-6'
+                onClick={handleDelete}
               >
-                {uploading ? 'Uploading...' : 'Choose file'}
+                <X className='h-4 w-4' />
               </Button>
             </div>
-          </div>
-          <div className='space-y-2'>
-            <label className='text-sm font-medium'>
-              Or paste image URL
-            </label>
-            <div className='flex gap-2'>
-              <Input
-                placeholder='https://example.com/image.jpg'
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-              <Button onClick={handleUrlInsert} disabled={!imageUrl.trim()}>
-                <Upload className='w-4 h-4' />
-              </Button>
-            </div>
+          )}
+          <div className='flex justify-end space-x-2'>
+            <Button
+              variant='outline'
+              onClick={() => {
+                onOpenChange(false)
+                setUploadedImage(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleInsert}
+              disabled={!uploadedImage || uploading}
+            >
+              Insert Image
+            </Button>
           </div>
         </div>
       </DialogContent>
