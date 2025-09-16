@@ -66,9 +66,26 @@ export default function ImageUpload({
   })
 
   const handleUrlInsert = () => {
-    if (imageUrl.trim() && editor) {
-      editor.chain().focus().setImage({ src: imageUrl.trim() }).run()
-      onImageInsert(imageUrl.trim())
+    const url = imageUrl.trim()
+    if (!url) return
+
+    // Validate URL
+    try {
+      new URL(url)
+    } catch {
+      console.log('Not a valid image url')
+      return
+    }
+
+    // Check if it looks like an image
+    if (!url.match(/\.(jpeg|jpg|png|webp|gif|svg)$/i)) {
+      console.log('Not a valid image url')
+      return
+    }
+
+    if (editor) {
+      editor.chain().focus().setImage({ src: url }).run()
+      onImageInsert(url)
       onOpenChange(false)
       setImageUrl('')
     }
