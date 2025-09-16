@@ -121,3 +121,23 @@ export async function deleteImageFromCloudinary(publicId: string): Promise<boole
     return false
   }
 }
+
+export async function uploadImageToCloudinary(file: File): Promise<{ url: string; publicId: string }> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`${getApiBaseUrl()}/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to upload image')
+  }
+
+  const data = await response.json()
+  return {
+    url: data.secure_url,
+    publicId: data.public_id
+  }
+}

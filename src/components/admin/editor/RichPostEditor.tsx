@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import type { Post } from '@/lib/types'
@@ -20,11 +19,22 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import BubbleMenu from './BubbleMenu'
 import Toolbar from './Toolbar'
 import ImageUpload from './ImageUpload'
+import { extractFirstImageFromHTML } from '@/lib/utils/post'
+import { clearImageDropHandler, CustomImage, setImageDropHandler } from './CustomImageExtension'
+import { useImageUpload } from '@/hooks/useImageUpload'
 
 interface RichPostEditorProps {
   post: Partial<Post>
   onChange: (post: Partial<Post>) => void
   onImageUpload?: (imageUrl: string) => void
+}
+
+function LoadingSpinner() {
+  return (
+    <div className='flex items-center justify-center'>
+      <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary'></div>
+    </div>
+  )
 }
 
 export default function RichPostEditor({
@@ -33,6 +43,92 @@ export default function RichPostEditor({
   onImageUpload,
 }: RichPostEditorProps) {
   const [showImageUpload, setShowImageUpload] = useState(false)
+  const { uploadImage, isUploading, uploadProgress } = useImageUpload()
+  const editorRef = useRef<HTMLDivElement>(null)
+
+  // Handle image drops
+  const handleImageDrop = useCallback(
+    async (files: File[], view: any) => {
+      for (const file of files) {
+        try {
+          const imageUrl = await uploadImage(file)
+
+          // Insert image at current cursor position
+          const { state, dispatch } = view
+          const { tr } = state
+          const { from } = state.selection
+
+          tr.insert(from, state.schema.nodes.image.create({ src: imageUrl }))
+          dispatch(tr)
+
+          // Notify parent component for tracking
+          if (onImageUpload) {
+            onImageUpload(imageUrl)
+          }
+        } catch (error) {
+          console.error('Failed to upload image:', error)
+        }
+      }
+    },
+    [uploadImage, onImageUpload]
+  )
+
+  // Register the drop handler
+  useEffect(() => {
+    setImageDropHandler({ onImageDrop: handleImageDrop })
+
+    return () => {
+      clearImageDropHandler()
+    }
+  }, [handleImageDrop])
+
+  // Drag and drop visual feedback
+  useEffect(() => {
+    const handleDragOver = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes('Files')) {
+        e.preventDefault()
+        const editorElement = editorRef.current
+        editorElement?.classList.add('drag-over')
+      }
+    }
+
+    const handleDragLeave = (e: DragEvent) => {
+      const editorElement = editorRef.current
+      editorElement?.classList.remove('drag-over')
+    }
+
+    const handleDrop = (e: DragEvent) => {
+      const editorElement = editorRef.current
+      editorElement?.classList.remove('drag-over')
+    }
+
+    const editorElement = editorRef.current
+    if (editorElement) {
+      editorElement.addEventListener(
+        'dragover',
+        handleDragOver as EventListener
+      )
+      editorElement.addEventListener(
+        'dragleave',
+        handleDragLeave as EventListener
+      )
+      editorElement.addEventListener('drop', handleDrop as EventListener)
+    }
+
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener(
+          'dragover',
+          handleDragOver as EventListener
+        )
+        editorElement.removeEventListener(
+          'dragleave',
+          handleDragLeave as EventListener
+        )
+        editorElement.removeEventListener('drop', handleDrop as EventListener)
+      }
+    }
+  }, [])
 
   // Extract first image from content for the post img field
   const extractFirstImage = useCallback((html: string) => {
@@ -86,9 +182,11 @@ export default function RichPostEditor({
         },
         nested: true,
       }),
-      Image.configure({
+      CustomImage.configure({
+        // Use the custom image extension
         HTMLAttributes: {
-          class: 'rounded-lg max-w-full',
+          class: 'rounded-lg max-w-full cursor-pointer',
+          draggable: 'false', // Prevent native drag behavior
         },
       }),
       HorizontalRule.configure({
@@ -115,6 +213,13 @@ export default function RichPostEditor({
       transformPastedText(text) {
         return text
       },
+      handleDrop: (view, event, slice, moved) => {
+        // Let our custom plugin handle image drops
+        if (event.dataTransfer?.files.length) {
+          return false // Return false to let our plugin handle it
+        }
+        return false
+      },
     },
     parseOptions: {
       preserveWhitespace: 'full',
@@ -122,17 +227,16 @@ export default function RichPostEditor({
     onUpdate: ({ editor }) => {
       const content = editor.getHTML()
       const firstImage = extractFirstImage(content)
-      
-      onChange({ 
-        ...post, 
+
+      onChange({
+        ...post,
         content,
-        img: firstImage // Set the first image as the post image/thumbnail
+        img: firstImage,
       })
     },
     immediatelyRender: false,
   })
 
-  // Tags
   const handleTagAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim()) {
       const newTag = e.currentTarget.value.trim()
@@ -167,15 +271,36 @@ export default function RichPostEditor({
         className='text-4xl font-bold border-0 px-0 py-4 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0'
         style={{ fontSize: '2.25rem', lineHeight: '2.5rem' }}
       />
+
       {/* Toolbar */}
       <Toolbar editor={editor} onImageUpload={() => setShowImageUpload(true)} />
 
       {/* Bubble Menu */}
       {editor && <BubbleMenu editor={editor} />}
 
-      {/* Editor Content */}
-      <div className='min-h-[400px] text-lg leading-relaxed outline-none'>
-        <EditorContent editor={editor} className='min-h-[50vh]' />
+      {/* Editor with overlay */}
+      <div className='relative'>
+        <div
+          ref={editorRef}
+          className='min-h-[400px] text-lg leading-relaxed outline-none transition-all duration-200'
+        >
+          <EditorContent
+            editor={editor}
+            className='min-h-[50vh] prose prose-lg max-w-none'
+          />
+        </div>
+
+        {/* Upload overlay */}
+        {isUploading && (
+          <div className='absolute inset-0 bg-background/80 flex items-center justify-center rounded-lg'>
+            <div className='text-center p-4 bg-background rounded-lg shadow-lg'>
+              <LoadingSpinner />
+              <p className='mt-2 text-sm text-muted-foreground'>
+                Uploading images... {Math.round(uploadProgress)}%
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tags */}
