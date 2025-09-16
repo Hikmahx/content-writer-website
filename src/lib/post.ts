@@ -105,3 +105,19 @@ export async function savePost(
   return data
 }
 
+export async function deleteImageFromCloudinary(publicId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/upload?publicId=${publicId}`, {
+      method: 'DELETE',
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete image')
+    }
+    
+    return true
+  } catch (error) {
+    console.error('Error deleting image from Cloudinary:', error)
+    return false
+  }
+}

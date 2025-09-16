@@ -24,11 +24,13 @@ import ImageUpload from './ImageUpload'
 interface RichPostEditorProps {
   post: Partial<Post>
   onChange: (post: Partial<Post>) => void
+  onImageUpload?: (imageUrl: string) => void
 }
 
 export default function RichPostEditor({
   post,
   onChange,
+  onImageUpload,
 }: RichPostEditorProps) {
   const [showImageUpload, setShowImageUpload] = useState(false)
 
@@ -149,8 +151,10 @@ export default function RichPostEditor({
   }
 
   const handleImageInsert = (url: string) => {
-    // The image is automatically set as the first image in onUpdate
-    console.log('Image inserted:', url)
+    // Notify parent component about the image upload
+    if (onImageUpload) {
+      onImageUpload(url)
+    }
   }
 
   return (

@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../post"
 import { prisma } from "../prisma"
 
 /**
@@ -52,4 +53,40 @@ export function extractFirstImageFromHTML(html: string): string | null {
   tempDiv.innerHTML = html
   const firstImg = tempDiv.querySelector('img')
   return firstImg ? firstImg.src : null
+}
+
+export function extractImageUrlsFromHTML(html: string): string[] {
+  if (!html) return []
+  
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const images = doc.querySelectorAll('img')
+  
+  return Array.from(images)
+    .map(img => img.getAttribute('src') || '')
+    .filter(src => src.includes('res.cloudinary.com'))
+}
+
+export function extractPublicIdFromUrl(url: string): string | null {
+  const match = url.match(/upload\/(?:v\d+\/)?([^\.]+)/)
+  return match ? match[1] : null
+}
+
+export async function cleanupUnusedImages(
+  content: string, 
+  allUploadedImages: string[]
+): Promise<void> {
+  const usedImages = extractImageUrlsFromHTML(content)
+  const usedImageSet = new Set(usedImages)
+  
+  // Find images that were uploaded but are no longer used
+  const unusedImages = allUploadedImages.filter(url => !usedImageSet.has(url))
+  
+  // Delete unused images from Cloudinary
+  for (const url of unusedImages) {
+    const publicId = extractPublicIdFromUrl(url)
+    if (publicId) {
+      await deleteImageFromCloudinary(publicId)
+    }
+  }
 }
