@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Image as ImageIcon, Upload, X } from 'lucide-react'
+import { Upload, X } from 'lucide-react'
+import { uploadImageToCloudinary, deleteImageFromCloudinary } from '@/lib/post'
 
 interface ImageUploadProps {
   open: boolean
@@ -36,21 +37,10 @@ export default function ImageUpload({
     if (!file) return
 
     setUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error('Upload failed')
-      }
-
-      const data = await response.json()
-      setUploadedImage({ url: data.secure_url, publicId: data.public_id })
+      const result = await uploadImageToCloudinary(file)
+      setUploadedImage({ url: result.url, publicId: result.publicId })
     } catch (error) {
       console.error('Upload error:', error)
       alert('Failed to upload image')
@@ -71,9 +61,7 @@ export default function ImageUpload({
   const handleDelete = async () => {
     if (uploadedImage?.publicId) {
       try {
-        await fetch(`/api/upload?publicId=${uploadedImage.publicId}`, {
-          method: 'DELETE',
-        })
+        await deleteImageFromCloudinary(uploadedImage.publicId)
       } catch (error) {
         console.error('Delete error:', error)
       }
@@ -81,8 +69,35 @@ export default function ImageUpload({
     setUploadedImage(null)
   }
 
+  const handleClose = async () => {
+    // Clean up the uploaded image if user cancels
+    if (uploadedImage?.publicId) {
+      try {
+        await deleteImageFromCloudinary(uploadedImage.publicId)
+      } catch (error) {
+        console.error('Error cleaning up image on cancel:', error)
+      }
+    }
+    setUploadedImage(null)
+    onOpenChange(false)
+  }
+
+  // Also clean up when the dialog is closed via other means (e.g., clicking outside)
+  const handleOpenChange = async (newOpen: boolean) => {
+    if (!newOpen && uploadedImage?.publicId) {
+      // Dialog is closing and we have an uploaded image - clean it up
+      try {
+        await deleteImageFromCloudinary(uploadedImage.publicId)
+      } catch (error) {
+        console.error('Error cleaning up image on dialog close:', error)
+      }
+      setUploadedImage(null)
+    }
+    onOpenChange(newOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle>Upload Image</DialogTitle>
@@ -124,13 +139,7 @@ export default function ImageUpload({
             </div>
           )}
           <div className='flex justify-end space-x-2'>
-            <Button
-              variant='outline'
-              onClick={() => {
-                onOpenChange(false)
-                setUploadedImage(null)
-              }}
-            >
+            <Button variant='outline' onClick={handleClose}>
               Cancel
             </Button>
             <Button
