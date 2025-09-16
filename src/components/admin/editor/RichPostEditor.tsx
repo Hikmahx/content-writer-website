@@ -20,8 +20,13 @@ import BubbleMenu from './BubbleMenu'
 import Toolbar from './Toolbar'
 import ImageUpload from './ImageUpload'
 import { extractFirstImageFromHTML } from '@/lib/utils/post'
-import { clearImageDropHandler, CustomImage, setImageDropHandler } from './CustomImageExtension'
+import {
+  clearImageDropHandler,
+  CustomImage,
+  setImageDropHandler,
+} from './CustomImageExtension'
 import { useImageUpload } from '@/hooks/useImageUpload'
+import { toast } from 'sonner'
 
 interface RichPostEditorProps {
   post: Partial<Post>
@@ -66,7 +71,12 @@ export default function RichPostEditor({
             onImageUpload(imageUrl)
           }
         } catch (error) {
-          console.error('Failed to upload image:', error)
+          toast.message('Failed to upload image.', {
+            description:
+              typeof error === 'object' && error && 'message' in error
+                ? (error as { message: string }).message
+                : 'An error occurred',
+          })
         }
       }
     },

@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Upload, X, Link, Image as ImageIcon } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '@/lib/post'
+import { toast } from 'sonner'
 
 interface ImageUploadProps {
   open: boolean
@@ -43,8 +44,12 @@ export default function ImageUpload({
       const result = await uploadImageToCloudinary(file)
       setUploadedImage({ url: result.url, publicId: result.publicId })
     } catch (error) {
-      console.error('Upload error:', error)
-      alert('Failed to upload image')
+      toast.message('Upload error', {
+        description:
+          typeof error === 'object' && error && 'message' in error
+            ? (error as { message: string }).message
+            : 'An error occurred',
+      })
     } finally {
       setUploading(false)
     }
@@ -73,13 +78,14 @@ export default function ImageUpload({
     try {
       new URL(url)
     } catch {
-      console.log('Not a valid image url')
+      toast('Not a valid image url')
       return
     }
 
     // Check if it looks like an image
     if (!url.match(/\.(jpeg|jpg|png|webp|gif|svg)$/i)) {
-      console.log('Not a valid image url')
+      toast('Not a valid image url')
+
       return
     }
 
@@ -107,7 +113,12 @@ export default function ImageUpload({
       try {
         await deleteImageFromCloudinary(uploadedImage.publicId)
       } catch (error) {
-        console.error('Delete error:', error)
+        toast.message('Failed to delete image.', {
+          description:
+            typeof error === 'object' && error && 'message' in error
+              ? (error as { message: string }).message
+              : 'An error occurred',
+        })
       }
     }
     setUploadedImage(null)
@@ -118,7 +129,12 @@ export default function ImageUpload({
       try {
         await deleteImageFromCloudinary(uploadedImage.publicId)
       } catch (error) {
-        console.error('Error cleaning up image on cancel:', error)
+        toast.message('Error cleaning up image on cancel', {
+          description:
+            typeof error === 'object' && error && 'message' in error
+              ? (error as { message: string }).message
+              : 'An error occurred',
+        })
       }
     }
     setUploadedImage(null)

@@ -11,6 +11,7 @@ import {
   extractImageUrlsFromHTML,
   cleanupUnusedImages,
 } from '@/lib/utils/post'
+import { toast } from 'sonner'
 
 interface PostEditorProps {
   postSlug?: string
@@ -45,7 +46,12 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch post:', error)
+        toast.message('Failed to fetch post.', {
+          description:
+            typeof error === 'object' && error && 'message' in error
+              ? (error as { message: string }).message
+              : 'An error occurred',
+        })
       } finally {
         setLoading(false)
       }
@@ -54,6 +60,15 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   }, [postSlug])
 
   const handleSave = async (published: boolean) => {
+    if (
+      !post.title ||
+      post.title.trim() === '' ||
+      !post.content ||
+      post.content.trim() === ''
+    ) {
+      toast.error('Post title and content are required.')
+      return
+    }
     setSaving(true)
     try {
       // Clean up unused images before saving
@@ -76,7 +91,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       }
 
       if (!postData.img) {
-        console.log('Warning: Post will be published without an image')
+        toast('Warning: Post will be created without an image')
       }
 
       const savedPost = await savePost(postData, postSlug)
@@ -90,7 +105,12 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
 
       router.push('/admin')
     } catch (error: any) {
-      console.error('Failed to save post:', error.message)
+      toast.message('Failed to save post.', {
+        description:
+          typeof error === 'object' && error && 'message' in error
+            ? (error as { message: string }).message
+            : 'An error occurred',
+      })
     } finally {
       setSaving(false)
     }

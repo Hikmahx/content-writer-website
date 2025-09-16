@@ -6,6 +6,7 @@ import './globals.css'
 import { Header } from '@/components/global/Header'
 import { Footer } from '@/components/global/Footer'
 import AuthProvider from '@/providers/AuthProvider'
+import { Toaster } from '@/components/ui/sonner'
 
 const lora = Lora({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({
           <Header />
           <main className='flex-1'>{children}</main>
           <Footer />
+          <Toaster />
         </body>
       </AuthProvider>
     </html>

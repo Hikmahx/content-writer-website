@@ -15,6 +15,7 @@ import {
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Trash2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface DeletePostProps {
   postSlug: string
@@ -38,7 +39,9 @@ export default function DeletePostModal({
       await onDelete(postSlug)
       setDialogOpen(false)
     } catch (error) {
-      console.error('Failed to delete post:', error)
+      toast.message('Failed to delete post.', {
+        description: typeof error === 'object' && error && 'message' in error ? (error as { message: string }).message : 'An error occurred',
+      })
     } finally {
       setIsDeleting(false)
     }

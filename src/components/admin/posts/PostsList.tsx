@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react'
 import { fetchPosts, deletePost } from '@/lib/post'
 import Pagination from '@/components/global/Pagination'
 
+import { toast } from 'sonner'
+
 interface PostsListProps {
   published: boolean
 }
@@ -20,16 +22,18 @@ export default function PostsList({ published }: PostsListProps) {
 
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(5)
-  const[pageCount, setPageCount] = useState(1)
+  const [pageCount, setPageCount] = useState(1)
 
   const handleDeletePost = async (postSlug: string) => {
     try {
       await deletePost(postSlug)
       setPosts(posts.filter((post) => post.slug !== postSlug))
       setTotalCount(totalCount - 1)
-      console.log('Post deleted')
+      toast('Post deleted.')
     } catch (err) {
-      console.error('Failed to delete post:', err)
+      toast.message('Failed to delete post.', {
+        description: typeof err === 'object' && err && 'message' in err ? (err as { message: string }).message : 'An error occurred',
+      })
       throw err
     }
   }
@@ -42,7 +46,11 @@ export default function PostsList({ published }: PostsListProps) {
     try {
       setLoading(true)
       setError(null)
-      const { posts: fetchedPosts, totalCount, totalPages } = await fetchPosts(
+      const {
+        posts: fetchedPosts,
+        totalCount,
+        totalPages,
+      } = await fetchPosts(
         'date',
         (pageIndex + 1).toString(),
         '',
@@ -54,7 +62,9 @@ export default function PostsList({ published }: PostsListProps) {
       setPageCount(Math.ceil(totalCount / pageSize))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load posts')
-      console.error('Failed to fetch posts:', err)
+      toast.message('Failed to fetch posts.', {
+        description: typeof err === 'object' && err && 'message' in err ? (err as { message: string }).message : 'An error occurred',
+      })
     } finally {
       setLoading(false)
     }

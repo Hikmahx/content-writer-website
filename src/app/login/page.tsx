@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button'
 import React from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import { toast } from 'sonner'
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
-  console.log(session, status)
+  if (session) {
+    toast(`You are logged in as ${session.user?.email}`)
+  }
 
   if (session) {
     return (
