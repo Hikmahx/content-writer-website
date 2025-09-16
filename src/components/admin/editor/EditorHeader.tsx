@@ -20,7 +20,7 @@ export default function EditorHeader({
   const isEditMode = !!post.id
 
   return (
-    <header className='sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-4 py-3'>
+    <header className='sticky top-0 z-20 bg-white backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-4 py-3'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-4'>
           <Link href='/blog/posts'>

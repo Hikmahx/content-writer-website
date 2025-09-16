@@ -272,13 +272,13 @@ export default function RichPostEditor({
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-4'>
       {/* Title */}
       <Input
         placeholder='Title'
         value={post.title || ''}
         onChange={(e) => onChange({ ...post, title: e.target.value })}
-        className='text-4xl font-bold border-0 px-0 py-4 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0'
+        className='text-4xl font-bold border-0 px-0 py-8 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none'
         style={{ fontSize: '2.25rem', lineHeight: '2.5rem' }}
       />
 
