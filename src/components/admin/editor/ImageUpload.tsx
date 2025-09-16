@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Upload, X } from 'lucide-react'
+import { Upload, X, Link, Image as ImageIcon } from 'lucide-react'
+import { useDropzone } from 'react-dropzone'
 import { uploadImageToCloudinary, deleteImageFromCloudinary } from '@/lib/post'
 
 interface ImageUploadProps {
@@ -19,6 +20,8 @@ interface ImageUploadProps {
   onImageInsert: (url: string) => void
   editor: any
 }
+
+type UploadMode = 'file' | 'url'
 
 export default function ImageUpload({
   open,
@@ -31,13 +34,11 @@ export default function ImageUpload({
     url: string
     publicId: string
   } | null>(null)
+  const [imageUrl, setImageUrl] = useState('')
+  const [mode, setMode] = useState<UploadMode>('file')
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const handleFileUpload = async (file: File) => {
     setUploading(true)
-
     try {
       const result = await uploadImageToCloudinary(file)
       setUploadedImage({ url: result.url, publicId: result.publicId })
@@ -49,12 +50,38 @@ export default function ImageUpload({
     }
   }
 
+  // react-dropzone
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (mode !== 'file' || !acceptedFiles.length) return
+      await handleFileUpload(acceptedFiles[0])
+    },
+    [mode]
+  )
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/*': [] },
+    multiple: false,
+  })
+
+  const handleUrlInsert = () => {
+    if (imageUrl.trim() && editor) {
+      editor.chain().focus().setImage({ src: imageUrl.trim() }).run()
+      onImageInsert(imageUrl.trim())
+      onOpenChange(false)
+      setImageUrl('')
+    }
+  }
+
   const handleInsert = () => {
-    if (uploadedImage && editor) {
+    if (mode === 'file' && uploadedImage && editor) {
       editor.chain().focus().setImage({ src: uploadedImage.url }).run()
       onImageInsert(uploadedImage.url)
       onOpenChange(false)
       setUploadedImage(null)
+    } else if (mode === 'url' && imageUrl.trim()) {
+      handleUrlInsert()
     }
   }
 
@@ -70,7 +97,6 @@ export default function ImageUpload({
   }
 
   const handleClose = async () => {
-    // Clean up the uploaded image if user cancels
     if (uploadedImage?.publicId) {
       try {
         await deleteImageFromCloudinary(uploadedImage.publicId)
@@ -79,73 +105,121 @@ export default function ImageUpload({
       }
     }
     setUploadedImage(null)
+    setImageUrl('')
+    setMode('file')
     onOpenChange(false)
   }
 
-  // Also clean up when the dialog is closed via other means (e.g., clicking outside)
-  const handleOpenChange = async (newOpen: boolean) => {
-    if (!newOpen && uploadedImage?.publicId) {
-      // Dialog is closing and we have an uploaded image - clean it up
-      try {
-        await deleteImageFromCloudinary(uploadedImage.publicId)
-      } catch (error) {
-        console.error('Error cleaning up image on dialog close:', error)
-      }
-      setUploadedImage(null)
+  const isInsertDisabled = () => {
+    if (mode === 'file') {
+      return !uploadedImage || uploading
+    } else {
+      return !imageUrl.trim()
     }
-    onOpenChange(newOpen)
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>Upload Image</DialogTitle>
+          <DialogTitle>Insert Image</DialogTitle>
         </DialogHeader>
+
+        {/* Mode Toggle */}
+        <div className='flex border rounded-md p-1 mb-4'>
+          <Button
+            type='button'
+            variant={mode === 'file' ? 'default' : 'ghost'}
+            className='flex-1 flex items-center gap-2'
+            onClick={() => setMode('file')}
+            size='sm'
+          >
+            <Upload className='h-4 w-4' />
+            Upload
+          </Button>
+          <Button
+            type='button'
+            variant={mode === 'url' ? 'default' : 'ghost'}
+            className='flex-1 flex items-center gap-2'
+            onClick={() => setMode('url')}
+            size='sm'
+          >
+            <Link className='h-4 w-4' />
+            URL
+          </Button>
+        </div>
+
         <div className='space-y-4'>
-          {!uploadedImage ? (
-            <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center'>
-              <Input
-                type='file'
-                id='image-upload'
-                accept='image/*'
-                onChange={handleFileUpload}
-                className='hidden'
-              />
-              <Label htmlFor='image-upload' className='cursor-pointer'>
+          {mode === 'file' ? (
+            /* File Upload Section */
+            !uploadedImage ? (
+              <div
+                {...getRootProps()}
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                  isDragActive
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <input {...getInputProps()} />
                 <div className='flex flex-col items-center justify-center space-y-2'>
-                  <Upload className='h-8 w-8 text-gray-400' />
+                  {isDragActive ? (
+                    <ImageIcon className='h-8 w-8 text-primary' />
+                  ) : (
+                    <Upload className='h-8 w-8 text-gray-400' />
+                  )}
                   <span className='text-sm text-gray-500'>
-                    {uploading ? 'Uploading...' : 'Click to upload an image'}
+                    {uploading
+                      ? 'Uploading...'
+                      : isDragActive
+                      ? 'Drop image here'
+                      : 'Drag & drop or click to upload'}
+                  </span>
+                  <span className='text-xs text-gray-400'>
+                    Supports JPEG, PNG, WebP
                   </span>
                 </div>
-              </Label>
-            </div>
+              </div>
+            ) : (
+              <div className='relative'>
+                <img
+                  src={uploadedImage.url}
+                  alt='Uploaded'
+                  className='w-full h-48 object-cover rounded-lg'
+                />
+                <Button
+                  variant='destructive'
+                  size='icon'
+                  className='absolute top-2 right-2 h-6 w-6'
+                  onClick={handleDelete}
+                >
+                  <X className='h-4 w-4' />
+                </Button>
+              </div>
+            )
           ) : (
-            <div className='relative'>
-              <img
-                src={uploadedImage.url}
-                alt='Uploaded'
-                className='w-full h-48 object-cover rounded-lg'
+            /* URL Input Section */
+            <div className='space-y-2'>
+              <Label htmlFor='image-url'>Image URL</Label>
+              <Input
+                id='image-url'
+                type='url'
+                placeholder='https://example.com/image.jpg'
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className='w-full'
               />
-              <Button
-                variant='destructive'
-                size='icon'
-                className='absolute top-2 right-2 h-6 w-6'
-                onClick={handleDelete}
-              >
-                <X className='h-4 w-4' />
-              </Button>
+              <p className='text-xs text-gray-500'>
+                Enter a direct image URL from Unsplash, Imgur, etc.
+              </p>
             </div>
           )}
+
           <div className='flex justify-end space-x-2'>
             <Button variant='outline' onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleInsert}
-              disabled={!uploadedImage || uploading}
-            >
+            <Button onClick={handleInsert} disabled={isInsertDisabled()}>
               Insert Image
             </Button>
           </div>
