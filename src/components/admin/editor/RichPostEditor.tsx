@@ -19,7 +19,7 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import BubbleMenu from './BubbleMenu'
 import Toolbar from './Toolbar'
 import ImageUpload from './ImageUpload'
-import { extractFirstImageFromHTML } from '@/lib/utils/post'
+import { extractFirstImageFromHTML, isEmptyContent } from '@/lib/utils/post'
 import {
   clearImageDropHandler,
   CustomImage,
@@ -32,6 +32,7 @@ interface RichPostEditorProps {
   post: Partial<Post>
   onChange: (post: Partial<Post>) => void
   onImageUpload?: (imageUrl: string) => void
+  disabled?: boolean
 }
 
 function LoadingSpinner() {
@@ -46,6 +47,7 @@ export default function RichPostEditor({
   post,
   onChange,
   onImageUpload,
+  disabled = false,
 }: RichPostEditorProps) {
   const [showImageUpload, setShowImageUpload] = useState(false)
   const { uploadImage, isUploading, uploadProgress } = useImageUpload()
@@ -236,6 +238,7 @@ export default function RichPostEditor({
     },
     onUpdate: ({ editor }) => {
       const content = editor.getHTML()
+      // Always update state to ensure images are captured
       const firstImage = extractFirstImage(content)
 
       onChange({
@@ -246,6 +249,12 @@ export default function RichPostEditor({
     },
     immediatelyRender: false,
   })
+
+  useEffect(() => {
+    if (editor && post.content === '' && editor.getHTML() !== '') {
+      editor.commands.clearContent()
+    }
+  }, [post.content, editor])
 
   const handleTagAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim()) {
@@ -280,6 +289,7 @@ export default function RichPostEditor({
         onChange={(e) => onChange({ ...post, title: e.target.value })}
         className='text-4xl font-bold border-0 px-0 py-8 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none'
         style={{ fontSize: '2.25rem', lineHeight: '2.5rem' }}
+        disabled={disabled}
       />
 
       {/* Toolbar */}
