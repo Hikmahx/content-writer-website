@@ -46,3 +46,32 @@ export interface Post {
     image: string
   }
 }
+
+
+export interface Experience {
+  id: string
+  organization: string
+  position: string
+  location: string
+  startDate: string
+  endDate?: string
+  responsibilities: string[]
+}
+
+export interface Education {
+  id: string
+  institution: string
+  degree: string
+  major?: string
+  gpa?: string
+  location: string
+  graduationDate: string
+}
+
+export interface PersonalInfo {
+  firstName: string
+  lastName: string
+  email: string
+  address: string
+  linkedin: string
+}
