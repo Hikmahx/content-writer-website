@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { ExperienceTimeline } from '@/components/experience/ExperienceTimeline'
-import { AddExperienceDialog } from '@/components/experience/AddExperienceDialog'
-import { ResumeGenerator } from '@/components/experience/ResumeGenerator'
+import { ExperienceTimeline } from '@/components/resume/ExperienceTimeline'
+import { AddExperienceDialog } from '@/components/resume/AddExperienceDialog'
+import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
 import { experienceData, educationData, personalInfo } from '@/lib/data'
 import type { Experience, Education, PersonalInfo } from '@/lib/types'
 
