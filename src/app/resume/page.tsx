@@ -50,7 +50,6 @@ export default function ExperiencePage() {
   return (
     <div className='min-h-screen bg-white'>
       <div className='max-w-6xl mx-auto px-8 py-16'>
-        {/* Header - Updated to match exact typography and spacing from image */}
         <div className='text-center'>
           <h1 className='text-5xl font-serif text-black mb-8'>Experiences</h1>
           <p className='text-gray-600 max-w-2xl mx-auto text-base leading-relaxed'>
@@ -60,7 +59,6 @@ export default function ExperiencePage() {
           </p>
         </div>
 
-        {/* Experience Timeline - Removed admin controls from header area */}
         <ExperienceTimeline
           experiences={experiences}
           education={education}
@@ -70,7 +68,6 @@ export default function ExperiencePage() {
           isAdmin={isAdmin}
         />
 
-        {/* Resume Download Button - Positioned exactly like in image */}
         <div className='fixed bottom-8 right-8 z-50'>
           <div className='flex items-center gap-3'>
             {isAdmin && (
@@ -90,7 +87,6 @@ export default function ExperiencePage() {
           </div>
         </div>
 
-        {/* Add/Edit Experience Dialog */}
         <AddExperienceDialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
