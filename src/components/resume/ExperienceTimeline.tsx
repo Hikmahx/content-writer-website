@@ -173,11 +173,11 @@ export function ExperienceTimeline({
       <div className='max-w-4xl mx-auto'>
         {/* Timeline Container */}
         <div ref={timelineRef} className='relative'>
-          <div className='sticky bg-white h-8 w-8 top-0 inset-x-0 m-auto z-30'></div>
+          <div className='sticky bg-white h-8 w-8 top-0 lg:inset-x-0 lg:m-auto z-30'></div>
           {/* Sticky Year Button */}
           <div
             ref={yearButtonRef}
-            className='sticky top-8 z-10 flex justify-center mb-8'
+            className='sticky -ml-6 lg:ml-auto top-8 z-10 flex lg:justify-center mb-8'
           >
             <div className='bg-beige text-black px-4 py-2 rounded-full text-sm font-medium shadow-lg transition-all duration-300'>
               {activeYear}
@@ -187,12 +187,12 @@ export function ExperienceTimeline({
           {/* Connecting Line - from year button to bottom dot */}
           <div
             ref={connectingLineRef}
-            className='absolute left-1/2 transform -translate-x-1/2 w-px bg-beige z-0'
+            className='absolute left-1.5 lg:left-1/2 transform -translate-x-1/2 w-px bg-beige z-0'
             style={{ top: '0', height: '0' }}
           />
 
           {/* Timeline Line (static background line) */}
-          <div className='absolute left-1/2 transform -translate-x-px top-0 bottom-0 w-px bg-border z-0'></div>
+          <div className='absolute lg:left-1/2 transform -translate-x-px top-0 bottom-0 w-px bg-border z-0'></div>
 
           {/* Experiences */}
           <div className='space-y-16'>
@@ -203,7 +203,7 @@ export function ExperienceTimeline({
                   experienceRefs.current[exp.id] = el
                 }}
                 className={`relative flex items-start ${
-                  index % 2 === 1 ? 'flex-row' : 'flex-row-reverse'
+                  index % 2 === 1 ? 'flex-row' : 'lg:flex-row-reverse'
                 }`}
               >
                 {/* Timeline Dot */}
@@ -211,7 +211,7 @@ export function ExperienceTimeline({
                   ref={(el) => {
                     dotRefs.current[exp.id] = el
                   }}
-                  className='absolute left-1/2 transform -translate-x-1/2 z-2k'
+                  className='absolute lg:left-1/2 transform lg:-translate-x-1/2 z-2k'
                 >
                   <div
                     className={`w-3 h-3 rounded-full transition-all duration-500 ${
@@ -223,7 +223,7 @@ export function ExperienceTimeline({
                 </div>
 
                 {/* Experience Card */}
-                <div className={`w-2/3 ${index % 2 === 1 ? 'pr-5' : 'pl-5'}`}>
+                <div className={`w-full lg:w-2/3 ${index % 2 === 1 ? 'lg:pr-5' : 'lg:pl-5'}`}>
                   <div className='px-6 hover:-translate-y-2 transition-all duration-300'>
                     <div className='mb-4'>
                       <div className='flex items-center justify-between'>
@@ -269,7 +269,7 @@ export function ExperienceTimeline({
                     {isAdmin && onEditExperience && onDeleteExperience && (
                       <div
                         className={`flex gap-2 mt-4 ${
-                          index % 2 === 1 ? 'justify-end' : 'justify-start'
+                          index % 2 === 1 ? 'lg:justify-end' : 'justify-start'
                         }`}
                       >
                         <Button
@@ -294,7 +294,7 @@ export function ExperienceTimeline({
                 </div>
 
                 {/* Empty space for alternating layout */}
-                <div className='w-2/3'></div>
+                <div className='lg:w-2/3'></div>
               </div>
             ))}
           </div>
