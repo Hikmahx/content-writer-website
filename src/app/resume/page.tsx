@@ -54,9 +54,9 @@ export default function ExperiencePage() {
         <div className='text-center'>
           <h1 className='text-5xl font-serif text-black mb-8'>Experiences</h1>
           <p className='text-gray-600 max-w-2xl mx-auto text-base leading-relaxed'>
-            My experiences over the years is as shown below. My experiences over
-            the years is as shown below. My experiences over the years is as
-            shown below. My experiences over the years is as shown below
+            My experiences highlight the stories I’ve crafted and the voices
+            I’ve shaped. Each role has strengthened my ability to connect with
+            readers.
           </p>
         </div>
 
