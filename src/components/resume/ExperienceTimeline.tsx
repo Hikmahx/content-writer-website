@@ -202,7 +202,7 @@ export function ExperienceTimeline({
                 ref={(el) => {
                   experienceRefs.current[exp.id] = el
                 }}
-                className={`relative flex items-start ${
+                className={`relative flex items-start group cursor-pointer ${
                   index % 2 === 1 ? 'flex-row' : 'lg:flex-row-reverse'
                 }`}
               >
@@ -268,7 +268,7 @@ export function ExperienceTimeline({
                     {/* Admin buttons */}
                     {isAdmin && onEditExperience && onDeleteExperience && (
                       <div
-                        className={`flex gap-2 mt-4 ${
+                        className={`flex gap-2 mt-4 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
                           index % 2 === 1 ? 'lg:justify-end' : 'justify-start'
                         }`}
                       >
@@ -284,7 +284,7 @@ export function ExperienceTimeline({
                           variant='ghost'
                           size='sm'
                           onClick={() => onDeleteExperience(exp.id)}
-                          className='h-8 px-2 text-red-500 hover:text-red-700 hover:bg-red-50'
+                          className='h-8 px-2 text-gray-400 hover:text-gray-500 hover:bg-gray-50'
                         >
                           <Trash2 className='w-3 h-3' />
                         </Button>
