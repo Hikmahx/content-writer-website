@@ -27,7 +27,7 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className='w-full pb-12'>
+    <footer className='w-full pb-12 print:hidden'>
       <div className='max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8'>
         <p className='text-sm text-muted-foreground'>
           © 2025 Sarah Yousuph, all rights reserved. | Site by{' '}

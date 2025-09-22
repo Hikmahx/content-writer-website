@@ -24,7 +24,7 @@ export function Header() {
 
   return (
     <>
-      <header className='w-full py-6 px-6 lg:px-12 relative z-50'>
+      <header className='w-full py-6 px-6 lg:px-12 relative z-50 print:hidden'>
         <nav className='flex items-center justify-between max-w-7xl mx-auto'>
           <Link
             href='/'
