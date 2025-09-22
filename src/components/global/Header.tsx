@@ -9,18 +9,29 @@ export function Header() {
   const [activeLink, setActiveLink] = useState('/')
 
   useEffect(() => {
-    // Set active link based on current pathname
     setActiveLink(window.location.pathname)
   }, [])
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
+  const toggleMenu = () => setIsOpen(!isOpen)
 
   const handleLinkClick = (href: string) => {
     setActiveLink(href)
     setIsOpen(false)
   }
+
+  const navItems = [
+    { href: '/', label: 'Home' },
+    { href: '/portfolio', label: 'Portfolio' },
+    { href: '/blog', label: 'Blog' },
+    { href: '/resume', label: 'Resume' },
+  ]
+
+  const linkClasses = (href: string, extra = '') =>
+    `transition-colors font-sans ${extra} ${
+      activeLink === href
+        ? 'text-black font-medium'
+        : 'text-gray-700 hover:text-gray-500'
+    }`
 
   return (
     <>
@@ -34,51 +45,18 @@ export function Header() {
             SARAH YOUSUPH
           </Link>
 
+          {/* Desktop nav */}
           <div className='hidden md:flex items-center space-x-8'>
-            <Link
-              href='/'
-              className={`transition-colors font-sans ${
-                activeLink === '/'
-                  ? 'text-black font-medium'
-                  : 'text-gray-700 hover:text-gray-500'
-              }`}
-              onClick={() => handleLinkClick('/')}
-            >
-              Home
-            </Link>
-            <Link
-              href='/portfolio'
-              className={`transition-colors font-sans ${
-                activeLink === '/portfolio'
-                  ? 'text-black font-medium'
-                  : 'text-gray-700 hover:text-gray-500'
-              }`}
-              onClick={() => handleLinkClick('/portfolio')}
-            >
-              Portfolio
-            </Link>
-            <Link
-              href='/blog'
-              className={`transition-colors font-sans ${
-                activeLink === '/blog'
-                  ? 'text-black font-medium'
-                  : 'text-gray-700 hover:text-gray-500'
-              }`}
-              onClick={() => handleLinkClick('/blog')}
-            >
-              Blog
-            </Link>
-            <Link
-              href='/resume'
-              className={`transition-colors font-sans ${
-                activeLink === '/resume'
-                  ? 'text-black font-medium'
-                  : 'text-gray-700 hover:text-gray-500'
-              }`}
-              onClick={() => handleLinkClick('/resume')}
-            >
-              Resume
-            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={linkClasses(item.href)}
+                onClick={() => handleLinkClick(item.href)}
+              >
+                {item.label}
+              </Link>
+            ))}
             <Link href='/contact'>
               <Button className='bg-black text-white hover:bg-beige hover:text-black transition-all px-6 font-sans text-base'>
                 CONTACT
@@ -86,6 +64,7 @@ export function Header() {
             </Link>
           </div>
 
+          {/* Hamburger */}
           <button
             onClick={toggleMenu}
             className='md:hidden relative z-50 w-8 h-8 flex flex-col justify-center items-center space-y-1 group'
@@ -110,6 +89,7 @@ export function Header() {
         </nav>
       </header>
 
+      {/* Mobile menu */}
       <div
         className={`fixed inset-0 z-40 transition-all duration-300 ease-in-out ${
           isOpen ? 'visible opacity-100' : 'invisible opacity-0'
@@ -121,31 +101,20 @@ export function Header() {
           onClick={() => setIsOpen(false)}
         />
 
-        {/* Mobile menu */}
         <div
           className={`absolute top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           <nav className='flex flex-col pt-24 px-8'>
-            {[
-              { href: '/', label: 'Home' },
-              { href: '/portfolio', label: 'portfolio' },
-              { href: '/blog', label: 'Blog' },
-              { href: '/resume', label: 'Resume' },
-            ].map((item, index) => (
+            {navItems.map((item, index) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-xl font-sans py-4 border-b border-gray-100 transition-all duration-300 ease-in-out transform ${
-                  isOpen
-                    ? 'translate-x-0 opacity-100'
-                    : 'translate-x-8 opacity-0'
-                } ${
-                  activeLink === item.href
-                    ? 'text-black font-medium'
-                    : 'text-gray-700 hover:text-gray-500'
-                }`}
+                className={linkClasses(
+                  item.href,
+                  'text-xl py-4 border-b border-gray-100'
+                )}
                 style={{
                   transitionDelay: isOpen ? `${index * 100}ms` : '0ms',
                 }}
