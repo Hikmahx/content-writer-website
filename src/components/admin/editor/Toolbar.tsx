@@ -32,7 +32,7 @@ export default function Toolbar({ editor, onImageUpload }: ToolbarProps) {
   }
 
   return (
-    <div className='sticky top-10 bg-white z-20 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border py-2 mb-6'>
+    <div className='sticky top-14 bg-white z-20 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border py-2 mb-6'>
       <div className='flex items-center gap-1'>
         <Button
           variant='ghost'

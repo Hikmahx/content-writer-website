@@ -27,6 +27,7 @@ import {
 } from './CustomImageExtension'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { toast } from 'sonner'
+import { X } from 'lucide-react'
 
 interface RichPostEditorProps {
   post: Partial<Post>
@@ -287,7 +288,7 @@ export default function RichPostEditor({
         placeholder='Title'
         value={post.title || ''}
         onChange={(e) => onChange({ ...post, title: e.target.value })}
-        className='text-4xl font-bold border-0 px-0 py-8 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none'
+        className='h-12 text-4xl font-bold border-0 px-0 py-8 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none'
         style={{ fontSize: '2.25rem', lineHeight: '2.5rem' }}
         disabled={disabled}
       />
@@ -331,14 +332,14 @@ export default function RichPostEditor({
             <Badge
               key={tag}
               variant='secondary'
-              className='flex items-center gap-1'
+              className='flex items-center gap-1 text-xs font-thin bg-beige/70'
             >
-              #{tag}
+              {tag}
               <button
                 onClick={() => handleTagRemove(tag)}
                 className='ml-1 hover:bg-destructive/20 rounded-full p-0.5'
               >
-                x
+                <X className='w-2 h-2' />
               </button>
             </Badge>
           ))}

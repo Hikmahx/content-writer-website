@@ -32,12 +32,12 @@ export default function CardPost({ post }: { post: Post }) {
               <PostDate time={post.createdAt} />
             </div>
           </div>
-          <Link href={`/blog/${post.slug}`} className='hover:text-beige'>
-            <CardTitle className='py-2'>{post.title}</CardTitle>
+          <Link href={`/blog/${post.slug}`} className='hover:text-beige no-underline'>
+            <CardTitle className='py-2 font-serif'>{post.title}</CardTitle>
           </Link>
         </CardHeader>
         <CardContent className='pb-0 px-0'>
-          <p className='font-normal text-base my-0 font-sans text-gray-500 w-full max-w-lg mr-auto'>
+          <p className='font-normal text-sm my-0 font-sans text-gray-500 w-full max-w-lg mr-auto'>
             {post.description.slice(0, 150) + '...'}
           </p>
         </CardContent>
@@ -47,9 +47,9 @@ export default function CardPost({ post }: { post: Post }) {
               {post.hashtags.map((tag, index) => (
                 <span
                   key={`${tag}-${index}`}
-                  className='no-underline font-normal text-sm bg-white border border-black px-3 py-1 rounded-full w-auto'
+                  className='no-underline text-xs font-thin bg-beige/70 px-3 py-1 rounded-full w-auto'
                 >
-                  # {tag}
+                  {tag}
                 </span>
               ))}
             </div>

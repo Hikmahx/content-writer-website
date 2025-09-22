@@ -57,7 +57,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         </div>
         <article className='prose prose-img:rounded-xl max-w-none mt-2'>
           <section>
-            <h1 className='text-3xl font-bold tracking-wide sm:text-4xl xl:text-5xl xl:leading-[1.32] mb-2'>
+            <h1 className='text-3xl font-bold font-serif tracking-wide sm:text-4xl xl:text-5xl xl:leading-[1.32] mb-2'>
               {post.title}
             </h1>
             <div className='flex items-center gap-2 pb-3'>
