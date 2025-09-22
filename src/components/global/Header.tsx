@@ -47,15 +47,15 @@ export function Header() {
               Home
             </Link>
             <Link
-              href='/about'
+              href='/portfolio'
               className={`transition-colors font-sans ${
-                activeLink === '/about'
+                activeLink === '/portfolio'
                   ? 'text-black font-medium'
                   : 'text-gray-700 hover:text-gray-500'
               }`}
-              onClick={() => handleLinkClick('/about')}
+              onClick={() => handleLinkClick('/portfolio')}
             >
-              About
+              Portfolio
             </Link>
             <Link
               href='/blog'
@@ -130,7 +130,7 @@ export function Header() {
           <nav className='flex flex-col pt-24 px-8'>
             {[
               { href: '/', label: 'Home' },
-              { href: '/about', label: 'About' },
+              { href: '/portfolio', label: 'portfolio' },
               { href: '/blog', label: 'Blog' },
               { href: '/resume', label: 'Resume' },
             ].map((item, index) => (
