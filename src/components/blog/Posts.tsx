@@ -70,7 +70,7 @@ export default function Posts({
         <h1 className='text-2xl font-bold tracking-tight'>Articles</h1>
         <SortSelect />
       </div>
-      <div className='flex flex-col mx-auto gap-x-6 gap-y-4 lg:gap-y-2 w-full'>
+      <div className='flex flex-col mx-auto gap-x-6 gap-y-4 md:gap-y-0 w-full'>
         {posts.length < 1 && (
           <div className='flex justify-center'>No Post Yet.</div>
         )}

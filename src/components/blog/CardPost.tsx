@@ -7,17 +7,15 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '../ui/card'
 import PostDate from './PostDate'
 
-
 export default function CardPost({ post }: { post: Post }) {
-  const createdAt = useMemo(() => new Date(post.createdAt), [ post.createdAt ])
+  const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt])
   return (
     <Card className='w-full prose prose-slate max-w-none relative rounded-none shadow-none flex flex-col md:flex-row items-center justify-between border-white border-b border-b-gray-300 first:border-t first:border-t-gray-300 gap-x-4'>
-      <div className='order-2 md:order-1'>
-        <Link href={`/blog/${post.slug}`} className='absolute inset-0'></Link>
+      <div className='order-2 md:order-1 w-full'>
         <CardHeader className='py-1 space-y-0 px-0'>
           <div className='flex items-center gap-2'>
             <div className='py-5'>
@@ -34,7 +32,9 @@ export default function CardPost({ post }: { post: Post }) {
               <PostDate time={post.createdAt} />
             </div>
           </div>
-          <CardTitle className='py-2'>{post.title}</CardTitle>
+          <Link href={`/blog/${post.slug}`} className='hover:text-beige'>
+            <CardTitle className='py-2'>{post.title}</CardTitle>
+          </Link>
         </CardHeader>
         <CardContent className='pb-0 px-0'>
           <p className='font-normal text-base my-0 font-sans text-gray-500 w-full max-w-lg mr-auto'>
@@ -56,11 +56,11 @@ export default function CardPost({ post }: { post: Post }) {
           </div>
         </CardFooter>
       </div>
-      <div className='overflow-hidden mt-4 md:mt-0 md:order-1'>
+      <div className='overflow-hidden mt-4 md:mt-0 md:order-1 w-full max-w-sm'>
         {post.img ? (
           <>
             <Image
-              className='w-full h-auto m-0 rounded-lg'
+              className='w-full h-auto mx-0 rounded-lg my-4'
               src={post.img}
               alt='placeholder'
               width={300}
@@ -68,7 +68,7 @@ export default function CardPost({ post }: { post: Post }) {
             />
           </>
         ) : (
-          <div className='h-[260px] w-full min-w-[300px] bg-gray-100 rounded-lg'></div>
+          <div className='h-[260px] w-full min-w-[300px] bg-gray-100 rounded-lg my-4'></div>
         )}
       </div>
     </Card>
