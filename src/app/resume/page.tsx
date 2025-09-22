@@ -50,7 +50,7 @@ export default function ExperiencePage() {
   return (
     <div className='min-h-screen bg-white'>
       <div className='max-w-6xl mx-auto px-8 py-16'>
-        <div className='text-center'>
+        <div className='text-center print:hidden'>
           <h1 className='text-5xl font-serif text-black mb-8'>Experiences</h1>
           <p className='text-gray-600 max-w-2xl mx-auto text-base leading-relaxed'>
             My experiences highlight the stories I’ve crafted and the voices
