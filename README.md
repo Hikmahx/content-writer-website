@@ -1,6 +1,6 @@
 # Content Writer Website (Work In Progress)
 
-A full-stack content writer website: blog, admin area, portfolio, contact, resume builder, and CMS-style content management. This README summarizes the project, organized by feature and architecture.
+A full-stack content writer [website](https://sarah-yousuph.vercel.app): blog, admin area, portfolio, contact, resume builder, and CMS-style content management. This README summarizes the project, organized by feature and architecture.
 
 ## Table of Contents
 
@@ -168,10 +168,10 @@ Users should be able to:
 - [Tailwind Typography](https://tailwindcss-typography.vercel.app/) - Blog prose  
 - [shadcn/ui](https://ui.shadcn.com/) - UI components  
 - [Framer Motion](https://www.framer.com/motion/) - Animations  
-- [Ionicons](https://ionicons.com) - Icons  
+- [Figma](https://www.figma.com) - UI design  
 - [Prisma](https://www.prisma.io/) - ORM  
 - [Cloudinary](https://cloudinary.com) - Image hosting & CDN  
-- [NextAuth.js](https://next-auth.js.org/) - Authentication  
+- [NextAuth.js](https://next-auth.js.org/) - Authentication with Google
 - [react-to-print](https://www.npmjs.com/package/react-to-print) - Resume export  
 - [Vercel](https://vercel.com/) - Deployment  
 
@@ -199,6 +199,7 @@ Users should be able to:
 ## To Do
 
 - [ ] Contact Page  
+- [ ] Unit Testing using Jest
 - [ ] Cron job for orphan-image cleanup  
 - [ ] Blog categories  
 - [ ] SEO improvements  
