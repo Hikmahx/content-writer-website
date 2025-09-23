@@ -8,10 +8,12 @@ import { AddExperienceDialog } from '@/components/resume/AddExperienceDialog'
 import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
 import { experienceData, educationData, personalInfo } from '@/lib/data'
 import type { Experience, Education, PersonalInfo } from '@/lib/types'
-
-const isAdmin = false
+import { useSession } from 'next-auth/react'
 
 export default function ExperiencePage() {
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'ADMIN'
+
   const [experiences, setExperiences] = useState<Experience[]>(experienceData)
   const [education, setEducation] = useState<Education[]>(educationData)
   const [personal, setPersonal] = useState<PersonalInfo>(personalInfo)
