@@ -9,7 +9,7 @@ import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
 import { experienceData, educationData, personalInfo } from '@/lib/data'
 import type { Experience, Education, PersonalInfo } from '@/lib/types'
 
-const isAdmin = true
+const isAdmin = false
 
 export default function ExperiencePage() {
   const [experiences, setExperiences] = useState<Experience[]>(experienceData)

@@ -63,15 +63,10 @@ export function ResumeGenerator({
       {/* Resume */}
       <div
         ref={resumeRef}
-        className='
-          hidden print:block 
-          bg-white text-black 
-          p-8 max-w-3xl mx-auto 
-          font-serif text-[11pt] leading-snug
-        '
+        className='hidden print:w-full print:flex print:flex-col justify-start items-start bg-white text-black p-8 max-w-3xl mx-auto font-serif text-[11pt] leading-snug'
       >
         {/* Header */}
-        <header className='text-center mb-4'>
+        <header className='text-center mb-4 w-full'>
           <h1 className='text-xl font-bold tracking-wide'>
             {personalInfo.firstName} {personalInfo.lastName}
           </h1>
@@ -85,7 +80,7 @@ export function ResumeGenerator({
         </header>
 
         {/* Experience */}
-        <section className='mb-4'>
+        <section className='mb-4 w-full'>
           <h2 className='font-bold uppercase border-b border-gray-400 mb-2 text-sm'>
             Experience
           </h2>
@@ -109,7 +104,7 @@ export function ResumeGenerator({
         </section>
 
         {/* Education */}
-        <section className='mb-4'>
+        <section className='mb-4 w-full'>
           <h2 className='font-bold uppercase border-b border-gray-400 mb-2 text-sm'>
             Education
           </h2>

@@ -10,7 +10,7 @@ export default function StoriesHeader() {
           Your articles
         </h1>
         <p className='text-muted-foreground'>
-          Create and manage your blog posts
+          Create and manage your blog posts (Admin-access only)
         </p>
       </div>
       <Link href='/admin/new'>

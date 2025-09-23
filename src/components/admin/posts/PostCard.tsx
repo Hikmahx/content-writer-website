@@ -51,13 +51,13 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
               {post.hashtags.length > 0 && (
                 <>
                   <span>•</span>
-                  <div className='flex gap-1'>
+                  <div className='flex gap-1 items-center'>
                     {post.hashtags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className='bg-muted px-2 py-1 rounded text-xs'
+                        className={` ${post.published? 'bg-beige/30' : 'bg-muted'} px-2 py-1 rounded text-xs`}
                       >
-                        #{tag}
+                        {tag}
                       </span>
                     ))}
                     {post.hashtags.length > 2 && (
