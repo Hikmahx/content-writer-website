@@ -19,7 +19,6 @@ import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import BubbleMenu from './BubbleMenu'
 import Toolbar from './Toolbar'
 import ImageUpload from './ImageUpload'
-import { extractFirstImageFromHTML, isEmptyContent } from '@/lib/utils/post'
 import {
   clearImageDropHandler,
   CustomImage,
