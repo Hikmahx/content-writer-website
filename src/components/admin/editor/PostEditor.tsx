@@ -90,26 +90,26 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
     }
   }, [post, postSlug, setDraftPost, removeDraft, hasRealContent])
 
-  // Load existing post data
+  // Load existing post data ONLY if postSlug exists
   useEffect(() => {
-    const fetchData = async () => {
-      if (!postSlug) {
-        setLoading(false)
+    if (!postSlug) {
+      setLoading(false)
 
-        // Clean up empty drafts on initial load only
-        if (initialLoadRef.current) {
-          const shouldRemoveDraft = !hasRealContent(draftPost)
-          if (shouldRemoveDraft) {
-            removeDraft()
-          }
-        }
-        initialLoadRef.current = false
-        return
-      }
-
-      // Only fetch if we have a postSlug and we're in initial load
+      // Clean up empty drafts on initial load only
       if (initialLoadRef.current) {
-        setLoading(true)
+        const shouldRemoveDraft = !hasRealContent(draftPost)
+        if (shouldRemoveDraft) {
+          removeDraft()
+        }
+      }
+      initialLoadRef.current = false
+      return
+    }
+
+    // Only fetch if we have a postSlug and we're in initial load
+    if (initialLoadRef.current) {
+      setLoading(true)
+      const fetchData = async () => {
         try {
           const data = await getPost(postSlug)
           if (data) {
@@ -126,10 +126,10 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
           initialLoadRef.current = false
         }
       }
-    }
 
-    fetchData()
-  }, [postSlug])
+      fetchData()
+    }
+  }, [postSlug, draftPost, removeDraft, hasRealContent])
 
   const handleSave = async (published: boolean) => {
     if (!post.title?.trim()) {
@@ -173,7 +173,21 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       }
 
       const savedPost = await savePost(postData, postSlug)
-      setPost(savedPost)
+
+      if (postSlug) {
+        // Editing existing post => keep saved data in editor
+        setPost(savedPost)
+      } else {
+        // New post => reset editor to empty
+        setPost({
+          title: '',
+          description: '',
+          content: '',
+          hashtags: [],
+          published: false,
+          img: '',
+        })
+      }
 
       if (savedPost.content) {
         setAllUploadedImages(extractImageUrlsFromHTML(savedPost.content))
@@ -186,7 +200,8 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
           post.id ? 'updated' : published ? 'published' : 'saved'
         }!`
       )
-      
+
+      // redirect after a short delay
       setTimeout(() => {
         router.push('/admin')
       }, 1000)
@@ -245,6 +260,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   return (
     <div className='max-w-4xl mx-auto'>
       <EditorHeader
+        postSlug={postSlug}
         post={post}
         saving={saving}
         savingType={savingType}

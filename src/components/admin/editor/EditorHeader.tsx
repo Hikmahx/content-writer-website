@@ -1,14 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import {
-  ArrowLeft,
-  Save,
-  Eye,
-  Trash2,
-  Loader2,
-  Edit,
-} from 'lucide-react'
+import { ArrowLeft, Save, Eye, Trash2, Loader2, Edit } from 'lucide-react'
 import Link from 'next/link'
 import type { Post } from '@/lib/types'
 import { toast } from 'sonner'
@@ -22,6 +15,7 @@ import { useState, useEffect, useCallback } from 'react'
 
 interface EditorHeaderProps {
   post: Partial<Post>
+  postSlug?: string
   saving: boolean
   savingType?: 'draft' | 'publish' | null
   clearing?: boolean
@@ -31,6 +25,7 @@ interface EditorHeaderProps {
 
 export default function EditorHeader({
   post,
+  postSlug,
   saving,
   savingType = null,
   clearing = false,
@@ -41,8 +36,8 @@ export default function EditorHeader({
   const [canRepublish, setCanRepublish] = useState(true)
   const [justUnpublished, setJustUnpublished] = useState(false)
 
-  const isEditMode = !!post.id
-  const isPublished = post.published || false // Ensure boolean
+  const isEditMode = !!postSlug
+  const isPublished = post.published || false
 
   // Memoize the content check to prevent unnecessary re-renders
   const hasContent = useCallback(() => {
@@ -164,7 +159,7 @@ export default function EditorHeader({
             </Button>
           </Link>
 
-          <div className='text-sm text-muted-foreground'>
+          <div className='text-sm text-muted-foreground flex items-center gap-1'>
             {saving ? (
               <span className='flex items-center gap-2'>
                 <Loader2 className='w-3 h-3 animate-spin' />
