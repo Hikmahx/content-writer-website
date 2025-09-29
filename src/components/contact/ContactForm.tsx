@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -48,8 +49,8 @@ export default function ContactForm() {
   }
 
   return (
-    <div className='min-h-50vh flex max-w-3xl shadow-md mx-auto my-8 rounded-lg overflow-hidden bg-white'>
-      <div className='flex-1 flex items-center justify-center p-8'>
+    <div className='min-h-50vh flex flex-col-reverse sm:flex-row max-w-3xl shadow-md mx-auto my-8 rounded-sm lg:rounded-lg overflow-hidden bg-white'>
+      <div className='flex-1 flex items-center justify-center p-8 pt-10'>
         <div className='w-full max-w-2xl'>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
@@ -152,7 +153,9 @@ export default function ContactForm() {
         </div>
       </div>
 
-      <div className='hidden lg:block w-80 bg-beige' />
+      <div className='w-full h-10 sm:h-auto sm:w-40 lg:w-60 bg-beige'>
+        <Image src='/contact-bg.svg' alt='Contact' width={320} height={400} className='object-cover h-full object-left border-white' />
+      </div>
     </div>
   )
 }
