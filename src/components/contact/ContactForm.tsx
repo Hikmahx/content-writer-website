@@ -23,29 +23,46 @@ const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
-  phoneNumber: z.string().min(8, 'Phone number is too short'),
   message: z.string().min(5, 'Message must be at least 5 characters'),
 })
 
 type ContactFormValues = z.infer<typeof contactFormSchema>
 
 export default function ContactForm() {
+  const [submitting, setSubmitting] = React.useState(false)
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
       email: '',
-      phoneNumber: '',
       message: '',
     },
   })
 
-  const onSubmit = (values: ContactFormValues) => {
-    console.log('Form submitted:', values)
-    toast.message('Message Sent', {
-      description: "Thanks for reaching out! I'll get back to you soon.",
-    })
+  const onSubmit = async (values: ContactFormValues) => {
+    try {
+      setSubmitting(true)
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+
+      if (res.ok) {
+        toast.message('Message Sent', {
+          description: "Thanks for reaching out! I'll get back to you soon.",
+        })
+        form.reset()
+      } else {
+        toast.error('Failed to send message')
+      }
+    } catch (error) {
+      toast.error('Something went wrong!')
+      console.error(error)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -143,9 +160,10 @@ export default function ContactForm() {
               <div className='flex justify-center pt-8'>
                 <Button
                   type='submit'
-                  className='ml-auto uppercase bg-black text-white hover:bg-beige hover:text-black px-6 font-sans w-fit mt-8 transition-all duration-300 ease-in-out transform'
+                  className='ml-auto uppercase bg-black text-white hover:bg-beige hover:text-black px-6 font-sans w-fit mt-8 transition-all duration-300 ease-in-out transform disabled:bg-gray-400 disabled:cursor-not-allowed'
+                  disabled={submitting}
                 >
-                  Send Message
+                  {submitting ? 'Submitting...' : 'Send Message'}
                 </Button>
               </div>
             </form>
@@ -154,7 +172,13 @@ export default function ContactForm() {
       </div>
 
       <div className='w-full h-10 sm:h-auto sm:w-40 lg:w-60 bg-beige'>
-        <Image src='/contact-bg.svg' alt='Contact' width={320} height={400} className='object-cover h-full object-left border-white' />
+        <Image
+          src='/contact-bg.svg'
+          alt='Contact'
+          width={320}
+          height={400}
+          className='object-cover h-full object-left border-white'
+        />
       </div>
     </div>
   )
