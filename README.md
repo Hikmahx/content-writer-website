@@ -42,6 +42,7 @@ Users should be able to:
 - Generate resumes with experience management (CRUD + client-side print/export).
 - View portfolio articles and contact the author.
 - Protect admin routes with authentication and role checks (NextAuth + Google).
+- Send messages via the **Contact Page** directly to the admin’s email (via SMTP).
 
 ---
 
@@ -147,6 +148,17 @@ Users should be able to:
 
 ---
 
+### Contact Page
+![contact](/public/readme/contact.gif)
+
+- Simple contact form for site visitors to reach out.  
+- Messages are delivered directly to the admin’s email using Nodemailer + SMTP.
+- Email content is rendered dynamically using Handlebars `(.hbs)` templates for better formatting.  
+- Validations for required fields (name, email, message).  
+- Toast notifications for success/failure feedback.
+
+---
+
 ## Architecture
 
 - **Image lifecycle** — temp upload → permanent on save → delete on post delete/update/clear draft.  
@@ -174,6 +186,8 @@ Users should be able to:
 - [NextAuth.js](https://next-auth.js.org/) - Authentication with Google
 - [react-to-print](https://www.npmjs.com/package/react-to-print) - Resume export  
 - [Vercel](https://vercel.com/) - Deployment  
+- [Nodemailer](https://nodemailer.com) - Email delivery for contact messages.
+
 
 ---
 
@@ -181,8 +195,8 @@ Users should be able to:
 
 - Handling image lifecycle (upload, cleanup).  
 - Rich-text editor integration with Tiptap.  
-- Draft persistence with localStorage.  
-- Admin dashboards with toast feedback and pagination.  
+- Sending styled emails using Nodemailer + Handlebars (`.hbs`) templates.  
+
 
 ---
 
@@ -198,7 +212,6 @@ Users should be able to:
 
 ## To Do
 
-- [ ] Contact Page  
 - [ ] Unit Testing using Jest
 - [ ] Cron job for orphan-image cleanup  
 - [ ] Blog categories  
