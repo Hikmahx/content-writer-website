@@ -51,7 +51,7 @@ export default function ContactForm() {
 
       if (res.ok) {
         toast.message('Message Sent', {
-          description: "Thanks for reaching out! I'll get back to you soon.",
+          description: 'Thanks for reaching out! I\'ll get back to you soon.',
         })
         form.reset()
       } else {
