@@ -14,12 +14,12 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  email         String    @unique
+  email         String          @unique
   emailVerified DateTime?
   image         String?
-  role          String    @default("USER")
+  role          String          @default("USER")
   accounts      Account[]
   sessions      Session[]
   // Optional for WebAuthn support
@@ -29,6 +29,9 @@ model User {
   Post          Post[]
   Comment       Comment[]
   Like          Like[]
+  Experience    Experience[]
+  Education     Education[]
+  PersonalInfo  PersonalInfo[]
 }
 
 model Account {
@@ -125,4 +128,38 @@ model Like {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+}
+
+model Experience {
+  id               String   @id @default(cuid()) @map("_id") @db.ObjectId
+  organization     String
+  position         String
+  location         String
+  startDate        DateTime
+  endDate          DateTime
+  createdAt        DateTime @default(now())
+  responsibilities String[]
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Education {
+  id             String   @id @default(cuid()) @map("_id") @db.ObjectId
+  institution    String
+  degree         String
+  major          String
+  location       String
+  graduationDate DateTime
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PersonalInfo {
+  id        String @id @default(cuid()) @map("_id") @db.ObjectId
+  firstName String
+  lastName  String
+  address   String
+  linkedin  String
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
