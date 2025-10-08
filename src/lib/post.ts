@@ -28,41 +28,70 @@ export async function fetchPosts(
     if (itemsPerPage)
       queryParams.append('itemsPerPage', itemsPerPage.toString())
 
-    const queryString = queryParams.toString()
-    const url = queryString
-      ? `${getApiBaseUrl()}/posts?${queryString}`
-      : `${getApiBaseUrl()}/posts`
-
+    const url = `${getApiBaseUrl()}/posts${
+      queryParams.toString() ? `?${queryParams}` : ''
+    }`
     const response = await fetch(url, { cache: 'no-store' })
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch posts: ${response}`)
+      throw new Error(
+        `Failed to fetch posts: ${response.status} ${response.statusText}`
+      )
     }
 
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('Failed to fetch posts:', error)
-    throw error
+    return await response.json()
+  } catch (err) {
+    console.error('Failed to fetch posts:', err)
+    throw err
   }
 }
 
 export async function getPost(slug: string): Promise<Post | null> {
   try {
     const response = await fetch(`${getApiBaseUrl()}/posts/${slug}`, {
-      cache: 'no-store'
+      cache: 'no-store',
     })
-    
+
     if (!response.ok) {
       if (response.status === 404) return null
-      throw new Error(`Failed to fetch post: ${response.status}`)
+      throw new Error(
+        `Failed to fetch post: ${response.status} ${response.statusText}`
+      )
     }
-    
-    const post = await response.json()
-    return post
-  } catch (error) {
-    console.error('Failed to fetch post:', error)
+
+    return await response.json()
+  } catch (err) {
+    console.error('Failed to fetch post:', err)
     return null
+  }
+}
+
+export async function savePost(
+  postData: Partial<Post>,
+  postSlug?: string
+): Promise<Post> {
+  try {
+    const method = postSlug ? 'PUT' : 'POST'
+    const url = `${getApiBaseUrl()}/posts${postSlug ? `/${postSlug}` : ''}`
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(postData),
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(
+        error.error || `Failed to ${postSlug ? 'update' : 'create'} post`
+      )
+    }
+
+    return await response.json()
+  } catch (err) {
+    console.error('Failed to save post:', err)
+    throw err
   }
 }
 
@@ -73,71 +102,58 @@ export async function deletePost(postId: string): Promise<void> {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to delete post')
+      throw new Error(
+        `Failed to delete post: ${response.status} ${response.statusText}`
+      )
     }
-  } catch (error) {
-    console.error('Failed to delete post:', error)
-    throw error
+  } catch (err) {
+    console.error('Failed to delete post:', err)
+    throw err
   }
 }
 
-export async function savePost(
-  postData: Partial<Post>,
-  postSlug?: string
-): Promise<Post> {
-  const method = postSlug ? 'PUT' : 'POST'
-  const url = postSlug
-    ? `${getApiBaseUrl()}/posts/${postSlug}`
-    : `${getApiBaseUrl()}/posts`
-
-  const response = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(postData),
-  })
-
-  const data = await response.json()
-
-  if (!response.ok) {
-    throw new Error(data.error || 'Failed to save post')
-  }
-
-  return data
-}
-
-export async function deleteImageFromCloudinary(publicId: string): Promise<boolean> {
+export async function uploadImageToCloudinary(
+  file: File
+): Promise<{ url: string; publicId: string }> {
   try {
-    const response = await fetch(`${getApiBaseUrl()}/upload?publicId=${publicId}`, {
-      method: 'DELETE',
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch(`${getApiBaseUrl()}/upload`, {
+      method: 'POST',
+      body: formData,
     })
-    
+
     if (!response.ok) {
-      throw new Error('Failed to delete image')
+      throw new Error(
+        `Failed to upload image: ${response.status} ${response.statusText}`
+      )
     }
-    
-    return true
-  } catch (error) {
-    console.error('Error deleting image from Cloudinary:', error)
-    return false
+
+    const data = await response.json()
+    return { url: data.secure_url, publicId: data.public_id }
+  } catch (err) {
+    console.error('Failed to upload image:', err)
+    throw err
   }
 }
 
-export async function uploadImageToCloudinary(file: File): Promise<{ url: string; publicId: string }> {
-  const formData = new FormData()
-  formData.append('file', file)
+export async function deleteImageFromCloudinary(
+  publicId: string
+): Promise<void> {
+  try {
+    const response = await fetch(
+      `${getApiBaseUrl()}/upload?publicId=${publicId}`,
+      { method: 'DELETE' }
+    )
 
-  const response = await fetch(`${getApiBaseUrl()}/upload`, {
-    method: 'POST',
-    body: formData,
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to upload image')
-  }
-
-  const data = await response.json()
-  return {
-    url: data.secure_url,
-    publicId: data.public_id
+    if (!response.ok) {
+      throw new Error(
+        `Failed to delete image: ${response.status} ${response.statusText}`
+      )
+    }
+  } catch (err) {
+    console.error('Failed to delete image from Cloudinary:', err)
+    throw err
   }
 }
