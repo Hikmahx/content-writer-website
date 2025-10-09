@@ -131,7 +131,7 @@ model Like {
 }
 
 model Experience {
-  id               String   @id @default(cuid()) @map("_id") @db.ObjectId
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
   organization     String
   position         String
   location         String
@@ -144,7 +144,7 @@ model Experience {
 }
 
 model Education {
-  id             String   @id @default(cuid()) @map("_id") @db.ObjectId
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
   institution    String
   degree         String
   major          String
@@ -155,7 +155,7 @@ model Education {
 }
 
 model PersonalInfo {
-  id        String @id @default(cuid()) @map("_id") @db.ObjectId
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
   firstName String
   lastName  String
   address   String
