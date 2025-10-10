@@ -1,6 +1,6 @@
 'use client'
 
-import type React from 'react'
+import { getResumeDataById, saveResumeData } from '@/lib/resume'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Minus } from 'lucide-react'
 import type { Experience, Education, PersonalInfo } from '@/lib/types'
+import { toast } from 'sonner'
 
 interface AddExperienceDialogProps {
   open: boolean
@@ -38,6 +39,8 @@ export function AddExperienceDialog({
   onUpdatePersonal,
   onUpdateEducation,
 }: AddExperienceDialogProps) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState<Partial<Experience>>({
     organization: '',
     position: '',
@@ -51,8 +54,17 @@ export function AddExperienceDialog({
   const [educationData, setEducationData] = useState<Education[]>(education)
 
   useEffect(() => {
-    if (experience) {
-      setFormData(experience)
+    if (experience && experience.id) {
+      setLoading(true)
+      getResumeDataById('experience', experience.id)
+        .then((data: any) => {
+          setFormData(data && data.experience ? data.experience : experience)
+          setLoading(false)
+        })
+        .catch(() => {
+          setFormData(experience)
+          setLoading(false)
+        })
     } else {
       setFormData({
         organization: '',
@@ -73,19 +85,50 @@ export function AddExperienceDialog({
     setEducationData(education)
   }, [education])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log(formData)
+    setError(null)
     if (formData.organization && formData.position && formData.startDate) {
-      onSubmit({
-        id: experience?.id || Date.now().toString(),
-        organization: formData.organization,
-        position: formData.position,
-        location: formData.location || '',
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        responsibilities:
-          formData.responsibilities?.filter((r) => r.trim()) || [],
-      })
+      setLoading(true)
+      try {
+        const toISO = (date: string | undefined) =>
+          date ? new Date(date).toISOString() : undefined
+
+        const payload: any = {
+          organization: formData.organization,
+          position: formData.position,
+          location: formData.location || '',
+          startDate: toISO(formData.startDate),
+          endDate: toISO(formData.endDate),
+          responsibilities:
+            formData.responsibilities?.filter((r) => r.trim()) || [],
+        }
+
+        const isEdit = Boolean(experience?.id)
+        if (isEdit && experience && experience.id) payload.id = experience.id
+        const saved = await saveResumeData(
+          payload,
+          'experience',
+          isEdit && experience && experience.id ? experience.id : undefined
+        )
+
+        const result =
+          saved && (saved as any).experience ? (saved as any).experience : saved
+        if (result) {
+          onSubmit(result)
+          onOpenChange(false)
+        }
+      } catch (err) {
+        toast.error('Failed to save experience', {
+          description:
+            typeof error === 'object' && error && 'message' in error
+              ? (error as { message: string }).message
+              : 'An error occurred',
+        })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -284,7 +327,9 @@ export function AddExperienceDialog({
                   Cancel
                 </Button>
                 <Button type='submit'>
-                  {experience ? 'Update' : 'Add'} Experience
+                  {loading
+                    ? 'Loading...'
+                    : `${experience ? 'Update' : 'Add'} Experience`}
                 </Button>
               </div>
             </form>
