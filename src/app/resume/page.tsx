@@ -91,7 +91,10 @@ export default function ExperiencePage() {
 
         <AddExperienceDialog
           open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open)
+            if (!open) setEditingExperience(null)
+          }}
           onSubmit={handleAddExperience}
           experience={editingExperience}
           personalInfo={personal}
