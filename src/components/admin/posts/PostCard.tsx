@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Edit, Eye } from 'lucide-react'
+import { MoreHorizontal, Edit, Eye, Trash2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import type { Post } from '@/lib/types'
-import DeletePostModal from './DeletePostModal'
+import DeleteModal from '@/components/global/DeleteModal'
 
 interface PostCardProps {
   post: Post
@@ -55,7 +55,9 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
                     {post.hashtags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className={` ${post.published? 'bg-beige/30' : 'bg-muted'} px-2 py-1 rounded text-xs`}
+                        className={` ${
+                          post.published ? 'bg-beige/30' : 'bg-muted'
+                        } px-2 py-1 rounded text-xs`}
                       >
                         {tag}
                       </span>
@@ -92,10 +94,18 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
                   </Link>
                 </DropdownMenuItem>
               )}
-              <DeletePostModal
-                postSlug={post.slug}
-                postTitle={post.title}
-                onDelete={onDelete}
+              <DeleteModal
+                itemName={post.title}
+                onDelete={onDelete && (() => onDelete(post.slug))}
+                trigger={
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className='text-destructive focus:text-destructive'
+                  >
+                    <Trash2 className='h-4 w-4 mr-2' />
+                    Delete
+                  </DropdownMenuItem>
+                }
               />
             </DropdownMenuContent>
           </DropdownMenu>
