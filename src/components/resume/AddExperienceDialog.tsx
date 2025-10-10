@@ -53,6 +53,21 @@ export function AddExperienceDialog({
   const [personalData, setPersonalData] = useState<PersonalInfo>(personalInfo)
   const [educationData, setEducationData] = useState<Education[]>(education)
 
+  // Reset all form states
+  const resetAll = () => {
+    setFormData({
+      organization: '',
+      position: '',
+      location: '',
+      startDate: '',
+      endDate: '',
+      responsibilities: [''],
+    })
+    setPersonalData(personalInfo)
+    setEducationData(education)
+    setError(null)
+  }
+
   useEffect(() => {
     if (experience && experience.id) {
       setLoading(true)
@@ -66,15 +81,9 @@ export function AddExperienceDialog({
           setLoading(false)
         })
     } else {
-      setFormData({
-        organization: '',
-        position: '',
-        location: '',
-        startDate: '',
-        endDate: '',
-        responsibilities: [''],
-      })
+      resetAll()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [experience])
 
   useEffect(() => {
@@ -87,7 +96,6 @@ export function AddExperienceDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log(formData)
     setError(null)
     if (formData.organization && formData.position && formData.startDate) {
       setLoading(true)
@@ -118,6 +126,7 @@ export function AddExperienceDialog({
         if (result) {
           onSubmit(result)
           onOpenChange(false)
+          resetAll()
         }
       } catch (err) {
         toast.error('Failed to save experience', {
@@ -189,7 +198,13 @@ export function AddExperienceDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        onOpenChange(isOpen)
+        if (!isOpen) resetAll()
+      }}
+    >
       <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>
@@ -322,7 +337,10 @@ export function AddExperienceDialog({
                 <Button
                   type='button'
                   variant='outline'
-                  onClick={() => onOpenChange(false)}
+                  onClick={() => {
+                    onOpenChange(false)
+                    resetAll()
+                  }}
                 >
                   Cancel
                 </Button>
