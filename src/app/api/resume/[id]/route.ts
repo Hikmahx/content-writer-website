@@ -65,7 +65,7 @@ export async function PUT(
     await requireAdmin()
     const { id } = await params
     const body = await req.json()
-    const { type, ...data } = body
+    const { type, id: _id, ...data } = body
 
     switch (type) {
       case 'experience': {

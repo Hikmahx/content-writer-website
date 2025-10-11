@@ -1,12 +1,17 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/utils/auth'
 
-export async function GET() {
+export async function GET(req?: NextRequest) {
   try {
+    // const type = req?.nextUrl.searchParams.get('type') ?? null
+
     const experiences = await prisma.experience.findMany()
     const education = await prisma.education.findMany()
     const personalInfo = await prisma.personalInfo.findMany()
+    // if (type === 'experience') {
+    //   return NextResponse.json({ experiences })
+    // }
 
     return NextResponse.json({ experiences, education, personalInfo })
   } catch {

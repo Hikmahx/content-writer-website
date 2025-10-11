@@ -55,15 +55,40 @@ export async function saveResumeData(
   resumeData: Experience | Education | PersonalInfo,
   type: string,
   id?: string
-): Promise<Experience | Education | PersonalInfo | null> {
+): Promise<{
+  experiences: Experience[]
+  education: Education[]
+  personalInfo: PersonalInfo[]
+}> {
   try {
     const method = id ? 'PUT' : 'POST'
     const url = `${getApiBaseUrl()}/resume${id ? `/${id}` : ''}?type=${type}`
 
+    let dataToSend: any
+
+    if (type === 'experience') {
+      const expData = resumeData as Experience
+      dataToSend = {
+        type,
+        ...expData,
+        startDate: new Date(expData.startDate),
+        endDate: expData.endDate ? new Date(expData.endDate) : null,
+      }
+    } else if (type === 'education') {
+      const eduData = resumeData as Education
+      dataToSend = {
+        type,
+        ...eduData,
+        graduationDate: new Date(eduData.graduationDate),
+      }
+    } else {
+      dataToSend = { type, ...resumeData }
+    }
+
     const response = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, ...resumeData }),
+      body: JSON.stringify(dataToSend),
       cache: 'no-store',
     })
 
@@ -75,7 +100,7 @@ export async function saveResumeData(
       )
     }
 
-    return await response.json()
+    return await fetchResumeData()
   } catch (err) {
     console.error('Failed to save data:', err)
     throw err
@@ -85,7 +110,11 @@ export async function saveResumeData(
 export async function deleteResumeData(
   type: string,
   id: string
-): Promise<void> {
+): Promise<{
+  experiences: Experience[]
+  education: Education[]
+  personalInfo: PersonalInfo[]
+}> {
   try {
     const response = await fetch(
       `${getApiBaseUrl()}/resume/${id}?type=${type}`,
@@ -99,6 +128,8 @@ export async function deleteResumeData(
         `Failed to delete data: ${response.status} ${response.statusText}`
       )
     }
+
+    return await fetchResumeData()
   } catch (err) {
     console.error('Failed to delete data:', err)
     throw err

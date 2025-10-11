@@ -75,3 +75,9 @@ export interface PersonalInfo {
   address: string
   linkedin: string
 }
+
+export interface Resume {
+  experiences: Experience[]
+  education: Education[]
+  personalInfo: PersonalInfo
+}
