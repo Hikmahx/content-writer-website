@@ -2,16 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/utils/auth'
 
-export async function GET(req?: NextRequest) {
+export async function GET() {
   try {
-    // const type = req?.nextUrl.searchParams.get('type') ?? null
-
     const experiences = await prisma.experience.findMany()
     const education = await prisma.education.findMany()
     const personalInfo = await prisma.personalInfo.findMany()
-    // if (type === 'experience') {
-    //   return NextResponse.json({ experiences })
-    // }
 
     return NextResponse.json({ experiences, education, personalInfo })
   } catch {
@@ -22,7 +17,7 @@ export async function GET(req?: NextRequest) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const user = await requireAdmin()
     const body = await req.json()
