@@ -1,3 +1,4 @@
+// components/resume/dialog/EducationTab.tsx
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -5,127 +6,206 @@ import { TabsContent } from '@/components/ui/tabs'
 import { Education } from '@/lib/types'
 import { Minus, Plus } from 'lucide-react'
 import React from 'react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { educationSchema } from '@/lib/validation'
+import { z } from 'zod'
 
 interface EducationProps {
-  educationData: Education[]
-  updateEducation: (index: number, field: keyof Education, value: any) => void
-  addEducation: () => void
-  removeEducation: (index:number) => void
-  onUpdateEducation: (education: Education[]) => void
+  education: Education[]
   onOpenChange: (open: boolean) => void
-  // setEducationData?: React.Dispatch<React.SetStateAction<Education[]>>
+  // onUpdateEducation: (education: Education[]) => void
 }
 
+type EducationFormData = z.infer<typeof educationSchema>
+
+const educationFormSchema = z.object({
+  education: z
+    .array(educationSchema)
+    .min(1, 'At least one education entry is required'),
+})
+
+type EducationFormValues = z.infer<typeof educationFormSchema>
+
 export default function EducationTab({
-  educationData,
-  updateEducation,
-  addEducation,
-  removeEducation,
-  onUpdateEducation,
+  education,
   onOpenChange,
+  // onUpdateEducation,
 }: EducationProps) {
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<EducationFormValues>({
+    resolver: zodResolver(educationFormSchema),
+    defaultValues: {
+      education:
+        education.length > 0
+          ? education.map((edu) => ({
+              ...edu,
+              major: edu.major || '',
+              gpa: edu.gpa || '',
+              location: edu.location || '',
+            }))
+          : [
+              {
+                id: Date.now().toString(),
+                institution: '',
+                degree: '',
+                major: '',
+                gpa: '',
+                location: '',
+                graduationDate: '',
+              },
+            ],
+    },
+    mode: 'onChange',
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'education',
+  })
+
+  const onSubmit = (data: EducationFormValues) => {
+    const educationData: Education[] = data.education.map((edu) => ({
+      ...edu,
+      major: edu.major || undefined,
+      gpa: edu.gpa || undefined,
+      location: edu.location || undefined,
+    }))
+    // onUpdateEducation(educationData)
+    console.log(educationData)
+  }
+
+  const handleAddEducation = () => {
+    append({
+      id: Date.now().toString(),
+      institution: '',
+      degree: '',
+      major: '',
+      gpa: '',
+      location: '',
+      graduationDate: '',
+    })
+  }
+
   return (
     <TabsContent value='education' className='space-y-4'>
-      {educationData.map((edu, index: number) => (
-        <div key={edu.id} className='border rounded-lg p-4 space-y-4'>
-          <div className='flex justify-between items-center'>
-            <h4 className='font-medium'>Education {index + 1}</h4>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              onClick={() => removeEducation(index)}
-            >
-              <Minus className='w-4 h-4' />
-            </Button>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {fields.map((field, index) => (
+          <div key={field.id} className='border rounded-lg p-4 space-y-4 mb-4'>
+            <div className='flex justify-between items-center'>
+              <h4 className='font-medium'>Education {index + 1}</h4>
+              {fields.length > 1 && (
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  onClick={() => remove(index)}
+                >
+                  <Minus className='w-4 h-4' />
+                </Button>
+              )}
+            </div>
+
+            {/* Hidden input for ID */}
+            <input type='hidden' {...register(`education.${index}.id`)} />
+
+            <div className='grid grid-cols-2 gap-4'>
+              <div>
+                <Label>Institution *</Label>
+                <Input
+                  {...register(`education.${index}.institution`)}
+                  className={
+                    errors.education?.[index]?.institution
+                      ? 'border-red-500'
+                      : ''
+                  }
+                />
+                {errors.education?.[index]?.institution && (
+                  <p className='text-red-500 text-xs mt-1'>
+                    {errors.education[index]?.institution?.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label>Degree *</Label>
+                <Input
+                  {...register(`education.${index}.degree`)}
+                  className={
+                    errors.education?.[index]?.degree ? 'border-red-500' : ''
+                  }
+                />
+                {errors.education?.[index]?.degree && (
+                  <p className='text-red-500 text-xs mt-1'>
+                    {errors.education[index]?.degree?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className='grid grid-cols-2 gap-4'>
+              <div>
+                <Label>Major</Label>
+                <Input {...register(`education.${index}.major`)} />
+              </div>
+              <div>
+                <Label>GPA</Label>
+                <Input {...register(`education.${index}.gpa`)} />
+              </div>
+            </div>
+
+            <div className='grid grid-cols-2 gap-4'>
+              <div>
+                <Label>Location</Label>
+                <Input {...register(`education.${index}.location`)} />
+              </div>
+              <div>
+                <Label>Graduation Date *</Label>
+                <Input
+                  type='date'
+                  {...register(`education.${index}.graduationDate`)}
+                  className={
+                    errors.education?.[index]?.graduationDate
+                      ? 'border-red-500'
+                      : ''
+                  }
+                />
+                {errors.education?.[index]?.graduationDate && (
+                  <p className='text-red-500 text-xs mt-1'>
+                    {errors.education[index]?.graduationDate?.message}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
+        ))}
 
-          <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <Label>Institution</Label>
-              <Input
-                value={edu.institution}
-                onChange={(e) =>
-                  updateEducation(index, 'institution', e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <Label>Degree</Label>
-              <Input
-                value={edu.degree}
-                onChange={(e) =>
-                  updateEducation(index, 'degree', e.target.value)
-                }
-              />
-            </div>
-          </div>
-
-          <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <Label>Major</Label>
-              <Input
-                value={edu.major || ''}
-                onChange={(e) =>
-                  updateEducation(index, 'major', e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <Label>GPA</Label>
-              <Input
-                value={edu.gpa || ''}
-                onChange={(e) => updateEducation(index, 'gpa', e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <Label>Location</Label>
-              <Input
-                value={edu.location}
-                onChange={(e) =>
-                  updateEducation(index, 'location', e.target.value)
-                }
-              />
-            </div>
-            <div>
-              <Label>Graduation Date</Label>
-              <Input
-                type='date'
-                value={edu.graduationDate}
-                onChange={(e) =>
-                  updateEducation(index, 'graduationDate', e.target.value)
-                }
-              />
-            </div>
-          </div>
-        </div>
-      ))}
-
-      <Button
-        type='button'
-        variant='outline'
-        onClick={addEducation}
-        className='w-full bg-transparent'
-      >
-        <Plus className='w-4 h-4 mr-2' />
-        Add Education
-      </Button>
-
-      <div className='flex justify-end gap-2'>
         <Button
           type='button'
           variant='outline'
-          onClick={() => onOpenChange(false)}
+          onClick={handleAddEducation}
+          className='w-full bg-transparent mb-4'
         >
-          Cancel
+          <Plus className='w-4 h-4 mr-2' />
+          Add Education
         </Button>
-        <Button onClick={() => onUpdateEducation(educationData)}>
-          Save Education
-        </Button>
-      </div>
+
+        <div className='flex justify-end gap-2'>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => onOpenChange(false)}
+          >
+            Cancel
+          </Button>
+          <Button type='submit' disabled={!isValid}>
+            Save Education
+          </Button>
+        </div>
+      </form>
     </TabsContent>
   )
 }

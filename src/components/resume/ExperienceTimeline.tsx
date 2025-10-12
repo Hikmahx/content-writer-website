@@ -1,26 +1,38 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { fetchResumeData, deleteResumeData } from '@/lib/resume'
 import { Button } from '@/components/ui/button'
+import DeleteModal from '@/components/global/DeleteModal'
 import { Edit, Trash2 } from 'lucide-react'
-import type { Education, Experience } from '@/lib/types'
+import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
+import { toast } from 'sonner'
 
 interface ExperienceTimelineProps {
   experiences: Experience[]
   education?: Education[]
   onEditExperience?: (experience: Experience) => void
-  onDeleteExperience?: (id: string) => void
+  // onDeleteExperience?: (id: string) => void
   onActiveYearChange?: (year: string) => void
   isAdmin?: boolean
+  setResume: React.Dispatch<
+    React.SetStateAction<Resume>
+  >
 }
 
 export function ExperienceTimeline({
-  experiences,
+  experiences: initialExperiences,
   onEditExperience,
-  onDeleteExperience,
+  // onDeleteExperience,
   onActiveYearChange,
   isAdmin = false,
+  setResume,
 }: ExperienceTimelineProps) {
+  const [experiences, setExperiences] = useState<Experience[]>(
+    initialExperiences || []
+  )
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeYear, setActiveYear] = useState<string>('')
   const [connectedDots, setConnectedDots] = useState<Set<string>>(new Set())
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -29,13 +41,35 @@ export function ExperienceTimeline({
   const connectingLineRef = useRef<HTMLDivElement>(null)
   const dotRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
+  // Fetch experiences from API on mount
+  useEffect(() => {
+    setLoading(true)
+    fetchResumeData()
+      .then((data: any) => {
+        // data.experiences is expected from the API
+        setExperiences(Array.isArray(data.experiences) ? data.experiences : [])
+        setLoading(false)
+      })
+      .catch((err: unknown) => {
+        setError('Failed to load experiences')
+        setLoading(false)
+      })
+  }, [])
+
+  useEffect(() => {
+    console.log('Initial experiences changed:', initialExperiences)
+    if (initialExperiences && initialExperiences.length >= 0) {
+      setExperiences(initialExperiences)
+    }
+  }, [initialExperiences])
+
   // Use useMemo to prevent recreation on every render
   const sortedExperiences = useMemo(() => {
     return [...experiences].sort(
       (a, b) =>
         new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
     )
-  }, [experiences]) // Only recreate when experiences changes
+  }, [experiences])
 
   // Helper function to get year from date string
   const getYear = (dateString: string) => {
@@ -160,6 +194,16 @@ export function ExperienceTimeline({
     }
   }, [sortedExperiences])
 
+  if (loading) {
+    return (
+      <div className='py-16 flex justify-center text-gray-700 w-full'>
+        Loading experiences...
+      </div>
+    )
+  }
+  if (error) {
+    toast.error(error)
+  }
   if (experiences.length < 1) {
     return (
       <p className='py-16 flex justify-center text-gray-700 w-full'>
@@ -223,7 +267,11 @@ export function ExperienceTimeline({
                 </div>
 
                 {/* Experience Card */}
-                <div className={`w-full lg:w-2/3 ${index % 2 === 1 ? 'lg:pr-5' : 'lg:pl-5'}`}>
+                <div
+                  className={`w-full lg:w-2/3 ${
+                    index % 2 === 1 ? 'lg:pr-5' : 'lg:pl-5'
+                  }`}
+                >
                   <div className='px-6 hover:-translate-y-2 transition-all duration-300'>
                     <div className='mb-4'>
                       <div className='flex items-center justify-between'>
@@ -249,24 +297,18 @@ export function ExperienceTimeline({
                       {exp.responsibilities.map(
                         (responsibility, bulletIndex) => (
                           <li key={bulletIndex} className='flex items-start'>
-                            {/* {index % 2 === 1 ? (
-                              <>
-                                <span className='flex-1'>{responsibility}</span>
-                                <span className='text-beige ml-2'>•</span>
-                              </>
-                            ) : ( */}
                             <>
                               <span className='text-beige mr-2'>•</span>
                               <span className='flex-1'>{responsibility}</span>
                             </>
-                            {/* )} */}
                           </li>
                         )
                       )}
                     </ul>
 
                     {/* Admin buttons */}
-                    {isAdmin && onEditExperience && onDeleteExperience && (
+                    {isAdmin && onEditExperience && (
+                      // && onDeleteExperience
                       <div
                         className={`flex gap-2 mt-4 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
                           index % 2 === 1 ? 'lg:justify-end' : 'justify-start'
@@ -280,14 +322,33 @@ export function ExperienceTimeline({
                         >
                           <Edit className='w-3 h-3' />
                         </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => onDeleteExperience(exp.id)}
-                          className='h-8 px-2 text-gray-400 hover:text-gray-500 hover:bg-gray-50'
-                        >
-                          <Trash2 className='w-3 h-3' />
-                        </Button>
+                        <DeleteModal
+                          itemName={exp.organization}
+                          onDelete={async () => {
+                            try {
+                              const data = await deleteResumeData(
+                                'experience',
+                                exp.id
+                              )
+                              // setExperiences((prev) =>
+                              //   prev.filter((e) => e.id !== exp.id)
+                              // )
+                              setResume(data)
+                              toast.message('Experience deleted successfully')
+                            } catch (err) {
+                              setError('Failed to delete experience')
+                            }
+                          }}
+                          trigger={
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='h-8 px-2 text-gray-400 hover:text-gray-500 hover:bg-gray-50'
+                            >
+                              <Trash2 className='w-3 h-3' />
+                            </Button>
+                          }
+                        />
                       </div>
                     )}
                   </div>

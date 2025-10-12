@@ -1,6 +1,5 @@
 // import type { Post, PostStatus } from "@prisma/client"
 
-
 // import type { Post, PostStatus } from "@prisma/client"
 
 // export type { Post, PostStatus }
@@ -30,23 +29,22 @@ export interface UpdatePostData extends Partial<CreatePostData> {
 }
 
 export interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  img?: string;
-  hashtags: string[];
-  published: boolean;
-  authorId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  title: string
+  slug: string
+  description: string
+  content: string
+  img?: string
+  hashtags: string[]
+  published: boolean
+  authorId: string
+  createdAt: Date
+  updatedAt: Date
   author: {
-    name:string;
+    name: string
     image: string
   }
 }
-
 
 export interface Experience {
   id: string
@@ -64,7 +62,7 @@ export interface Education {
   degree: string
   major?: string
   gpa?: string
-  location: string
+  location?: string
   graduationDate: string
 }
 
@@ -72,7 +70,7 @@ export interface PersonalInfo {
   firstName: string
   lastName: string
   email: string
-  address: string
+  address?: string
   linkedin: string
 }
 

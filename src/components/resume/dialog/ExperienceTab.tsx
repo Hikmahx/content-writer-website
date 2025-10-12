@@ -1,95 +1,108 @@
-// components/resume/dialog/ExperienceTab.tsx
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TabsContent } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Experience } from '@/lib/types'
-import { formatDateForInput } from '@/lib/utils/date'
 import React, { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { experienceSchema, ExperienceFormData } from '@/lib/validation'
 
 interface ExperienceTabProps {
-  onOpenChange: (open: boolean) => void
-  formData: Partial<Experience>
-  setFormData: React.Dispatch<React.SetStateAction<Partial<Experience>>>
+  initialData?: Partial<Experience> | null
   loading?: boolean
   experience?: Experience | null
-  handleSubmit: (e: React.FormEvent) => void
-  resetAll: () => void
+  onOpenChange: (open: boolean) => void
+  onSubmit: (data: Partial<Experience>) => void
 }
 
 export default function ExperienceTab({
-  onOpenChange,
-  formData,
-  setFormData,
+  initialData,
   loading,
   experience,
-  handleSubmit,
-  resetAll,
+  onOpenChange,
+  onSubmit,
 }: ExperienceTabProps) {
   const [responsibilitiesText, setResponsibilitiesText] = useState('')
 
-  // Initialize form data properly
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset,
+    trigger,
+  } = useForm<ExperienceFormData>({
+    resolver: zodResolver(experienceSchema),
+    defaultValues: {
+      organization: '',
+      position: '',
+      location: '',
+      startDate: '',
+      endDate: '',
+      responsibilities: [''],
+    },
+    mode: 'onChange',
+  })
+
+  // Initialize form with initial data
   useEffect(() => {
-    if (formData.responsibilities && formData.responsibilities.length > 0) {
-      setResponsibilitiesText(formData.responsibilities.join('\n'))
-    } else {
-      setResponsibilitiesText('')
+    if (initialData) {
+      const formValues = {
+        organization: initialData.organization || '',
+        position: initialData.position || '',
+        location: initialData.location || '',
+        startDate: initialData.startDate || '',
+        endDate: initialData.endDate || '',
+        responsibilities: initialData.responsibilities || [''],
+      }
+
+      reset(formValues)
+      setResponsibilitiesText(formValues.responsibilities.join('\n'))
     }
-  }, [formData])
+  }, [initialData, reset])
 
-  // Handle form submission
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Convert text to array
-    const responsibilitiesArray = responsibilitiesText
+  // Handle textarea changes
+  const handleTextareaChange = (text: string) => {
+    setResponsibilitiesText(text)
+    const responsibilitiesArray = text
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
 
-    // Validation
-    if (responsibilitiesArray.length < 2) {
-      alert('Please add at least 2 bullet points')
-      return
-    }
-
-    const wordCount = responsibilitiesArray
-      .join(' ')
-      .split(/\s+/)
-      .filter((word) => word.length > 0).length
-    if (wordCount < 10) {
-      alert(`Please add more details. You have ${wordCount}/10 words.`)
-      return
-    }
-
-    // Create the complete experience object
-    const experienceData: Experience = {
-      id: formData.id || Date.now().toString(),
-      organization: formData.organization || '',
-      position: formData.position || '',
-      location: formData.location || '',
-      startDate: formData.startDate || '',
-      endDate: formData.endDate || '',
-      responsibilities: responsibilitiesArray,
-    }
-
-    // Update parent form data
-    setFormData(experienceData)
-
-    // Call the submit handler
-    handleSubmit(e)
+    setValue(
+      'responsibilities',
+      responsibilitiesArray.length > 0 ? responsibilitiesArray : ['']
+    )
+    trigger('responsibilities')
   }
 
-  // Handle individual field changes
-  const handleFieldChange = (field: keyof Experience, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+  // Handle form submission
+  const onFormSubmit = (data: ExperienceFormData) => {
+    const finalResponsibilities = responsibilitiesText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+
+    const experienceData: Partial<Experience> = {
+      organization: data.organization,
+      position: data.position,
+      location: data.location || '',
+      startDate: data.startDate,
+      endDate: data.endDate || undefined,
+      responsibilities: finalResponsibilities,
+    }
+
+    if (experience?.id) {
+      experienceData.id = experience.id
+    }
+    console.log({ experienceData })
+    onSubmit(experienceData)
   }
 
-  // Calculate stats for display
   const bulletPointCount = responsibilitiesText
     .split('\n')
     .filter((line) => line.trim().length > 0).length
@@ -99,27 +112,33 @@ export default function ExperienceTab({
 
   return (
     <TabsContent value='experience' className='space-y-4'>
-      <form onSubmit={onSubmit} className='space-y-4'>
+      <form onSubmit={handleSubmit(onFormSubmit)} className='space-y-4'>
         <div className='grid grid-cols-2 gap-4'>
           <div>
             <Label htmlFor='organization'>Organization *</Label>
             <Input
               id='organization'
-              value={formData.organization || ''}
-              onChange={(e) =>
-                handleFieldChange('organization', e.target.value)
-              }
-              required
+              {...register('organization')}
+              className={errors.organization ? 'border-red-500' : ''}
             />
+            {errors.organization && (
+              <p className='text-red-500 text-xs mt-1'>
+                {errors.organization.message}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor='position'>Position Title *</Label>
             <Input
               id='position'
-              value={formData.position || ''}
-              onChange={(e) => handleFieldChange('position', e.target.value)}
-              required
+              {...register('position')}
+              className={errors.position ? 'border-red-500' : ''}
             />
+            {errors.position && (
+              <p className='text-red-500 text-xs mt-1'>
+                {errors.position.message}
+              </p>
+            )}
           </div>
         </div>
 
@@ -127,8 +146,7 @@ export default function ExperienceTab({
           <Label htmlFor='location'>Location</Label>
           <Input
             id='location'
-            value={formData.location || ''}
-            onChange={(e) => handleFieldChange('location', e.target.value)}
+            {...register('location')}
             placeholder='e.g., New York, NY'
           />
         </div>
@@ -139,23 +157,18 @@ export default function ExperienceTab({
             <Input
               id='startDate'
               type='date'
-              value={
-                formData.startDate ? formatDateForInput(formData.startDate) : ''
-              }
-              onChange={(e) => handleFieldChange('startDate', e.target.value)}
-              required
+              {...register('startDate')}
+              className={errors.startDate ? 'border-red-500' : ''}
             />
+            {errors.startDate && (
+              <p className='text-red-500 text-xs mt-1'>
+                {errors.startDate.message}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor='endDate'>End Date (Leave empty for current)</Label>
-            <Input
-              id='endDate'
-              type='date'
-              value={
-                formData.endDate ? formatDateForInput(formData.endDate) : ''
-              }
-              onChange={(e) => handleFieldChange('endDate', e.target.value)}
-            />
+            <Input id='endDate' type='date' {...register('endDate')} />
           </div>
         </div>
 
@@ -171,12 +184,14 @@ export default function ExperienceTab({
           <Textarea
             id='responsibilities'
             value={responsibilitiesText}
-            onChange={(e) => setResponsibilitiesText(e.target.value)}
-            placeholder={`Managed social media accounts with 10K+ followers
-Created and scheduled content calendar for multiple platforms  
-Analyzed engagement metrics and prepared monthly reports
-Collaborated with marketing team on campaign strategies`}
-            className='min-h-[140px] text-sm leading-relaxed resize-y'
+            onChange={(e) => handleTextareaChange(e.target.value)}
+            placeholder={`Managed social media accounts with 10K+ followers\nCreated and scheduled content calendar for multiple platforms\nAnalyzed engagement metrics and prepared monthly reports`}
+            className={`min-h-[140px] text-sm leading-relaxed resize-y ${
+              errors.responsibilities ? 'border-red-500' : ''
+            }`}
+            // onKeyDown={(e) => {}}
+            // onKeyUp={(e) => {}}
+            // onInput={(e) => {}}
           />
 
           <div className='flex justify-between items-center mt-2'>
@@ -197,13 +212,9 @@ Collaborated with marketing team on campaign strategies`}
               </p>
             </div>
 
-            {bulletPointCount < 2 || wordCount < 10 ? (
+            {errors.responsibilities && (
               <p className='text-red-500 text-xs text-right'>
-                Please meet the requirements above
-              </p>
-            ) : (
-              <p className='text-green-600 text-xs text-right'>
-                ✓ Requirements met
+                {errors.responsibilities.message}
               </p>
             )}
           </div>
@@ -213,23 +224,12 @@ Collaborated with marketing team on campaign strategies`}
           <Button
             type='button'
             variant='outline'
-            onClick={() => {
-              onOpenChange(false)
-              resetAll()
-            }}
+            onClick={() => onOpenChange(false)}
             disabled={loading}
           >
             Cancel
           </Button>
-          <Button
-            type='submit'
-            disabled={
-              loading ||
-              !formData.organization ||
-              !formData.position ||
-              !formData.startDate
-            }
-          >
+          <Button type='submit' disabled={loading}>
             {loading
               ? 'Saving...'
               : experience

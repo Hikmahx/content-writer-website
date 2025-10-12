@@ -136,7 +136,7 @@ model Experience {
   position         String
   location         String
   startDate        DateTime
-  endDate          DateTime
+  endDate          DateTime?
   createdAt        DateTime @default(now())
   responsibilities String[]
   userId           String

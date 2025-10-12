@@ -1,17 +1,15 @@
 'use client'
 
-import { getResumeDataById, saveResumeData } from '@/lib/resume'
-
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { Experience, Education, PersonalInfo } from '@/lib/types'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { Experience, Education, PersonalInfo, Resume } from '@/lib/types'
+import { getResumeDataById, saveResumeData } from '@/lib/resume'
 import { toast } from 'sonner'
 import EducationTab from './dialog/EducationTab'
 import PersonalInfoTab from './dialog/PersonalInfoTab'
@@ -21,52 +19,42 @@ import { formatDateForInput } from '@/lib/utils/date'
 interface ResumeDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (experience: Experience) => void
+  onExpSubmit: (data: {
+    experiences: Experience[]
+    education: Education[]
+    personalInfo: PersonalInfo
+  }) => void
   experience?: Experience | null
   personalInfo: PersonalInfo
   education: Education[]
-  onUpdatePersonal: (info: PersonalInfo) => void
-  onUpdateEducation: (education: Education[]) => void
+  // onUpdatePersonal: (info: PersonalInfo) => void
+  // onUpdateEducation: (education: Education[]) => void
+  setResume: React.Dispatch<React.SetStateAction<Resume>>
 }
 
 export function ResumeDialog({
   open,
   onOpenChange,
-  onSubmit,
+  onExpSubmit,
   experience,
   personalInfo,
   education,
-  onUpdatePersonal,
-  onUpdateEducation,
-}: ResumeDialogProps) {
+  setResume,
+}: // onUpdatePersonal,
+// onUpdateEducation,
+ResumeDialogProps) {
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState<Partial<Experience>>({
-    organization: '',
-    position: '',
-    location: '',
-    startDate: '',
-    endDate: '',
-    responsibilities: [''],
-  })
+  const [initialExperience, setInitialExperience] =
+    useState<Partial<Experience> | null>(null)
 
-  const [personalData, setPersonalData] = useState<PersonalInfo>(personalInfo)
-  const [educationData, setEducationData] = useState<Education[]>(education)
+  // guard against duplicate toasts (helps in dev/strict mode or accidental multiple calls)
+  const successToastShownRef = useRef(false)
 
-  // Reset all form states
-  const resetAll = () => {
-    setFormData({
-      organization: '',
-      position: '',
-      location: '',
-      startDate: '',
-      endDate: '',
-      responsibilities: [''],
-    })
-    setPersonalData(personalInfo)
-    setEducationData(education)
-  }
+  useEffect(() => {
+    // reset toast guard whenever dialog opens
+    if (open) successToastShownRef.current = false
+  }, [open])
 
-  // Load experience data for editing
   useEffect(() => {
     const loadExperienceData = async () => {
       if (open && experience) {
@@ -76,7 +64,7 @@ export function ResumeDialog({
           const experienceData = data?.experience || experience
 
           // Format dates for input fields
-          setFormData({
+          const formattedExperience = {
             ...experienceData,
             startDate: experienceData.startDate
               ? formatDateForInput(experienceData.startDate)
@@ -84,11 +72,13 @@ export function ResumeDialog({
             endDate: experienceData.endDate
               ? formatDateForInput(experienceData.endDate)
               : '',
-          })
+          }
+
+          setInitialExperience(formattedExperience)
         } catch (error) {
           console.error('Failed to load experience:', error)
           // Fallback to the passed experience prop with formatted dates
-          setFormData({
+          const formattedExperience = {
             ...experience,
             startDate: experience.startDate
               ? formatDateForInput(experience.startDate)
@@ -96,129 +86,82 @@ export function ResumeDialog({
             endDate: experience.endDate
               ? formatDateForInput(experience.endDate)
               : '',
-          })
+          }
+          setInitialExperience(formattedExperience)
         } finally {
           setLoading(false)
         }
       } else if (open) {
         // Reset for new experience
-        resetAll()
+        setInitialExperience({
+          organization: '',
+          position: '',
+          location: '',
+          startDate: '',
+          endDate: '',
+          responsibilities: [''],
+        })
       }
     }
 
     loadExperienceData()
   }, [open, experience])
 
-  useEffect(() => {
-    setPersonalData(personalInfo)
-  }, [personalInfo])
-
-  useEffect(() => {
-    setEducationData(education)
-  }, [education])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!formData.organization || !formData.position || !formData.startDate) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-
-    // Use the current counts from the form data
-    const currentResponsibilities = formData.responsibilities || []
-    if (currentResponsibilities.length < 2) {
-      toast.error('Please add at least 2 responsibility bullet points')
-      return
-    }
-
-    const wordCount = currentResponsibilities
-      .join(' ')
-      .split(/\s+/)
-      .filter((word) => word.length > 0).length
-    if (wordCount < 10) {
-      toast.error(`Please add more details. You have ${wordCount}/10 words.`)
-      return
-    }
-
+  const handleFormSubmit = async (formData: Partial<Experience>) => {
     setLoading(true)
     try {
-      const payload: any = {
-        organization: formData.organization,
-        position: formData.position,
-        location: formData.location || '',
-        startDate: formData.startDate,
-        endDate: formData.endDate || null,
-        responsibilities: currentResponsibilities.filter((r) => r.trim()),
-      }
-
       const isEdit = Boolean(experience?.id)
-
-      const saved = await saveResumeData(
-        payload,
+      const data = await saveResumeData(
+        formData,
         'experience',
         isEdit ? experience!.id : undefined
       )
 
-      // Get the saved experience from response
-      let result
-      if (saved.experiences && Array.isArray(saved.experiences)) {
-        if (isEdit) {
-          result = saved.experiences.find((exp) => exp.id === experience!.id)
-        } else {
-          result = saved.experiences[saved.experiences.length - 1]
-        }
-      } else if (saved.experiences) {
-        result = saved.experiences
-      } else {
-        result = payload
+      // TODO
+      // let resultExperience: Experience
+
+      // if (saved.experiences && Array.isArray(saved.experiences)) {
+      //   if (isEdit) {
+      //     resultExperience = saved.experiences.find(
+      //       (exp) => exp.id === experience!.id
+      //     )!
+      //   } else {
+      //     resultExperience =
+      //       saved.experiences.find(
+      //         (exp) =>
+      //           exp.organization === formData.organization &&
+      //           exp.position === formData.position
+      //       ) || saved.experiences[saved.experiences.length - 1]
+      //   }
+      // } else {
+      //   resultExperience = {
+      //     ...formData,
+      //     id: formData.id ?? Date.now().toString(),
+      //   } as Experience
+      // }
+      // TODO
+
+      // onExpSubmit({
+      //   experiences: [resultExperience],
+      //   education,
+      //   personalInfo,
+      // })
+
+      if (!successToastShownRef.current) {
+        toast.success(`Experience ${isEdit ? 'updated' : 'added'} successfully`)
+        successToastShownRef.current = true
       }
 
-      if (result) {
-        const finalExperience: Experience = {
-          ...result,
-          id: result.id || (isEdit ? experience!.id : Date.now().toString()),
-          responsibilities: currentResponsibilities, // Use the current responsibilities
-        }
-
-        // This should immediately update the parent state
-        onSubmit(finalExperience)
-      }
+      onOpenChange(false)
+      setResume(data)
     } catch (err: any) {
       console.error('Failed to save experience:', err)
       toast.error('Failed to save experience', {
-        description: err.message || 'An unexpected error occurred',
+        description: err?.message || 'An unexpected error occurred',
       })
     } finally {
       setLoading(false)
     }
-  }
-
-  const addEducation = () => {
-    const newEducation: Education = {
-      id: Date.now().toString(),
-      institution: '',
-      degree: '',
-      major: '',
-      gpa: '',
-      location: '',
-      graduationDate: '',
-    }
-    setEducationData((prev) => [...prev, newEducation])
-  }
-
-  const updateEducation = (
-    index: number,
-    field: keyof Education,
-    value: any
-  ) => {
-    setEducationData((prev) =>
-      prev.map((edu, i) => (i === index ? { ...edu, [field]: value } : edu))
-    )
-  }
-
-  const removeEducation = (index: number) => {
-    setEducationData((prev) => prev.filter((_, i) => i !== index))
   }
 
   return (
@@ -226,9 +169,7 @@ export function ResumeDialog({
       open={open}
       onOpenChange={(isOpen) => {
         onOpenChange(isOpen)
-        if (!isOpen) {
-          resetAll()
-        }
+        if (!isOpen) setInitialExperience(null)
       }}
     >
       <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
@@ -246,29 +187,25 @@ export function ResumeDialog({
           </TabsList>
 
           <ExperienceTab
-            formData={formData}
-            setFormData={setFormData}
+            initialData={initialExperience}
             loading={loading}
             experience={experience}
             onOpenChange={onOpenChange}
-            handleSubmit={handleSubmit}
-            resetAll={resetAll}
+            onSubmit={handleFormSubmit}
           />
 
           <PersonalInfoTab
-            personalData={personalData}
-            setPersonalData={setPersonalData}
+            personalInfo={personalInfo}
             onOpenChange={onOpenChange}
-            onUpdatePersonal={onUpdatePersonal}
+            // onUpdatePersonal={onUpdatePersonal}
+            // setResume={setResume}
           />
 
           <EducationTab
-            educationData={educationData}
-            addEducation={addEducation}
-            updateEducation={updateEducation}
-            removeEducation={removeEducation}
+            education={education}
             onOpenChange={onOpenChange}
-            onUpdateEducation={onUpdateEducation}
+            // setResume={setResume}
+            // onUpdateEducation={onUpdateEducation}
           />
         </Tabs>
       </DialogContent>
