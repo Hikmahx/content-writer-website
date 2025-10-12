@@ -7,23 +7,20 @@ import DeleteModal from '@/components/global/DeleteModal'
 import { Edit, Trash2 } from 'lucide-react'
 import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
 import { toast } from 'sonner'
+import { ExperienceItem } from './ExperienceItem'
 
 interface ExperienceTimelineProps {
   experiences: Experience[]
   education?: Education[]
   onEditExperience?: (experience: Experience) => void
-  // onDeleteExperience?: (id: string) => void
   onActiveYearChange?: (year: string) => void
   isAdmin?: boolean
-  setResume: React.Dispatch<
-    React.SetStateAction<Resume>
-  >
+  setResume: React.Dispatch<React.SetStateAction<Resume>>
 }
 
 export function ExperienceTimeline({
   experiences: initialExperiences,
   onEditExperience,
-  // onDeleteExperience,
   onActiveYearChange,
   isAdmin = false,
   setResume,
@@ -46,7 +43,6 @@ export function ExperienceTimeline({
     setLoading(true)
     fetchResumeData()
       .then((data: any) => {
-        // data.experiences is expected from the API
         setExperiences(Array.isArray(data.experiences) ? data.experiences : [])
         setLoading(false)
       })
@@ -57,7 +53,6 @@ export function ExperienceTimeline({
   }, [])
 
   useEffect(() => {
-    console.log('Initial experiences changed:', initialExperiences)
     if (initialExperiences && initialExperiences.length >= 0) {
       setExperiences(initialExperiences)
     }
@@ -71,26 +66,8 @@ export function ExperienceTimeline({
     )
   }, [experiences])
 
-  // Helper function to get year from date string
   const getYear = (dateString: string) => {
     return new Date(dateString).getFullYear().toString()
-  }
-
-  // Format date range in the template style
-  const formatDateRange = (startDate: string, endDate?: string) => {
-    const start = new Date(startDate)
-    const end = endDate ? new Date(endDate) : null
-
-    const startMonth = start.toLocaleDateString('en-US', { month: 'short' })
-    const startYear = start.getFullYear()
-
-    if (end) {
-      const endMonth = end.toLocaleDateString('en-US', { month: 'short' })
-      const endYear = end.getFullYear()
-      return `${startMonth} ${startYear} - ${endMonth} ${endYear}`
-    }
-
-    return `${startMonth} ${startYear} - Present`
   }
 
   // Update connecting line position
@@ -241,122 +218,18 @@ export function ExperienceTimeline({
           {/* Experiences */}
           <div className='space-y-16'>
             {sortedExperiences.map((exp, index) => (
-              <div
-                key={exp.id}
-                ref={(el) => {
-                  experienceRefs.current[exp.id] = el
-                }}
-                className={`relative flex items-start group cursor-pointer ${
-                  index % 2 === 1 ? 'flex-row' : 'lg:flex-row-reverse'
-                }`}
-              >
-                {/* Timeline Dot */}
-                <div
-                  ref={(el) => {
-                    dotRefs.current[exp.id] = el
-                  }}
-                  className='absolute lg:left-1/2 transform lg:-translate-x-1/2 z-2k'
-                >
-                  <div
-                    className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                      connectedDots.has(exp.id)
-                        ? 'bg-beige shadow-lg scale-125'
-                        : 'bg-beige/90'
-                    }`}
-                  />
-                </div>
-
-                {/* Experience Card */}
-                <div
-                  className={`w-full lg:w-2/3 ${
-                    index % 2 === 1 ? 'lg:pr-5' : 'lg:pl-5'
-                  }`}
-                >
-                  <div className='px-6 hover:-translate-y-2 transition-all duration-300'>
-                    <div className='mb-4'>
-                      <div className='flex items-center justify-between'>
-                        <h3 className='font-semibold text-foreground text-lg mb-1'>
-                          {exp.organization}
-                        </h3>
-                        <p>{exp.location}</p>
-                      </div>
-                      <div className='flex items-center justify-between italic text-xs'>
-                        <p className='text-muted-foreground font-medium mb-2'>
-                          {exp.position}
-                        </p>
-                        <p>{formatDateRange(exp.startDate, exp.endDate)}</p>
-                      </div>
-                    </div>
-
-                    <ul
-                      className={`space-y-2 text-sm text-muted-foreground ${
-                        // index % 2 === 1 ? 'text-right' :
-                        'text-left'
-                      }`}
-                    >
-                      {exp.responsibilities.map(
-                        (responsibility, bulletIndex) => (
-                          <li key={bulletIndex} className='flex items-start'>
-                            <>
-                              <span className='text-beige mr-2'>•</span>
-                              <span className='flex-1'>{responsibility}</span>
-                            </>
-                          </li>
-                        )
-                      )}
-                    </ul>
-
-                    {/* Admin buttons */}
-                    {isAdmin && onEditExperience && (
-                      // && onDeleteExperience
-                      <div
-                        className={`flex gap-2 mt-4 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-                          index % 2 === 1 ? 'lg:justify-end' : 'justify-start'
-                        }`}
-                      >
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => onEditExperience(exp)}
-                          className='h-8 px-2'
-                        >
-                          <Edit className='w-3 h-3' />
-                        </Button>
-                        <DeleteModal
-                          itemName={exp.organization}
-                          onDelete={async () => {
-                            try {
-                              const data = await deleteResumeData(
-                                'experience',
-                                exp.id
-                              )
-                              // setExperiences((prev) =>
-                              //   prev.filter((e) => e.id !== exp.id)
-                              // )
-                              setResume(data)
-                              toast.message('Experience deleted successfully')
-                            } catch (err) {
-                              setError('Failed to delete experience')
-                            }
-                          }}
-                          trigger={
-                            <Button
-                              variant='ghost'
-                              size='sm'
-                              className='h-8 px-2 text-gray-400 hover:text-gray-500 hover:bg-gray-50'
-                            >
-                              <Trash2 className='w-3 h-3' />
-                            </Button>
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Empty space for alternating layout */}
-                <div className='lg:w-2/3'></div>
-              </div>
+              <ExperienceItem
+                exp={exp}
+                index={index}
+                isAdmin={isAdmin}
+                onEditExperience={onEditExperience}
+                setResume={setResume}
+                key={index}
+                experienceRefs={experienceRefs}
+                dotRefs={dotRefs}
+                connectedDots={connectedDots}
+                setError={setError}
+              />
             ))}
           </div>
         </div>

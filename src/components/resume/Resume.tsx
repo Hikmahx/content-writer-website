@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { ExperienceTimeline } from '@/components/resume/ExperienceTimeline'
+import { ExperienceTimeline } from '@/components/resume/ExperienceDisplay/ExperienceTimeline'
 import { ResumeDialog } from '@/components/resume/ResumeDialog'
 import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
 import { personalInfo } from '@/lib/data'
