@@ -1,13 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { fetchResumeData, deleteResumeData } from '@/lib/resume'
-import { Button } from '@/components/ui/button'
-import DeleteModal from '@/components/global/DeleteModal'
-import { Edit, Trash2 } from 'lucide-react'
-import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
+import { fetchResumeData } from '@/lib/resume'
 import { toast } from 'sonner'
+import type { Education, Experience, Resume } from '@/lib/types'
 import { ExperienceItem } from './ExperienceItem'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface ExperienceTimelineProps {
   experiences: Experience[]
@@ -46,7 +44,7 @@ export function ExperienceTimeline({
         setExperiences(Array.isArray(data.experiences) ? data.experiences : [])
         setLoading(false)
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         setError('Failed to load experiences')
         setLoading(false)
       })
@@ -58,7 +56,6 @@ export function ExperienceTimeline({
     }
   }, [initialExperiences])
 
-  // Use useMemo to prevent recreation on every render
   const sortedExperiences = useMemo(() => {
     return [...experiences].sort(
       (a, b) =>
@@ -129,7 +126,9 @@ export function ExperienceTimeline({
         }
       })
 
-      const year = getYear(closestExperience.startDate)
+      const year =
+        getYear(closestExperience?.startDate) ||
+        new Date().getFullYear().toString()
       setActiveYear(year)
       onActiveYearChange?.(year)
 
@@ -171,17 +170,10 @@ export function ExperienceTimeline({
     }
   }, [sortedExperiences])
 
-  if (loading) {
-    return (
-      <div className='py-16 flex justify-center text-gray-700 w-full'>
-        Loading experiences...
-      </div>
-    )
-  }
   if (error) {
     toast.error(error)
   }
-  if (experiences.length < 1) {
+  if (experiences.length < 1 && !loading) {
     return (
       <p className='py-16 flex justify-center text-gray-700 w-full'>
         No experience available yet.
@@ -195,21 +187,21 @@ export function ExperienceTimeline({
         {/* Timeline Container */}
         <div ref={timelineRef} className='relative'>
           <div className='sticky bg-white h-8 w-8 top-0 lg:inset-x-0 lg:m-auto z-30'></div>
-          {/* Sticky Year Button */}
+          {/* Sticky Year Badge */}
           <div
             ref={yearButtonRef}
             className='sticky -ml-6 lg:ml-auto top-8 z-10 flex lg:justify-center mb-8'
           >
-            <div className='bg-beige text-black px-4 py-2 rounded-full text-sm font-medium shadow-lg transition-all duration-300'>
-              {activeYear}
+            <div className={`${loading? 'bg-gray-200 text-white text-[8px]': 'bg-beige text-black'} px-4 py-2 rounded-full text-sm font-medium shadow-lg transition-all duration-500`}>
+              {loading ? 'loading..' : activeYear}
             </div>
           </div>
 
           {/* Connecting Line - from year button to bottom dot */}
           <div
             ref={connectingLineRef}
-            className='absolute left-1.5 lg:left-1/2 transform -translate-x-1/2 w-px bg-beige z-0'
-            style={{ top: '0', height: '0' }}
+            className={`absolute left-1.5 lg:left-1/2 transform -translate-x-1/2 w-px ${loading? 'bg-gray-200': 'bg-beige'} z-0 transition-all duration-500`}
+            style={{ top: '0', height: loading ? '800px' : '0' }}
           />
 
           {/* Timeline Line (static background line) */}
@@ -217,23 +209,71 @@ export function ExperienceTimeline({
 
           {/* Experiences */}
           <div className='space-y-16'>
-            {sortedExperiences.map((exp, index) => (
-              <ExperienceItem
-                exp={exp}
-                index={index}
-                isAdmin={isAdmin}
-                onEditExperience={onEditExperience}
-                setResume={setResume}
-                key={index}
-                experienceRefs={experienceRefs}
-                dotRefs={dotRefs}
-                connectedDots={connectedDots}
-                setError={setError}
-              />
-            ))}
+            {loading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <ExperienceItemSkeleton key={index} index={index} />
+                ))
+              : sortedExperiences.map((exp, index) => (
+                  <ExperienceItem
+                    exp={exp}
+                    index={index}
+                    isAdmin={isAdmin}
+                    onEditExperience={onEditExperience}
+                    setResume={setResume}
+                    key={exp.id}
+                    experienceRefs={experienceRefs}
+                    dotRefs={dotRefs}
+                    connectedDots={connectedDots}
+                    setError={setError}
+                  />
+                ))}
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ExperienceItemSkeleton({ index }: { index: number }) {
+  return (
+    <div
+      className={`relative flex items-start ${
+        index % 2 === 1 ? 'flex-row' : 'lg:flex-row-reverse'
+      }`}
+    >
+      {/* Timeline Dot */}
+      <div className='absolute lg:left-1/2 transform lg:-translate-x-1/2 z-2k'>
+        <div className='w-3 h-3 rounded-full bg-gray-200' />
+      </div>
+
+      {/* Card */}
+      <div
+        className={`w-full lg:w-2/3 ${index % 2 === 1 ? 'lg:pr-5' : 'lg:pl-5'}`}
+      >
+        <div className='px-6'>
+          <div className='mb-4'>
+            <div className='flex items-center justify-between'>
+              <Skeleton className='h-5 w-1/3' />
+              <Skeleton className='h-4 w-16' />
+            </div>
+            <div className='flex items-center justify-between italic text-xs mt-2'>
+              <Skeleton className='h-3 w-1/4' />
+              <Skeleton className='h-3 w-1/5' />
+            </div>
+          </div>
+
+          <ul className='space-y-2 text-sm'>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <li key={i} className='flex items-start gap-2'>
+                <Skeleton className='h-3 w-3 rounded-full' />
+                <Skeleton className='h-3 w-3/4' />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className='lg:w-2/3'></div>
     </div>
   )
 }
