@@ -27,8 +27,6 @@ interface ResumeDialogProps {
   experience?: Experience | null
   personalInfo: PersonalInfo
   education: Education[]
-  // onUpdatePersonal: (info: PersonalInfo) => void
-  // onUpdateEducation: (education: Education[]) => void
   setResume: React.Dispatch<React.SetStateAction<Resume>>
 }
 
@@ -40,30 +38,24 @@ export function ResumeDialog({
   personalInfo,
   education,
   setResume,
-}: // onUpdatePersonal,
-// onUpdateEducation,
-ResumeDialogProps) {
+}: ResumeDialogProps) {
   const [loading, setLoading] = useState(false)
   const [initialExperience, setInitialExperience] =
     useState<Partial<Experience> | null>(null)
-
-  // guard against duplicate toasts (helps in dev/strict mode or accidental multiple calls)
   const successToastShownRef = useRef(false)
 
   useEffect(() => {
-    // reset toast guard whenever dialog opens
     if (open) successToastShownRef.current = false
   }, [open])
 
   useEffect(() => {
     const loadExperienceData = async () => {
-      if (open && experience) {
+      if (open && experience?.id) {
         setLoading(true)
         try {
           const data: any = await getResumeDataById('experience', experience.id)
           const experienceData = data?.experience || experience
 
-          // Format dates for input fields
           const formattedExperience = {
             ...experienceData,
             startDate: experienceData.startDate
@@ -77,7 +69,7 @@ ResumeDialogProps) {
           setInitialExperience(formattedExperience)
         } catch (error) {
           console.error('Failed to load experience:', error)
-          // Fallback to the passed experience prop with formatted dates
+
           const formattedExperience = {
             ...experience,
             startDate: experience.startDate
@@ -107,56 +99,40 @@ ResumeDialogProps) {
     loadExperienceData()
   }, [open, experience])
 
-  const handleFormSubmit = async (formData: Partial<Experience>) => {
+  const handleFormSubmit = async (
+    type: 'experience' | 'education' | 'personalInfo',
+    formData: Partial<Experience> | Partial<Education> | Partial<PersonalInfo>
+  ) => {
     setLoading(true)
     try {
-      const isEdit = Boolean(experience?.id)
-      const data = await saveResumeData(
-        formData,
-        'experience',
-        isEdit ? experience!.id : undefined
-      )
+      const id =
+        type === 'experience'
+          ? (experience as Experience)?.id
+          : // : type === 'education'
+            // ? (education as Education)?.id
+            (personalInfo as PersonalInfo)?.id
 
-      // TODO
-      // let resultExperience: Experience
+      const isEdit = Boolean(id)
 
-      // if (saved.experiences && Array.isArray(saved.experiences)) {
-      //   if (isEdit) {
-      //     resultExperience = saved.experiences.find(
-      //       (exp) => exp.id === experience!.id
-      //     )!
-      //   } else {
-      //     resultExperience =
-      //       saved.experiences.find(
-      //         (exp) =>
-      //           exp.organization === formData.organization &&
-      //           exp.position === formData.position
-      //       ) || saved.experiences[saved.experiences.length - 1]
-      //   }
-      // } else {
-      //   resultExperience = {
-      //     ...formData,
-      //     id: formData.id ?? Date.now().toString(),
-      //   } as Experience
-      // }
-      // TODO
-
-      // onExpSubmit({
-      //   experiences: [resultExperience],
-      //   education,
-      //   personalInfo,
-      // })
+      const data = await saveResumeData(formData, type, isEdit ? id : undefined)
 
       if (!successToastShownRef.current) {
-        toast.success(`Experience ${isEdit ? 'updated' : 'added'} successfully`)
+        const label =
+          type === 'experience'
+            ? 'Experience'
+            : type === 'education'
+            ? 'Education'
+            : 'Personal info'
+
+        toast.success(`${label} ${isEdit ? 'updated' : 'added'} successfully`)
         successToastShownRef.current = true
       }
 
       onOpenChange(false)
       setResume(data)
     } catch (err: any) {
-      console.error('Failed to save experience:', err)
-      toast.error('Failed to save experience', {
+      console.error(`Failed to save ${type}:`, err)
+      toast.error(`Failed to save ${type}`, {
         description: err?.message || 'An unexpected error occurred',
       })
     } finally {
@@ -191,21 +167,21 @@ ResumeDialogProps) {
             loading={loading}
             experience={experience}
             onOpenChange={onOpenChange}
-            onSubmit={handleFormSubmit}
+            onSubmit={(formData) => handleFormSubmit('experience', formData)}
           />
 
           <PersonalInfoTab
             personalInfo={personalInfo}
+            loading={loading}
             onOpenChange={onOpenChange}
-            // onUpdatePersonal={onUpdatePersonal}
-            // setResume={setResume}
+            onSubmit={(formData) => handleFormSubmit('personalInfo', formData)}
           />
 
           <EducationTab
+            // loading={loading}
             education={education}
             onOpenChange={onOpenChange}
-            // setResume={setResume}
-            // onUpdateEducation={onUpdateEducation}
+            // onSubmit={(formData) => handleFormSubmit('education', formData)}
           />
         </Tabs>
       </DialogContent>

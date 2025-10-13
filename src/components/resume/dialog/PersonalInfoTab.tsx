@@ -11,15 +11,17 @@ import { personalInfoSchema, PersonalInfoFormData } from '@/lib/validation'
 
 interface PersonalInfoProps {
   personalInfo: PersonalInfo
+  loading?: boolean
   onOpenChange: (open: boolean) => void
-  // onUpdatePersonal: (personalInfo: PersonalInfo) => void
+  onSubmit: (data: Partial<PersonalInfo>) => void
 }
 
 export default function PersonalInfoTab({
   personalInfo,
+  loading,
   onOpenChange,
-}: // onUpdatePersonal,
-PersonalInfoProps) {
+  onSubmit,
+}: PersonalInfoProps) {
   const {
     register,
     handleSubmit,
@@ -27,16 +29,16 @@ PersonalInfoProps) {
   } = useForm<PersonalInfoFormData>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      firstName: personalInfo.firstName,
-      lastName: personalInfo.lastName,
-      email: personalInfo.email,
-      linkedin: personalInfo.linkedin,
-      address: personalInfo.address || '',
+      firstName: personalInfo?.firstName || '',
+      lastName: personalInfo?.lastName || '',
+      email: personalInfo?.email || '',
+      linkedin: personalInfo?.linkedin || '',
+      address: personalInfo?.address || '',
     },
     mode: 'onChange',
   })
 
-  const onSubmit = (data: PersonalInfoFormData) => {
+  const onFormSubmit = (data: PersonalInfoFormData) => {
     const personalInfoData: PersonalInfo = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -44,13 +46,18 @@ PersonalInfoProps) {
       linkedin: data.linkedin || '',
       address: data.address || undefined,
     }
-    // onUpdatePersonal(personalInfoData)
+
+    if (personalInfo?.id) {
+      personalInfoData.id = personalInfo.id
+    }
+
     console.log(personalInfoData)
+    onSubmit(personalInfoData)
   }
 
   return (
     <TabsContent value='personal' className='space-y-4'>
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+      <form onSubmit={handleSubmit(onFormSubmit)} className='space-y-4'>
         <div className='grid grid-cols-2 gap-4'>
           <div>
             <Label htmlFor='firstName'>First Name *</Label>
@@ -125,8 +132,12 @@ PersonalInfoProps) {
           >
             Cancel
           </Button>
-          <Button type='submit' disabled={!isValid}>
-            Save Personal Info
+          <Button type='submit' disabled={loading}>
+            {loading
+              ? 'Saving...'
+              : personalInfo
+              ? 'Update Info'
+              : 'Save Info'}
           </Button>
         </div>
       </form>

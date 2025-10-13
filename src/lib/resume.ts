@@ -32,19 +32,37 @@ export async function saveResumeData(
 
   let bodyData: any = { type, ...resumeData }
 
-  if (type === 'experience') {
-    const exp = resumeData as Experience
-    bodyData = {
-      ...bodyData,
-      startDate: exp.startDate ? new Date(exp.startDate) : null,
-      endDate: exp.endDate ? new Date(exp.endDate) : null,
+  switch (type) {
+    case 'experience': {
+      const exp = resumeData as Experience
+      bodyData = {
+        ...bodyData,
+        startDate: exp.startDate ? new Date(exp.startDate) : null,
+        endDate: exp.endDate ? new Date(exp.endDate) : null,
+      }
+      break
     }
-  } else if (type === 'education') {
-    const edu = resumeData as Education
-    bodyData = {
-      ...bodyData,
-      graduationDate: edu.graduationDate ? new Date(edu.graduationDate) : null,
+
+    case 'education': {
+      const edu = resumeData as Education
+      bodyData = {
+        ...bodyData,
+        graduationDate: edu.graduationDate
+          ? new Date(edu.graduationDate)
+          : null,
+      }
+      break
     }
+
+    case 'personalInfo': {
+      bodyData = {
+        ...bodyData,
+      }
+      break
+    }
+
+    default:
+      break
   }
 
   const res = await fetch(url, {
