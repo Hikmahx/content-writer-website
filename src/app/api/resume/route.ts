@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const experiences = await prisma.experience.findMany()
     const education = await prisma.education.findMany()
-    const personalInfo = await prisma.personalInfo.findMany()
+    const personalInfo = await prisma.personalInfo.findFirst()
 
     return NextResponse.json({ experiences, education, personalInfo })
   } catch {

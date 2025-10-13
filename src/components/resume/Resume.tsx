@@ -6,7 +6,6 @@ import { Plus } from 'lucide-react'
 import { ExperienceTimeline } from '@/components/resume/ExperienceDisplay/ExperienceTimeline'
 import { ResumeDialog } from '@/components/resume/ResumeDialog'
 import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
-import { personalInfo } from '@/lib/data'
 import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
 import { useSession } from 'next-auth/react'
 import { fetchResumeData } from '@/lib/resume'
@@ -18,7 +17,13 @@ export default function ResumeInfo() {
   const [resume, setResume] = useState<Resume>({
     experiences: [],
     education: [],
-    personalInfo,
+    personalInfo: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      linkedin: '',
+      address: '',
+    },
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingExperience, setEditingExperience] = useState<Experience | null>(
@@ -35,7 +40,7 @@ export default function ResumeInfo() {
           setResume({
             experiences: data.experiences || [],
             education: data.education || [],
-            personalInfo: data.personalInfo || personalInfo,
+            personalInfo: data.personalInfo || {},
           })
         } catch (err) {
           console.error('Failed to load resume data:', err)

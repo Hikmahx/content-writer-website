@@ -24,7 +24,7 @@ export async function getResumeDataById<
 
 export async function saveResumeData(
   resumeData: Partial<Experience | Education | PersonalInfo>,
-  type: 'experience' | 'education' | 'personal',
+  type: 'experience' | 'education' | 'personalInfo',
   id?: string
 ): Promise<Resume> {
   const method = id ? 'PUT' : 'POST'

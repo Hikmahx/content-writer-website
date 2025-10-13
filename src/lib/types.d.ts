@@ -47,7 +47,7 @@ export interface Post {
 }
 
 export interface Experience {
-  id: string
+  id?: string
   organization: string
   position: string
   location: string
@@ -57,7 +57,7 @@ export interface Experience {
 }
 
 export interface Education {
-  id: string
+  id?: string
   institution: string
   degree: string
   major?: string
@@ -67,6 +67,7 @@ export interface Education {
 }
 
 export interface PersonalInfo {
+  id?: string
   firstName: string
   lastName: string
   email: string

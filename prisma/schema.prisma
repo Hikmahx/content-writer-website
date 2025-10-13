@@ -131,16 +131,16 @@ model Like {
 }
 
 model Experience {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
   organization     String
   position         String
   location         String
   startDate        DateTime
   endDate          DateTime?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
   responsibilities String[]
   userId           String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Education {
@@ -158,6 +158,7 @@ model PersonalInfo {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   firstName String
   lastName  String
+  email     String
   address   String
   linkedin  String
   userId    String @unique
