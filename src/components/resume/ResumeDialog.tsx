@@ -9,7 +9,11 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Experience, Education, PersonalInfo, Resume } from '@/lib/types'
-import { getResumeDataById, saveResumeData } from '@/lib/resume'
+import {
+  getResumeDataById,
+  saveResumeData,
+  deleteResumeData,
+} from '@/lib/resume'
 import { toast } from 'sonner'
 import EducationTab from './dialog/EducationTab'
 import PersonalInfoTab from './dialog/PersonalInfoTab'
@@ -101,31 +105,67 @@ export function ResumeDialog({
 
   const handleFormSubmit = async (
     type: 'experience' | 'education' | 'personalInfo',
-    formData: Partial<Experience> | Partial<Education> | Partial<PersonalInfo>
+    formData: Partial<Experience> | Education[] | Partial<PersonalInfo>
   ) => {
     setLoading(true)
     try {
-      const id =
-        type === 'experience'
-          ? (experience as Experience)?.id
-          : // : type === 'education'
-            // ? (education as Education)?.id
-            (personalInfo as PersonalInfo)?.id
+      let data: Resume
 
-      const isEdit = Boolean(id)
+      if (type === 'education') {
+        // Save each education entry
+        const educationArray = formData as Education[]
 
-      const data = await saveResumeData(formData, type, isEdit ? id : undefined)
+        if (educationArray.length === 0) {
+          throw new Error('At least one education entry is required')
+        }
 
-      if (!successToastShownRef.current) {
-        const label =
+        let lastSavedData: Resume | null = null
+
+        for (const edu of educationArray) {
+          const id = edu.id
+          const isEdit = Boolean(id && id.trim() !== '')
+
+          // Create a clean copy without empty ID for new entries
+          const educationData: Partial<Education> = { ...edu }
+          if (!isEdit) {
+            delete educationData.id
+          }
+
+          lastSavedData = await saveResumeData(
+            educationData,
+            'education',
+            isEdit ? id : undefined
+          )
+        }
+
+        data = lastSavedData as Resume
+
+        if (!successToastShownRef.current) {
+          toast.success('Education entries saved successfully')
+          successToastShownRef.current = true
+        }
+      } else {
+        // Handle single entries (experience, personalInfo)
+        const singleFormData = formData as
+          | Partial<Experience>
+          | Partial<PersonalInfo>
+        const id =
           type === 'experience'
-            ? 'Experience'
-            : type === 'education'
-            ? 'Education'
-            : 'Personal info'
+            ? (experience as Experience)?.id
+            : (personalInfo as PersonalInfo)?.id
 
-        toast.success(`${label} ${isEdit ? 'updated' : 'added'} successfully`)
-        successToastShownRef.current = true
+        const isEdit = Boolean(id)
+        data = await saveResumeData(
+          singleFormData,
+          type,
+          isEdit ? id : undefined
+        )
+
+        if (!successToastShownRef.current) {
+          const label = type === 'experience' ? 'Experience' : 'Personal info'
+          toast.success(`${label} ${isEdit ? 'updated' : 'added'} successfully`)
+          successToastShownRef.current = true
+        }
       }
 
       onOpenChange(false)
@@ -135,6 +175,24 @@ export function ResumeDialog({
       toast.error(`Failed to save ${type}`, {
         description: err?.message || 'An unexpected error occurred',
       })
+    } finally {
+      setLoading(false)
+    }
+  }
+  const handleDeleteEducation = async (id: string) => {
+    if (!id) return
+
+    setLoading(true)
+    try {
+      const data = await deleteResumeData('education', id)
+      setResume(data)
+      toast.success('Education deleted successfully')
+    } catch (err: any) {
+      console.error(err)
+      toast.error('Failed to delete education', {
+        description: err?.message || 'An unexpected error occurred',
+      })
+      throw err
     } finally {
       setLoading(false)
     }
@@ -178,10 +236,11 @@ export function ResumeDialog({
           />
 
           <EducationTab
-            // loading={loading}
             education={education}
+            loading={loading}
             onOpenChange={onOpenChange}
-            // onSubmit={(formData) => handleFormSubmit('education', formData)}
+            onSubmit={(formData) => handleFormSubmit('education', formData)}
+            onDeleteEducation={handleDeleteEducation}
           />
         </Tabs>
       </DialogContent>
