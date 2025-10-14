@@ -24,10 +24,10 @@ export const experienceSchema = z.object({
 export const educationSchema = z.object({
   id: z.string(),
   institution: z.string().min(1, 'Institution is required'),
-  degree: z.string().min(1, 'Degree is required'),
-  major: z.string().optional(),
+  degree: z.string().optional(),
+  major: z.string().min(1, 'Major is required'),
   gpa: z.string().optional(),
-  location: z.string().optional(),
+  location: z.string().min(1, 'Location is required'),
   graduationDate: z.string().min(1, 'Graduation date is required'),
 })
 

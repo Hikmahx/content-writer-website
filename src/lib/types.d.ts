@@ -59,10 +59,10 @@ export interface Experience {
 export interface Education {
   id?: string
   institution: string
-  degree: string
-  major?: string
+  degree?: string
+  major: string
   gpa?: string
-  location?: string
+  location: string
   graduationDate: string
 }
 

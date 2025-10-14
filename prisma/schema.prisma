@@ -146,9 +146,10 @@ model Experience {
 model Education {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   institution    String
-  degree         String
+  degree         String?
   major          String
   location       String
+  gpa            String?
   graduationDate DateTime
   userId         String
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
