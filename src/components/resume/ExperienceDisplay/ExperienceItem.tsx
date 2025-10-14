@@ -38,7 +38,9 @@ export function ExperienceItem({
     <div
       key={exp.id}
       ref={(el) => {
-        experienceRefs.current[exp.id] = el
+        if (exp.id) {
+          experienceRefs.current[exp.id] = el
+        }
       }}
       className={`relative flex items-start group cursor-pointer ${
         index % 2 === 1 ? 'flex-row' : 'lg:flex-row-reverse'
@@ -47,13 +49,15 @@ export function ExperienceItem({
       {/* Timeline Dot */}
       <div
         ref={(el) => {
-          dotRefs.current[exp.id] = el
+          if (exp.id) {
+            dotRefs.current[exp.id] = el
+          }
         }}
         className='absolute lg:left-1/2 transform lg:-translate-x-1/2 z-2k'
       >
         <div
           className={`w-3 h-3 rounded-full transition-all duration-500 ${
-            connectedDots.has(exp.id)
+            exp.id && connectedDots.has(exp.id)
               ? 'bg-beige shadow-lg scale-125'
               : 'bg-beige/90'
           }`}
@@ -115,6 +119,10 @@ export function ExperienceItem({
                 itemName={exp.organization}
                 onDelete={async () => {
                   try {
+                    if (!exp.id) {
+                      setError('Experience ID is missing')
+                      return
+                    }
                     const data = await deleteResumeData('experience', exp.id)
                     setResume(data)
                     toast.message('Experience deleted successfully')

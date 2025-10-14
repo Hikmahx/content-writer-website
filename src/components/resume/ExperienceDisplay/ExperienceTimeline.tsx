@@ -77,6 +77,8 @@ export function ExperienceTimeline({
       return
 
     const lastExp = sortedExperiences[sortedExperiences.length - 1]
+    if (!lastExp.id) return
+
     const lastDotElement = dotRefs.current[lastExp.id]
     if (!lastDotElement) return
 
@@ -113,6 +115,8 @@ export function ExperienceTimeline({
 
       // Find the experience closest to the year button
       sortedExperiences.forEach((exp) => {
+        if (!exp.id) return
+
         const expElement = experienceRefs.current[exp.id]
         if (expElement) {
           const expRect = expElement.getBoundingClientRect()
@@ -135,6 +139,8 @@ export function ExperienceTimeline({
       // Update connected dots based on scroll position
       const newConnectedDots = new Set<string>()
       sortedExperiences.forEach((exp) => {
+        if (!exp.id) return
+
         const expElement = experienceRefs.current[exp.id]
         if (expElement) {
           const expRect = expElement.getBoundingClientRect()
