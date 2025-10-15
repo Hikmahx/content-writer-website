@@ -55,9 +55,16 @@ export async function DELETE(request: NextRequest) {
 
     const result = await cloudinary.uploader.destroy(publicId)
 
+    if (result.result === 'not found') {
+      return NextResponse.json(
+        { error: 'Image not found in Cloudinary' },
+        { status: 404 }
+      )
+    }
+
     if (result.result !== 'ok') {
       return NextResponse.json(
-        { error: 'Failed to delete image' },
+        { error: 'Failed to delete image', details: result },
         { status: 500 }
       )
     }

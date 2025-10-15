@@ -43,7 +43,6 @@ export async function GET(req: NextRequest) {
       }),
       prisma.post.count({ where: query.where }),
     ])
-    console.log(posts, count)
     return NextResponse.json({
       posts,
       totalCount: count,
