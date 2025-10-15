@@ -1,7 +1,6 @@
 import type React from 'react'
 import type { Metadata } from 'next'
-import { Lora } from 'next/font/google'
-import { Open_Sans } from 'next/font/google'
+import { Lora, Open_Sans } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/global/Header'
 import { Footer } from '@/components/global/Footer'
@@ -35,15 +34,16 @@ export default function RootLayout({
     <html
       lang='en'
       className={`${lora.variable} ${openSans.variable} antialiased`}
+      suppressHydrationWarning
     >
-      <AuthProvider>
-        <body className='min-h-screen flex flex-col bg-white font-sans'>
+      <body className='min-h-screen flex flex-col bg-white font-sans'>
+        <AuthProvider>
           <Header />
           <main className='flex-1'>{children}</main>
           <Footer />
           <Toaster />
-        </body>
-      </AuthProvider>
+        </AuthProvider>
+      </body>
     </html>
   )
 }
