@@ -3,17 +3,18 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeLink, setActiveLink] = useState('/')
+  const { data: session } = useSession()
 
   useEffect(() => {
     setActiveLink(window.location.pathname)
   }, [])
 
   const toggleMenu = () => setIsOpen(!isOpen)
-
   const handleLinkClick = (href: string) => {
     setActiveLink(href)
     setIsOpen(false)
@@ -25,6 +26,11 @@ export function Header() {
     { href: '/blog', label: 'Blog' },
     { href: '/resume', label: 'Resume' },
   ]
+
+  const isAdmin = session?.user?.role === 'ADMIN'
+  if (isAdmin) {
+    navItems.push({ href: '/admin', label: 'Admin' })
+  }
 
   const linkClasses = (href: string, extra = '') =>
     `transition-colors font-sans ${extra} ${
