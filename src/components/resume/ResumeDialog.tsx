@@ -214,10 +214,10 @@ export function ResumeDialog({
         </DialogHeader>
 
         <Tabs defaultValue='experience' className='w-full'>
-          <TabsList className='grid w-full grid-cols-3'>
-            <TabsTrigger value='experience'>Experience</TabsTrigger>
-            <TabsTrigger value='personal'>Personal Info</TabsTrigger>
-            <TabsTrigger value='education'>Education</TabsTrigger>
+          <TabsList className='w-full p-0 bg-background justify-start border-b rounded-none'>
+            <TabsTrigger value='experience' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>Experience</TabsTrigger>
+            <TabsTrigger value='personal' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>Personal Info</TabsTrigger>
+            <TabsTrigger value='education' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>Education</TabsTrigger>
           </TabsList>
 
           <ExperienceTab

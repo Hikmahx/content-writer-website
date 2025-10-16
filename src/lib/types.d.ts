@@ -1,9 +1,3 @@
-// import type { Post, PostStatus } from "@prisma/client"
-
-// import type { Post, PostStatus } from "@prisma/client"
-
-// export type { Post, PostStatus }
-
 export interface PostWithRelated extends Post {
   relatedPosts: Post[]
 }

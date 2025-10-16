@@ -1,4 +1,5 @@
 'use client'
+
 import type { Post } from '@/lib/types'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'

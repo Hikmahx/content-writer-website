@@ -26,13 +26,11 @@ export default function ExperienceTab({
 }: ExperienceTabProps) {
   const [responsibilitiesText, setResponsibilitiesText] = useState('')
 
-  // React Hook Form with Zod validation
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
     reset,
     trigger,
   } = useForm<ExperienceFormData>({
@@ -99,16 +97,9 @@ export default function ExperienceTab({
     if (experience?.id) {
       experienceData.id = experience.id
     }
-    console.log({ experienceData })
+    // console.log({ experienceData })
     onSubmit(experienceData)
   }
-
-  const bulletPointCount = responsibilitiesText
-    .split('\n')
-    .filter((line) => line.trim().length > 0).length
-  const wordCount = responsibilitiesText
-    .split(/\s+/)
-    .filter((word) => word.length > 0).length
 
   return (
     <TabsContent value='experience' className='space-y-4'>
@@ -174,13 +165,6 @@ export default function ExperienceTab({
 
         <div>
           <Label htmlFor='responsibilities'>Responsibilities *</Label>
-          <p className='text-xs text-muted-foreground mb-2'>
-            • Each line becomes a bullet point
-            <br />
-            • Minimum 2 bullet points required
-            <br />• Minimum 10 words total
-          </p>
-
           <Textarea
             id='responsibilities'
             value={responsibilitiesText}
@@ -189,29 +173,9 @@ export default function ExperienceTab({
             className={`min-h-[140px] text-sm leading-relaxed resize-y ${
               errors.responsibilities ? 'border-red-500' : ''
             }`}
-            // onKeyDown={(e) => {}}
-            // onKeyUp={(e) => {}}
-            // onInput={(e) => {}}
           />
 
           <div className='flex justify-between items-center mt-2'>
-            <div className='space-y-1'>
-              <p
-                className={`text-xs ${
-                  bulletPointCount >= 2 ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                • {bulletPointCount}/2 bullet points
-              </p>
-              <p
-                className={`text-xs ${
-                  wordCount >= 10 ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                • {wordCount}/10 words
-              </p>
-            </div>
-
             {errors.responsibilities && (
               <p className='text-red-500 text-xs text-right'>
                 {errors.responsibilities.message}

@@ -36,7 +36,6 @@ export function ExperienceTimeline({
   const connectingLineRef = useRef<HTMLDivElement>(null)
   const dotRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
-  // Fetch experiences from API on mount
   useEffect(() => {
     setLoading(true)
     fetchResumeData()
@@ -144,7 +143,7 @@ export function ExperienceTimeline({
         const expElement = experienceRefs.current[exp.id]
         if (expElement) {
           const expRect = expElement.getBoundingClientRect()
-          const dotPosition = expRect.top + 24 // Approximate dot position
+          const dotPosition = expRect.top + 24
 
           // Connect dot if it has passed the year button
           if (dotPosition <= yearButtonTop + 10) {
