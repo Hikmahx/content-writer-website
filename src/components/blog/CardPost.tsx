@@ -60,7 +60,7 @@ export default function CardPost({ post }: { post: Post }) {
         {post.img ? (
           <>
             <Image
-              className='w-full h-auto mx-0 rounded-lg my-4'
+              className='w-full h-[240px] object-cover mx-0 rounded-lg my-4 shadow shadow-beige'
               src={post.img}
               alt='placeholder'
               width={300}
