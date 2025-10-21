@@ -32,19 +32,25 @@ export async function validateSlugUniqueness(
  * @param limit - The max number of characters (default 200)
  * @returns A plain text snippet
  */
-export function extractTextFromHTML(html: string, limit = 300): string {
+export function extractTextFromHTML(html: string, limit = 420): string {
   if (!html || isEmptyContent(html)) return ''
 
   // If running in the browser, use DOMParser
   if (typeof window !== 'undefined') {
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, 'text/html')
+
+    // Remove all header elements (h1–h6)
+    const headers = doc.querySelectorAll('h1, h2, h3, h4, h5, h6')
+    headers.forEach((header) => header.remove())
+
     const text = doc.body.textContent || ''
     return text.slice(0, limit).trim()
   }
 
-  // Server-side fallback (regex strips tags)
-  const text = html.replace(/<[^>]*>/g, '')
+  // Server-side fallback (regex strips headers + other tags)
+  const htmlWithoutHeaders = html.replace(/<h[1-6][^>]*>.*?<\/h[1-6]>/gi, '')
+  const text = htmlWithoutHeaders.replace(/<[^>]*>/g, '')
   return text.slice(0, limit).trim()
 }
 
