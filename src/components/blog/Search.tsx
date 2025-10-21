@@ -37,11 +37,11 @@ export default function Search({ searchTerm }: { searchTerm: string }) {
   }
   return (
     <form onSubmit={(e) => handleSearch(e)}>
-      <div className='relative max-w-xs'>
+      <div className='relative w-full md:max-w-xs'>
         <Input
           type='text'
           placeholder='Search...'
-          className='max-w-xs'
+          className='md:max-w-xs'
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
         />
