@@ -54,6 +54,7 @@ export default function PostsList({ published }: PostsListProps) {
         'date',
         (pageIndex + 1).toString(),
         '',
+        '',
         published,
         pageSize
       )
