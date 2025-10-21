@@ -9,49 +9,70 @@ export async function GET(req: NextRequest) {
   const sortBy = searchParams.get('sortBy') || 'date'
   const searchTerm = searchParams.get('search') || ''
   const published = searchParams.get('published') || 'true'
-
+  const category = searchParams.get('category') || 'all'
   const itemsPerPage = parseInt(searchParams.get('itemsPerPage') || '10')
+
   const orderBy =
     sortBy === 'title'
       ? { title: 'asc' as const }
       : { createdAt: 'desc' as const }
+
   const publishedBool = published === 'true'
 
-  const query = {
-    take: itemsPerPage,
-    skip: itemsPerPage * (page - 1),
-    orderBy,
-    where: {
-      published: publishedBool,
-      OR: [
-        { title: { contains: searchTerm, mode: 'insensitive' as const } },
-        { content: { contains: searchTerm, mode: 'insensitive' as const } },
-        { description: { contains: searchTerm, mode: 'insensitive' as const } },
-      ],
-    },
+  const where: any = {
+    published: publishedBool,
+    OR: [
+      { title: { contains: searchTerm, mode: 'insensitive' as const } },
+      { content: { contains: searchTerm, mode: 'insensitive' as const } },
+      { description: { contains: searchTerm, mode: 'insensitive' as const } },
+    ],
+  }
+
+  if (category !== 'all' && category.trim() !== '') {
+    where.catId = category
   }
 
   try {
-    const [posts, count] = await prisma.$transaction([
+    const [posts, count, categories] = await prisma.$transaction([
       prisma.post.findMany({
-        ...query,
+        take: itemsPerPage,
+        skip: itemsPerPage * (page - 1),
+        orderBy,
+        where,
         include: {
           author: {
             select: { name: true, image: true },
           },
+          category: { select: { title: true } },
         },
       }),
-      prisma.post.count({ where: query.where }),
+      prisma.post.count({ where }),
+      prisma.category.findMany({
+        select: { id: true, title: true },
+      }),
     ])
-    return NextResponse.json({
-      posts,
-      totalCount: count,
-      currentPage: page,
-      totalPages: Math.ceil(count / itemsPerPage),
-    })
+
+    const formattedPosts = posts.map((post) => ({
+      ...post,
+      category: post.category?.title || null,
+    }))
+
+    return NextResponse.json(
+      {
+        posts: formattedPosts,
+        totalCount: count,
+        currentPage: page,
+        totalPages: Math.ceil(count / itemsPerPage),
+        categories,
+      },
+      { status: 200 }
+    )
   } catch (err) {
     console.log(err)
-    return NextResponse.json({ message: 'Something went wrong', status: 500 })
+    return NextResponse.json(
+      { message: 'Something went wrong' },
+      { status: 500 }
+    )
   }
 }
 
@@ -60,12 +81,14 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireAdmin()
     const body = await request.json()
+    const { category, ...rest } = body
 
     await validateSlugUniqueness(body.slug)
 
     const newPost = await prisma.post.create({
       data: {
-        ...body,
+        ...rest,
+        catId: category,
         published: body.published || false,
         authorId: user.id,
         slug: body.slug,
@@ -74,10 +97,16 @@ export async function POST(request: NextRequest) {
         author: {
           select: { name: true, image: true },
         },
+        category: { select: { title: true } },
       },
     })
 
-    return NextResponse.json(newPost, { status: 201 })
+    const formattedPost = {
+      ...newPost,
+      category: newPost.category?.title || null,
+    }
+
+    return NextResponse.json(formattedPost, { status: 201 })
   } catch (err: any) {
     if (err.message === 'Title should be unique always') {
       console.log(err.message)
