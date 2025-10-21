@@ -15,14 +15,21 @@ export async function fetchPosts(
   sortBy?: string,
   page?: string,
   search?: string,
+  category?: string,
   published?: boolean,
   itemsPerPage?: number
-): Promise<{ posts: Post[]; totalCount: number; totalPages: number }> {
+): Promise<{
+  posts: Post[]
+  totalCount: number
+  totalPages: number
+  categories: string[]
+}> {
   try {
     const queryParams = new URLSearchParams()
     if (sortBy) queryParams.append('sortBy', sortBy)
     if (page) queryParams.append('page', page)
     if (search) queryParams.append('search', search)
+    if (category) queryParams.append('category', category)
     if (published !== undefined)
       queryParams.append('published', published.toString())
     if (itemsPerPage)

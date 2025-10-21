@@ -12,6 +12,7 @@ export default async function Page({
     sortBy?: string
     page?: string
     search?: string
+    category?: string
     // limit?: number
   }>
 }) {
@@ -21,11 +22,13 @@ export default async function Page({
   const sortBy = params?.sortBy || 'date'
   const currentPage = Math.max(1, parseInt(params?.page || '1') || 1)
   const searchTerm = params?.search || ''
+  const category = params?.category || 'all'
 
   const data = await fetchPosts(
     sortBy,
     currentPage.toString(),
-    searchTerm
+    searchTerm,
+    category,
     // true,
     // 10
   )
@@ -43,6 +46,7 @@ export default async function Page({
         pageCount={data.totalPages}
         searchTerm={searchTerm}
         limit={10}
+        categories={data.categories}
       />
     </>
   )
