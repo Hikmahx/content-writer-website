@@ -109,7 +109,7 @@ export default function Posts({
           </div>
         </div>
       </div>
-      <div className='flex gap-12'>
+      <div className='flex gap-20'>
         <div className='flex flex-col flex-1 mx-auto gap-x-6 gap-y-4 md:gap-y-0 w-full max-w-5xl'>
           {posts.length < 1 && (
             <div className='flex justify-center'>No Post Yet.</div>
