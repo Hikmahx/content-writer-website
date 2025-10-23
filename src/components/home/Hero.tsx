@@ -7,23 +7,17 @@ import { motion } from 'framer-motion'
 
 export function Hero() {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
-      className='relative xl:max-h-[80vh] overflow-hidden flex flex-col-reverse md:flex-col md:grid md:grid-cols-2 2xl:max-w-7xl mx-auto md:items-center mb-12 md:mb-0'
-    >
+    <section className='relative xl:max-h-[80vh] overflow-hidden flex flex-col-reverse md:flex-col md:grid md:grid-cols-2 2xl:max-w-7xl mx-auto md:items-center mb-12 md:mb-0'>
       <motion.div
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
         className='relative z-10 max-w-7xl mx-auto px-6 lg:pr-12 lg:pl-0 lg:py-20 xl:py-28 -mt-32'
       >
         <div className='flex flex-col lg:px-10 xl:pl-12 2xl:pl-0 space-y-6 text-center md:text-left sm:bg-white mt-4 sm:mt-8 xl:-mt-20'>
           <div className='flex flex-col space-y-4'>
             <p className='text-lg'>Hello, I'm</p>
-            <div className=''>
+            <div>
               <h1 className='text-5xl lg:text-6xl font-medium font-serif text-foreground tracking-wider mb-3'>
                 SARAH YOUSUPH
               </h1>
@@ -44,9 +38,9 @@ export function Hero() {
         </div>
       </motion.div>
       <motion.div
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
+        initial={{ opacity: 0.4 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <Image
           src='/hero-img.svg'
@@ -67,6 +61,6 @@ export function Hero() {
           className='absolute bottom-0 left-0 hidden lg:block'
         />
       </div>
-    </motion.section>
+    </section>
   )
 }
