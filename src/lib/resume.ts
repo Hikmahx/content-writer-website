@@ -1,5 +1,5 @@
 import { Education, Experience, PersonalInfo, Resume } from './types'
-
+import axios from 'axios'
 function getApiBaseUrl() {
   if (typeof window !== 'undefined') return '/api'
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
@@ -7,19 +7,22 @@ function getApiBaseUrl() {
 }
 
 export async function fetchResumeData(): Promise<Resume> {
-  const res = await fetch(`${getApiBaseUrl()}/resume`, { cache: 'no-store' })
-  if (!res.ok) throw new Error(`Failed to fetch data: ${res.statusText}`)
-  return res.json()
+  const res = await axios.get(`${getApiBaseUrl()}/resume`, {
+    headers: { 'Cache-Control': 'no-store' },
+  })
+  if (res.status !== 200)
+    throw new Error(`Failed to fetch data: ${res.statusText}`)
+  return res.data
 }
 
 export async function getResumeDataById<
   T extends Experience | Education | PersonalInfo
 >(type: string, id: string): Promise<T | null> {
-  const res = await fetch(`${getApiBaseUrl()}/resume/${id}?type=${type}`, {
-    cache: 'no-store',
+  const res = await axios.get(`${getApiBaseUrl()}/resume/${id}?type=${type}`, {
+    headers: { 'Cache-Control': 'no-store' },
   })
-  if (!res.ok) throw new Error(`Failed to fetch ${type} by id`)
-  return await res.json()
+  if (res.status !== 200) throw new Error(`Failed to fetch ${type} by id`)
+  return res.data
 }
 
 export async function saveResumeData(
@@ -65,14 +68,12 @@ export async function saveResumeData(
       break
   }
 
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(bodyData),
-    cache: 'no-store',
-  })
+  const res = await (method === 'PUT'
+    ? axios.put(url, bodyData)
+    : axios.post(url, bodyData))
 
-  if (!res.ok) throw new Error(`Failed to ${id ? 'update' : 'create'} ${type}`)
+  if (res.status !== 200)
+    throw new Error(`Failed to ${id ? 'update' : 'create'} ${type}`)
   return fetchResumeData()
 }
 
@@ -80,9 +81,7 @@ export async function deleteResumeData(
   type: string,
   id: string
 ): Promise<Resume> {
-  const res = await fetch(`${getApiBaseUrl()}/resume/${id}?type=${type}`, {
-    method: 'DELETE',
-  })
-  if (!res.ok) throw new Error(`Failed to delete ${type}`)
+  const res = await axios.delete(`${getApiBaseUrl()}/resume/${id}?type=${type}`)
+  if (res.status !== 200) throw new Error(`Failed to delete ${type}`)
   return fetchResumeData()
 }

@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import axios from 'axios'
 
 const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -43,13 +44,9 @@ export default function ContactForm() {
   const onSubmit = async (values: ContactFormValues) => {
     try {
       setSubmitting(true)
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      })
+      const res = await axios.post('/api/contact', values)
 
-      if (res.ok) {
+      if (res.status === 200) {
         toast.message('Message Sent', {
           description: 'Thanks for reaching out! I\'ll get back to you soon.',
         })

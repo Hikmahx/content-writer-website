@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { Post } from './types'
 
 // Base API URL helper
@@ -38,15 +39,17 @@ export async function fetchPosts(
     const url = `${getApiBaseUrl()}/posts${
       queryParams.toString() ? `?${queryParams}` : ''
     }`
-    const response = await fetch(url, { cache: 'no-store' })
+    const response = await axios.get(url, {
+      headers: { 'Cache-Control': 'no-store' },
+    })
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(
         `Failed to fetch posts: ${response.status} ${response.statusText}`
       )
     }
 
-    return await response.json()
+    return response.data
   } catch (err) {
     console.error('Failed to fetch posts:', err)
     throw err
@@ -55,18 +58,19 @@ export async function fetchPosts(
 
 export async function getPost(slug: string): Promise<Post | null> {
   try {
-    const response = await fetch(`${getApiBaseUrl()}/posts/${slug}`, {
-      cache: 'no-store',
+    const response = await axios.get(`${getApiBaseUrl()}/posts/${slug}`, {
+      headers: { 'Cache-Control': 'no-store' },
     })
 
-    if (!response.ok) {
-      if (response.status === 404) return null
+    if (response.status === 404) return null
+
+    if (response.status !== 200) {
       throw new Error(
         `Failed to fetch post: ${response.status} ${response.statusText}`
       )
     }
 
-    return await response.json()
+    return response.data
   } catch (err) {
     console.error('Failed to fetch post:', err)
     return null
@@ -80,22 +84,22 @@ export async function savePost(
   try {
     const method = postSlug ? 'PUT' : 'POST'
     const url = `${getApiBaseUrl()}/posts${postSlug ? `/${postSlug}` : ''}`
+    const response =
+      method === 'PUT'
+        ? await axios.put(url, postData)
+        : await axios.post(url, postData)
 
-    const response = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(postData),
-      cache: 'no-store',
-    })
-
-    if (!response.ok) {
-      const error = await response.json()
+    if (response.status !== 200 && response.status !== 201) {
+      // try to surface API error message if present
+      const apiError =
+        response.data && (response.data.error || response.data.message)
       throw new Error(
-        error.error || `Failed to ${postSlug ? 'update' : 'create'} post`
+        (apiError as string) ||
+          `Failed to ${postSlug ? 'update' : 'create'} post`
       )
     }
 
-    return await response.json()
+    return response.data as Post
   } catch (err) {
     console.error('Failed to save post:', err)
     throw err
@@ -104,11 +108,9 @@ export async function savePost(
 
 export async function deletePost(postId: string): Promise<void> {
   try {
-    const response = await fetch(`${getApiBaseUrl()}/posts/${postId}`, {
-      method: 'DELETE',
-    })
+    const response = await axios.delete(`${getApiBaseUrl()}/posts/${postId}`)
 
-    if (!response.ok) {
+    if (response.status !== 200 && response.status !== 204) {
       throw new Error(
         `Failed to delete post: ${response.status} ${response.statusText}`
       )
@@ -126,18 +128,17 @@ export async function uploadImageToCloudinary(
     const formData = new FormData()
     formData.append('file', file)
 
-    const response = await fetch(`${getApiBaseUrl()}/upload`, {
-      method: 'POST',
-      body: formData,
+    const response = await axios.post(`${getApiBaseUrl()}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
 
-    if (!response.ok) {
+    if (response.status !== 200 && response.status !== 201) {
       throw new Error(
         `Failed to upload image: ${response.status} ${response.statusText}`
       )
     }
 
-    const data = await response.json()
+    const data = response.data
     return { url: data.secure_url, publicId: data.public_id }
   } catch (err) {
     console.error('Failed to upload image:', err)
@@ -149,12 +150,11 @@ export async function deleteImageFromCloudinary(
   publicId: string
 ): Promise<void> {
   try {
-    const response = await fetch(
-      `${getApiBaseUrl()}/upload?publicId=${publicId}`,
-      { method: 'DELETE' }
+    const response = await axios.delete(
+      `${getApiBaseUrl()}/upload?publicId=${publicId}`
     )
 
-    if (!response.ok) {
+    if (response.status !== 200 && response.status !== 204) {
       throw new Error(
         `Failed to delete image: ${response.status} ${response.statusText}`
       )
