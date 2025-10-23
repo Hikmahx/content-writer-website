@@ -54,10 +54,11 @@ export function Hero() {
           width={320}
           height={320}
           className='w-[600px] h-[400px] md:h-[500px] lg:h-[640px] xl:h-[750px] object-cover object-[14px_0] sm:object-[80px_0] md:object-left lg:z-10 mt-8 md:mt-0 relative xl:relative bottom-20 lg:bottom-auto lg:top-[-15%] xl:top-[-12%] right-[-20%] md:right-[-18%]'
+          priority
+          fetchPriority='high'
         />
       </motion.div>
-      <div
-      >
+      <div>
         <Image
           src='/hero-bottom.svg'
           alt='hero bottom icon'
