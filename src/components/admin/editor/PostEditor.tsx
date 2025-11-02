@@ -42,6 +42,8 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       hashtags: [],
       published: false,
       img: '',
+      category: 'all',
+      catId: null,
     }
   )
 
@@ -54,6 +56,8 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
           hashtags: [],
           published: false,
           img: '',
+          category: 'all',
+          catId: null,
         }
       : draftPost
   )
@@ -170,6 +174,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
         slug: newSlug,
         description:
           post.description || extractTextFromHTML(post.content || ''),
+        catId: post.catId || undefined,
       }
 
       const savedPost = await savePost(postData, postSlug)

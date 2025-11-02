@@ -31,6 +31,7 @@ export interface Post {
   img?: string
   hashtags: string[]
   published: boolean
+  category?: string
   authorId: string
   createdAt: Date
   updatedAt: Date
@@ -73,4 +74,11 @@ export interface Resume {
   experiences: Experience[]
   education: Education[]
   personalInfo: PersonalInfo
+}
+
+export interface Message {
+  id: string
+  content: string
+  role: 'user' | 'assistant'
+  timestamp: Date
 }
