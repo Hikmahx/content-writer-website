@@ -1,13 +1,9 @@
 import Link from 'next/link'
 import { FaEnvelope, FaInstagram, FaLinkedinIn } from 'react-icons/fa'
+import { FaUpwork } from 'react-icons/fa6'
 import { FaMedium } from 'react-icons/fa6'
 
 const socialLinks = [
-  {
-    href: 'https://www.instagram.com/sarahs.odysseys/',
-    icon: FaInstagram,
-    label: 'Instagram',
-  },
   {
     href: 'https://ng.linkedin.com/in/sarah-yousuph-8891a3237',
     icon: FaLinkedinIn,
@@ -22,6 +18,11 @@ const socialLinks = [
     href: 'https://medium.com/@sarahyousuph.sy',
     icon: FaMedium,
     label: 'Medium',
+  },
+  {
+    href: 'https://www.upwork.com/freelancers/~0118c3507b9e418464',
+    icon: FaUpwork,
+    label: 'Upwork',
   },
 ]
 
