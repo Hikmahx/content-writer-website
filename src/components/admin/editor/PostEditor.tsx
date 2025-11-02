@@ -43,7 +43,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       published: false,
       img: '',
       category: 'all',
-      catId: null,
+      catId: undefined,
     }
   )
 
@@ -57,7 +57,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
           published: false,
           img: '',
           category: 'all',
-          catId: null,
+          catId: undefined,
         }
       : draftPost
   )

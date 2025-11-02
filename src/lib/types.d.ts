@@ -31,6 +31,7 @@ export interface Post {
   img?: string
   hashtags: string[]
   published: boolean
+  category?: string
   catId?: string
   authorId: string
   createdAt: Date
