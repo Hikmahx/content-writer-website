@@ -377,14 +377,58 @@ export default function RichPostEditor({
         )}
       </div>
 
-      {/* Tags + Categories */}
+      {/* Tags & Category */}
       <div className='space-y-3'>
-        <div className='flex items-center justify-between'>
-          <label className='text-sm font-medium text-foreground'>Tags</label>
-          <label className='text-sm font-medium text-foreground'>Category</label>
-        </div>
         <div className='flex items-center justify-between gap-4 mb-2'>
-          <div className='flex flex-wrap gap-2 flex-1'>
+          <div className='flex flex-col space-y-3'>
+            <label className='text-sm font-medium text-foreground'>Tags</label>
+            <Input
+              placeholder='Add a tag and press Enter'
+              onKeyDown={handleTagAdd}
+              className='max-w-xs'
+            />
+          </div>
+          <div className='flex flex-col space-y-3'>
+            <label className='text-sm font-medium text-foreground text-right'>
+              Category
+            </label>
+            <div className='w-48'>
+              <Select
+                value={selectedCategory}
+                onValueChange={(val) => {
+                  setSelectedCategory(val)
+                  const selected = categories.find((c) => c.id === val)
+                  onChange({
+                    ...post,
+                    category:
+                      !selected || selected.id === 'all'
+                        ? undefined
+                        : selected.title,
+                    catId:
+                      !selected || selected.id === 'all'
+                        ? undefined
+                        : selected.id,
+                  })
+                }}
+              >
+                <SelectTrigger className='h-9'>
+                  <SelectValue>
+                    {categories.find((c) => c.id === selectedCategory)?.title ||
+                      'All'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <div className='flex flex-wrap gap-2 flex-1'>
           {post.hashtags?.map((tag) => (
             <Badge
               key={tag}
@@ -400,43 +444,7 @@ export default function RichPostEditor({
               </button>
             </Badge>
           ))}
-          </div>
-
-          <div className='w-48'>
-            <Select
-              value={selectedCategory}
-              onValueChange={(val) => {
-                setSelectedCategory(val)
-                const selected = categories.find((c) => c.id === val)
-                onChange({
-                  ...post,
-                  category: !selected || selected.id === 'all' ? undefined : selected.title,
-                  catId: !selected || selected.id === 'all' ? undefined : selected.id,
-                })
-              }}
-            >
-              <SelectTrigger className='h-9'>
-                <SelectValue>
-                  {categories.find((c) => c.id === selectedCategory)?.title ||
-                    'All'}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
-
-        <Input
-          placeholder='Add a tag and press Enter'
-          onKeyDown={handleTagAdd}
-          className='max-w-xs'
-        />
       </div>
 
       {/* Image Upload Modal */}
