@@ -7,14 +7,8 @@ import { motion } from 'framer-motion'
 
 export function About() {
   return (
-    <section className='bg-white relative w-full h-full py-8 lg:py-16 text-center lg:text-start px-4 sm:px-6 lg:px-8'>
-      <Image
-        src='/about-bg.png'
-        alt='intro background'
-        className='absolute inset-0 w-[100%] h-[100%] opacity-30'
-        width={1000}
-        height={1000}
-      />
+    <section className='bg-white relative text-center lg:text-start py-8 lg:py-16 px-4 sm:px-6 lg:px-8'>
+      <div className="absolute inset-0 bg-[url('/about-bg.png')] bg-cover bg-center bg-no-repeat opacity-30"></div>
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -36,7 +30,7 @@ export function About() {
                 alt='Sarah Yousuph smiling'
                 width={256}
                 height={256}
-                className='w-3/5 mx-auto lg:w-full h-full object-cover'
+                className='w-3/5 mx-auto lg:w-full object-cover'
               />
 
               <div className='absolute -top-4 -right-4 w-20 h-20 bg-gray-200 rounded-full'></div>
@@ -44,7 +38,7 @@ export function About() {
           </div>
 
           <div className='lg:flex-[0_0_60%] flex flex-col space-y-6'>
-            <div className='flex flex-col space-y-4 max-w-md sm:max-w-2xl lg:max-w-4xl'>
+            <div className='space-y-4 max-w-md sm:max-w-2xl lg:max-w-4xl'>
               <h2 className='text-4xl font-bold text-foreground font-serif'>
                 A bit about me
               </h2>
