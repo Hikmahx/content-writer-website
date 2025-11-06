@@ -34,7 +34,8 @@ export function useAiChat() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition =
-        window.SpeechRecognition || (window as any).webkitSpeechRecognition
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition
       if (SpeechRecognition) {
         recognitionRef.current = new SpeechRecognition()
         recognitionRef.current.continuous = false
@@ -68,10 +69,11 @@ export function useAiChat() {
 
       const updateVolume = () => {
         if (analyserRef.current && dataArrayRef.current) {
-          analyserRef.current.getByteFrequencyData(dataArrayRef.current)
-          const average =
-            dataArrayRef.current.reduce((a, b) => a + b) /
-            dataArrayRef.current.length
+          const dataArray = new Uint8Array(
+            analyserRef.current.frequencyBinCount
+          )
+          analyserRef.current.getByteFrequencyData(dataArray)
+          const average = dataArray.reduce((a, b) => a + b) / dataArray.length
           setMicVolume(Math.min(average / 255, 1))
           animationFrameRef.current = requestAnimationFrame(updateVolume)
         }
@@ -165,7 +167,7 @@ export function useAiChat() {
       setIsListening(false)
       stopVolumeMonitoring()
     }
-    
+
     recognitionRef.current.onresult = (event: any) => {
       let interimTranscript = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
