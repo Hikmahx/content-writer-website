@@ -174,3 +174,23 @@ model PersonalInfo {
   userId    String @unique
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model AdminProfile {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  bio             String?
+  profileImage    String?
+  linkedinUrl     String?
+  awards          String[]
+  specialties     String[]
+  yearsExperience Int?
+  updatedAt       DateTime @updatedAt
+}
+
+model ChatHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  message   String
+  response  String
+  role      String
+  sessionId String
+  createdAt DateTime @default(now())
+}
