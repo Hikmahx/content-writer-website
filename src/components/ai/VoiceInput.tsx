@@ -4,8 +4,10 @@ import type React from 'react'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mic, Send, Square } from 'lucide-react'
+import { Mic, Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface VoiceInputProps {
   onSendMessage: (message: string) => void
@@ -14,6 +16,8 @@ interface VoiceInputProps {
   onStopListening: () => void
   isLoading: boolean
   micVolume?: number
+  error?: string | null
+  onClearError?: () => void
 }
 
 export function VoiceInput({
@@ -23,29 +27,42 @@ export function VoiceInput({
   onStopListening,
   isLoading,
   micVolume = 0,
+  error,
+  onClearError,
 }: VoiceInputProps) {
   const [input, setInput] = useState('')
-  const [ripples, setRipples] = useState<Array<{ id: string; scale: number }>>(
-    []
-  )
 
-  useEffect(() => {
-    if (!isListening) return
-
-    const rippleScale = 1 + micVolume * 2
-    const newRipple = {
-      id: Math.random().toString(),
-      scale: rippleScale,
+  const getFriendlyErrorMessage = (errorType: string) => {
+    switch (errorType) {
+      case 'no-speech':
+        return 'Could not hear anything. Please try again!'
+      case 'audio-capture':
+        return 'Microphone error. Check your permissions.'
+      case 'not-allowed':
+        return 'Permission denied. Allow microphone access.'
+      case 'network':
+        return 'Connection error. Check your internet.'
+      case 'aborted':
+        return 'Voice search canceled.'
+      case 'not-supported':
+        return 'Voice input is not supported in this browser.'
+      default:
+        return 'Something went wrong. Please try again!'
     }
+  }
 
-    setRipples((prev) => [...prev, newRipple])
-
-    const timer = setTimeout(() => {
-      setRipples((prev) => prev.filter((r) => r.id !== newRipple.id))
-    }, 600)
-
-    return () => clearTimeout(timer)
-  }, [micVolume, isListening])
+  // Show error toast when error occurs
+  useEffect(() => {
+    if (error) {
+      const errorMessage = getFriendlyErrorMessage(error)
+      toast.error(errorMessage)
+      
+      // Clear error after showing
+      if (onClearError) {
+        onClearError()
+      }
+    }
+  }, [error, onClearError])
 
   const handleSend = () => {
     if (input.trim()) {
@@ -73,42 +90,92 @@ export function VoiceInput({
       />
 
       <div className='relative'>
-        {isListening && ripples.length > 0 && (
-          <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-            {ripples.map((ripple) => (
-              <div
-                key={ripple.id}
-                className='absolute rounded-full border-2 border-red-400 animate-pulse'
-                style={{
-                  width: `${40 * ripple.scale}px`,
-                  height: `${40 * ripple.scale}px`,
-                  opacity: Math.max(0, 1 - ripple.scale / 3),
-                  animation: 'ripple-out 0.6s ease-out forwards',
-                }}
-              />
-            ))}
-          </div>
-        )}
-
         <Button
           size='icon'
           variant={isListening ? 'destructive' : 'outline'}
-          onClick={isListening ? onStopListening : onStartListening}
-          disabled={isLoading}
+          aria-label={
+            isListening ? 'Listening... Click to stop' : 'Voice Search'
+          }
           className={cn(
             'transition-all relative z-10',
-            isListening && 'bg-red-500 hover:bg-red-600 animate-pulse'
+            isListening
+              ? 'bg-beige/50 hover:bg-beige/60 focus-visible:ring-beige/50'
+              : 'border border-gray-200  hover:bg-beige focus-visible:ring-gray-200'
           )}
-          title={isListening ? 'Stop recording' : 'Start recording'}
+          onClick={isListening ? onStopListening : onStartListening}
+          disabled={isLoading}
         >
-          {isListening ? (
-            <>
-              <Square className='w-4 h-4' />
-              <span className='absolute inset-0 rounded-md border-2 border-red-400 animate-pulse' />
-            </>
-          ) : (
-            <Mic className='w-4 h-4' />
-          )}
+          <motion.div
+            animate={isListening ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+            transition={{
+              duration: isListening ? 1.5 : 0.2,
+              repeat: isListening ? Number.POSITIVE_INFINITY : 0,
+              ease: 'easeInOut',
+            }}
+          >
+            <AnimatePresence>
+              {!isListening ? (
+                <>
+                  <Mic className='text-gray-400 hover:text-black' />
+                </>
+              ) : (
+                <motion.div
+                  key='fx'
+                  className='pointer-events-none absolute inset-0'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <motion.div
+                    className='absolute inset-0 rounded-[0.75rem] border border-beige/40'
+                    animate={{ scale: [1, 1.8, 1], opacity: [0.8, 0.2, 0.8] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                  <motion.div
+                    className='absolute inset-0 rounded-[0.75rem] border border-beige/30'
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0.1, 0.6] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                      delay: 0.3,
+                    }}
+                  />
+                  <motion.div
+                    className='absolute inset-0 rounded-[0.75rem] border border-beige/20'
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.05, 0.4] }}
+                    transition={{
+                      duration: 1,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                      delay: 0.6,
+                    }}
+                  />
+
+                  <div className='absolute inset-0 flex items-center justify-center gap-1'>
+                    {[...Array(4)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className='w-0.5 border border-black rounded-full bg-black'
+                        animate={{ height: [4, 16, 8, 20, 4] }}
+                        transition={{
+                          duration: 1.2,
+                          repeat: Number.POSITIVE_INFINITY,
+                          ease: 'easeInOut',
+                          delay: i * 0.1,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </Button>
       </div>
 
@@ -120,19 +187,6 @@ export function VoiceInput({
       >
         <Send className='w-4 h-4' />
       </Button>
-
-      <style>{`
-        @keyframes ripple-out {
-          from {
-            transform: scale(1);
-            opacity: 1;
-          }
-          to {
-            transform: scale(3);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   )
 }

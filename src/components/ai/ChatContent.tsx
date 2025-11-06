@@ -18,9 +18,11 @@ export function ChatContent({ onClose }: ChatContentProps) {
     isLoading,
     isListening,
     micVolume,
+    error,
     sendMessage,
     startListening,
     stopListening,
+    clearError,
     clearChat,
   } = useAiChat()
 
@@ -94,6 +96,8 @@ export function ChatContent({ onClose }: ChatContentProps) {
           onStopListening={stopListening}
           isLoading={isLoading}
           micVolume={micVolume}
+          error={error}
+          onClearError={clearError}
         />
       </div>
     </>
