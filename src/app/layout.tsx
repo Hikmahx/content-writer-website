@@ -6,6 +6,7 @@ import { Header } from '@/components/global/Header'
 import { Footer } from '@/components/global/Footer'
 import AuthProvider from '@/providers/AuthProvider'
 import { Toaster } from '@/components/ui/sonner'
+import { ChatBubble } from '@/components/ai/ChatBubble'
 
 const lora = Lora({
   subsets: ['latin'],
@@ -42,6 +43,7 @@ export default function RootLayout({
           <main className='flex-1'>{children}</main>
           <Footer />
           <Toaster />
+          <ChatBubble />
         </AuthProvider>
       </body>
     </html>
