@@ -36,7 +36,7 @@ export function ChatBubble() {
         }`}
       >
         <div className='relative'>
-          <div className={`speech-bubble bg-white shadow-2xl w-96 flex flex-col ${isOpen ? 'animate-speech-bubble' : ''}`}>
+          <div className={`speech-bubble bg-white shadow-2xl ml-auto w-[90%] max-w-96 flex flex-col ${isOpen ? 'animate-speech-bubble' : ''}`}>
             <div className='flex items-center justify-end p-4'>
               <button
                 onClick={() => setIsOpen(false)}
