@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react'
 import RootLayout from '../layout'
 
 jest.mock('next/font/google', () => ({
@@ -12,23 +11,28 @@ jest.mock('next/font/google', () => ({
 
 jest.mock('@/components/global/Header', () => ({
   __esModule: true,
-  Header: () => <header data-testid="header">Header</header>
+  Header: () => <header data-testid='header'>Header</header>
 }))
 
 jest.mock('@/components/global/Footer', () => ({
   __esModule: true,
-  Footer: () => <footer data-testid="footer">Footer</footer>
+  Footer: () => <footer data-testid='footer'>Footer</footer>
 }))
 
 jest.mock('@/components/ui/sonner', () => ({
   __esModule: true,
-  Toaster: () => <div data-testid="toaster">Toaster</div>
+  Toaster: () => <div data-testid='toaster'>Toaster</div>
+}))
+
+jest.mock('@/components/ai/ChatBubble', () => ({
+  __esModule: true,
+  ChatBubble: () => <div data-testid='chat-bubble'>ChatBubble</div>
 }))
 
 jest.mock('@/providers/AuthProvider', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="auth-provider">{children}</div>
+    <div data-testid='auth-provider'>{children}</div>
   )
 }))
 
@@ -36,18 +40,25 @@ describe('RootLayout', () => {
   it('renders all components in correct structure', () => {
     // Test that RootLayout returns the expected structure
     const result = RootLayout({
-      children: <div data-testid="test-child">Test Content</div>,
+      children: <div data-testid='test-child'>Test Content</div>,
     })
 
     // The result should be a React element with the html structure
     expect(result).toBeDefined()
     expect(result.type).toBe('html')
     expect(result.props.lang).toBe('en')
-    
+    expect(result.props.suppressHydrationWarning).toBe(true)
+
     // Your layout uses the font variables, not className
     expect(result.props.className).toContain('--font-lora')
     expect(result.props.className).toContain('--font-open-sans')
     expect(result.props.className).toContain('antialiased')
+
+    const body = result.props.children
+    expect(body.type).toBe('body')
+    expect(body.props.className).toBe(
+      'min-h-screen flex flex-col bg-white font-sans'
+    )
   })
 
   it('has correct metadata', () => {
