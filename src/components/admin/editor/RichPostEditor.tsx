@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Input } from '@/components/ui/input'
@@ -11,7 +11,6 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
-import axios from 'axios'
 import { Badge } from '@/components/ui/badge'
 import type { Post } from '@/lib/types'
 import TextAlign from '@tiptap/extension-text-align'
@@ -33,6 +32,7 @@ import {
   setImageDropHandler,
 } from './CustomImageExtension'
 import { useImageUpload } from '@/hooks/useImageUpload'
+import { useCategories } from '@/hooks/useCategories'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
 
@@ -57,12 +57,7 @@ export default function RichPostEditor({
   onImageUpload,
   disabled = false,
 }: RichPostEditorProps) {
-  const [categories, setCategories] = useState<{ id: string; title: string }[]>(
-    []
-  )
-  const [selectedCategory, setSelectedCategory] = useState<string>(() =>
-    post && post.category ? 'loading' : 'all'
-  )
+  const { categories: fetchedCategories } = useCategories()
   const [showImageUpload, setShowImageUpload] = useState(false)
   const { uploadImage, isUploading, uploadProgress } = useImageUpload()
   const editorRef = useRef<HTMLDivElement>(null)
@@ -270,45 +265,12 @@ export default function RichPostEditor({
     }
   }, [post.content, editor])
 
-  // Load categories once and cache in sessionStorage
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const cached = sessionStorage.getItem('categories_cache')
-        if (cached) {
-          setCategories(JSON.parse(cached))
-          return
-        }
-
-        const resp = await axios.get('/api/posts')
-        // API returns categories as array of { id, title }
-        const cats = resp.data.categories || []
-        const withAll = [{ id: 'all', title: 'All' }, ...cats]
-        setCategories(withAll)
-        sessionStorage.setItem('categories_cache', JSON.stringify(withAll))
-      } catch (err) {
-        console.error('Failed to load categories', err)
-        setCategories([{ id: 'all', title: 'All' }])
-      }
-    }
-
-    loadCategories()
-  }, [])
-
-  // Keep selected category in sync when post changes (for editing)
-  useEffect(() => {
-    // If post has a category title, try to find its id from cached categories
+  // Simplify category selection logic with useMemo
+  const selectedCategory = useMemo(() => {
     const catTitle = post.category || 'all'
-    const found = categories.find((c) => c.title === catTitle)
-    if (found) {
-      setSelectedCategory(found.id)
-    } else if (catTitle === 'all') {
-      setSelectedCategory('all')
-    } else if (categories.length > 0) {
-      // categories loaded but title not found - fallback to 'all'
-      setSelectedCategory('all')
-    }
-  }, [post.category, categories])
+    const found = fetchedCategories.find((c) => c.title === catTitle)
+    return found ? found.id : 'all'
+  }, [post.category, fetchedCategories])
 
   const handleTagAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim()) {
@@ -396,8 +358,7 @@ export default function RichPostEditor({
               <Select
                 value={selectedCategory}
                 onValueChange={(val) => {
-                  setSelectedCategory(val)
-                  const selected = categories.find((c) => c.id === val)
+                  const selected = fetchedCategories.find((c) => c.id === val)
                   onChange({
                     ...post,
                     category:
@@ -413,12 +374,12 @@ export default function RichPostEditor({
               >
                 <SelectTrigger className='h-9'>
                   <SelectValue>
-                    {categories.find((c) => c.id === selectedCategory)?.title ||
-                      'All'}
+                    {fetchedCategories.find((c) => c.id === selectedCategory)
+                      ?.title || 'All'}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => (
+                  {fetchedCategories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.title}
                     </SelectItem>
