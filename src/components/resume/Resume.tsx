@@ -56,6 +56,7 @@ export default function ResumeInfo() {
           onActiveYearChange={setActiveYear}
           isAdmin={isAdmin}
           setResume={() => mutate()}
+          isLoading={isLoading}
         />
 
         <div className='fixed bottom-8 right-8 z-50 flex items-center gap-3'>
