@@ -5,6 +5,7 @@ import './globals.css'
 import { Header } from '@/components/global/Header'
 import { Footer } from '@/components/global/Footer'
 import AuthProvider from '@/providers/AuthProvider'
+import { SWRProvider } from '@/providers/SWRProvider'
 import { Toaster } from '@/components/ui/sonner'
 import { ChatBubble } from '@/components/ai/ChatBubble'
 
@@ -39,11 +40,13 @@ export default function RootLayout({
     >
       <body className='min-h-screen flex flex-col bg-white font-sans'>
         <AuthProvider>
-          <Header />
-          <main className='flex-1'>{children}</main>
-          <Footer />
-          <Toaster />
-          <ChatBubble />
+          <SWRProvider>
+            <Header />
+            <main className='flex-1'>{children}</main>
+            <Footer />
+            <Toaster />
+            <ChatBubble />
+          </SWRProvider>
         </AuthProvider>
       </body>
     </html>

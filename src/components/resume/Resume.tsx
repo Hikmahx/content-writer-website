@@ -1,72 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { ExperienceTimeline } from '@/components/resume/ExperienceDisplay/ExperienceTimeline'
 import { ResumeDialog } from '@/components/resume/ResumeDialog'
 import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
-import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
+import type { Education, Experience, PersonalInfo } from '@/lib/types'
 import { useSession } from 'next-auth/react'
-import { fetchResumeData } from '@/lib/resume'
+import { useResume } from '@/hooks/useResume'
 
 export default function ResumeInfo() {
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'ADMIN'
 
-  const [resume, setResume] = useState<Resume>({
-    experiences: [],
-    education: [],
-    personalInfo: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      linkedin: '',
-      address: '',
-    },
-  })
+  const { resume, isLoading, mutate } = useResume()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingExperience, setEditingExperience] = useState<Experience | null>(
     null
   )
   const [activeYear, setActiveYear] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(
-    () => {
-      const loadData = async () => {
-        try {
-          const data = await fetchResumeData()
-          setResume({
-            experiences: data.experiences || [],
-            education: data.education || [],
-            personalInfo: data.personalInfo || {},
-          })
-        } catch (err) {
-          console.error('Failed to load resume data:', err)
-        } finally {
-          setLoading(false)
-        }
-      }
-
-      loadData()
-    },
-    [
-      // resume
-    ]
-  )
 
   const handleAddExperience = (updatedResume: {
     experiences: Experience[]
     education: Education[]
     personalInfo: PersonalInfo
   }) => {
-    // setResume({
-    //   experiences: updatedResume.experiences || [],
-    //   education: updatedResume.education || [],
-    //   personalInfo: updatedResume.personalInfo || personalInfo,
-    // })
-
+    mutate()
     setIsDialogOpen(false)
     setEditingExperience(null)
   }
@@ -76,25 +36,6 @@ export default function ResumeInfo() {
     setIsDialogOpen(true)
   }
 
-  // const handleDeleteExperience = (id: string) =>
-  //   setResume((prev) => ({
-  //     ...prev,
-  //     experiences: prev.experiences.filter((exp) => exp.id !== id),
-  //   }))
-
-  // const handleUpdatePersonalInfo = (info: PersonalInfo) =>
-  //   setResume((prev) => ({ ...prev, personalInfo: info }))
-
-  // const handleUpdateEducation = (education: Education[]) =>
-  //   setResume((prev) => ({ ...prev, education }))
-
-  //   if (loading) {
-  //     return (
-  //       <div className='min-h-screen flex items-center justify-center'>
-  //         <p>Loading...</p>
-  //       </div>
-  //     )
-  //   }
 
   return (
     <div className='min-h-screen bg-white'>
@@ -112,10 +53,10 @@ export default function ResumeInfo() {
           experiences={resume.experiences}
           education={resume.education}
           onEditExperience={isAdmin ? handleEditExperience : undefined}
-          //   onDeleteExperience={isAdmin ? handleDeleteExperience : undefined}
           onActiveYearChange={setActiveYear}
           isAdmin={isAdmin}
-          setResume={setResume}
+          setResume={() => mutate()}
+          isLoading={isLoading}
         />
 
         <div className='fixed bottom-8 right-8 z-50 flex items-center gap-3'>
@@ -143,13 +84,9 @@ export default function ResumeInfo() {
           }}
           onExpSubmit={handleAddExperience}
           experience={editingExperience}
-          //   setResumeData={setResume}
           personalInfo={resume.personalInfo}
           education={resume.education}
-          setResume={setResume}
-
-          //   onUpdatePersonal={handleUpdatePersonalInfo}
-          //   onUpdateEducation={handleUpdateEducation}
+          setResume={() => mutate()}
         />
       </div>
     </div>

@@ -1,5 +1,7 @@
 import { Education, Experience, PersonalInfo, Resume } from './types'
 import axios from 'axios'
+import { mutate } from 'swr'
+
 function getApiBaseUrl() {
   if (typeof window !== 'undefined') return '/api'
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
@@ -74,7 +76,18 @@ export async function saveResumeData(
 
   if (res.status !== 200)
     throw new Error(`Failed to ${id ? 'update' : 'create'} ${type}`)
-  return fetchResumeData()
+  
+  const updatedResume = await fetchResumeData()
+
+  // Invalidate SWR cache for resume
+  if (typeof window !== 'undefined') {
+    await mutate((key) => typeof key === 'string' && key.includes('/resume'))
+    if (id) {
+      await mutate(`/api/resume/${id}?type=${type}`)
+    }
+  }
+
+  return updatedResume
 }
 
 export async function deleteResumeData(
@@ -83,5 +96,14 @@ export async function deleteResumeData(
 ): Promise<Resume> {
   const res = await axios.delete(`${getApiBaseUrl()}/resume/${id}?type=${type}`)
   if (res.status !== 200) throw new Error(`Failed to delete ${type}`)
-  return fetchResumeData()
+  
+  const updatedResume = await fetchResumeData()
+
+  // Invalidate SWR cache for resume
+  if (typeof window !== 'undefined') {
+    await mutate((key) => typeof key === 'string' && key.includes('/resume'))
+    await mutate(`/api/resume/${id}?type=${type}`)
+  }
+
+  return updatedResume
 }

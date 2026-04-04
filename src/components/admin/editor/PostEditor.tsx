@@ -6,7 +6,8 @@ import RichPostEditor from './RichPostEditor'
 import EditorHeader from './EditorHeader'
 import type { Post } from '@/lib/types'
 import { useRouter } from 'next/navigation'
-import { getPost, savePost } from '@/lib/post'
+import { savePost } from '@/lib/post'
+import { usePost } from '@/hooks/usePosts'
 import {
   extractTextFromHTML,
   extractImageUrlsFromHTML,
@@ -23,7 +24,6 @@ const getStorageKey = (postSlug?: string) =>
   postSlug ? `post-draft-${postSlug}` : 'new-post-draft'
 
 export default function PostEditor({ postSlug }: PostEditorProps) {
-  const [loading, setLoading] = useState(!!postSlug)
   const [saving, setSaving] = useState(false)
   const [savingType, setSavingType] = useState<'draft' | 'publish' | null>(null)
   const [clearing, setClearing] = useState(false)
@@ -31,6 +31,12 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   const router = useRouter()
   const saveTimeoutRef = useRef<NodeJS.Timeout>()
   const initialLoadRef = useRef(true)
+
+  const {
+    post: fetchedPost,
+    isLoading: loading,
+    mutate: mutatePost,
+  } = usePost(postSlug || null)
 
   // Use localStorage for draft backup ONLY for new posts
   const [draftPost, setDraftPost, removeDraft] = useLocalStorage<Partial<Post>>(
@@ -94,11 +100,9 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
     }
   }, [post, postSlug, setDraftPost, removeDraft, hasRealContent])
 
-  // Load existing post data ONLY if postSlug exists
+  // Load existing post data from SWR when available
   useEffect(() => {
     if (!postSlug) {
-      setLoading(false)
-
       // Clean up empty drafts on initial load only
       if (initialLoadRef.current) {
         const shouldRemoveDraft = !hasRealContent(draftPost)
@@ -110,30 +114,15 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       return
     }
 
-    // Only fetch if we have a postSlug and we're in initial load
-    if (initialLoadRef.current) {
-      setLoading(true)
-      const fetchData = async () => {
-        try {
-          const data = await getPost(postSlug)
-          if (data) {
-            setPost(data)
-            if (data.content) {
-              setAllUploadedImages(extractImageUrlsFromHTML(data.content))
-            }
-            removeDraft()
-          }
-        } catch (error) {
-          toast.error('Failed to load post')
-        } finally {
-          setLoading(false)
-          initialLoadRef.current = false
-        }
+    if (fetchedPost && initialLoadRef.current) {
+      setPost(fetchedPost)
+      if (fetchedPost.content) {
+        setAllUploadedImages(extractImageUrlsFromHTML(fetchedPost.content))
       }
-
-      fetchData()
+      removeDraft()
+      initialLoadRef.current = false
     }
-  }, [postSlug, draftPost, removeDraft, hasRealContent])
+  }, [postSlug, fetchedPost, draftPost, removeDraft, hasRealContent])
 
   const handleSave = async (published: boolean) => {
     if (!post.title?.trim()) {
@@ -180,10 +169,9 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
       const savedPost = await savePost(postData, postSlug)
 
       if (postSlug) {
-        // Editing existing post => keep saved data in editor
+        await mutatePost()
         setPost(savedPost)
       } else {
-        // New post => reset editor to empty
         setPost({
           title: '',
           description: '',
@@ -254,7 +242,7 @@ export default function PostEditor({ postSlug }: PostEditorProps) {
   // Check if we should show clear draft button
   const shouldShowClearDraft = !postSlug && hasRealContent(post)
 
-  if (loading) {
+  if (loading && postSlug) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
         <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
