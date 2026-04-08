@@ -10,9 +10,15 @@ import {
   CardTitle,
 } from '../ui/card'
 import PostDate from './PostDate'
+import { cleanDescription } from '@/lib/utils/post'
+
 
 export default function CardPost({ post }: { post: Post }) {
-  const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt])
+  const excerpt = useMemo(() => {
+    const cleaned = cleanDescription(post.description)
+    return cleaned.slice(0, 150) + '...'
+  }, [post.description])
+
   return (
     <Card className='w-full prose prose-slate max-w-none relative rounded-none shadow-none flex flex-col md:flex-row items-center justify-between border-white border-b border-b-gray-300 first:border-t first:border-t-gray-300 gap-x-4'>
       <div className='order-2 md:order-1 w-full'>
@@ -38,7 +44,7 @@ export default function CardPost({ post }: { post: Post }) {
         </CardHeader>
         <CardContent className='pb-0 px-0'>
           <p className='font-normal text-sm my-0 font-sans text-gray-500 w-full max-w-lg mr-auto'>
-            {post.description.slice(0, 150) + '...'}
+            {excerpt}
           </p>
         </CardContent>
         <CardFooter className='px-0'>

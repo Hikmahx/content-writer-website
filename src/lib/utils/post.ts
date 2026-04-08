@@ -148,3 +148,11 @@ export function isEmptyContent(content: string): boolean {
 
   return cleanContent === ''
 }
+
+export function cleanDescription(raw: string): string {
+  const match = raw.match(/^((?:[A-Z][a-z]+)+)(?=[A-Z])/)
+  if (match) {
+    return raw.slice(match[1].length)
+  }
+  return raw
+}

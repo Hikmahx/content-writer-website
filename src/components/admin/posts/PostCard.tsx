@@ -12,6 +12,7 @@ import {
 import Link from 'next/link'
 import type { Post } from '@/lib/types'
 import DeleteModal from '@/components/global/DeleteModal'
+import { cleanDescription } from '@/lib/utils/post'
 
 interface PostCardProps {
   post: Post
@@ -42,7 +43,7 @@ export default function PostCard({ post, onDelete }: PostCardProps) {
               </h3>
             </Link>
             <p className='text-muted-foreground text-sm mb-4 line-clamp-2'>
-              {post.description}
+              {cleanDescription(post.description)}
             </p>
             <div className='flex items-center gap-4 text-xs text-muted-foreground'>
               <span>{formatDate(post.createdAt)}</span>
