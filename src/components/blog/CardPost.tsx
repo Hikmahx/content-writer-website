@@ -39,7 +39,7 @@ export default function CardPost({ post }: { post: Post }) {
             </div>
           </div>
           <Link href={`/blog/${post.slug}`} className='hover:text-beige no-underline'>
-            <CardTitle className='py-2 font-serif'>{post.title}</CardTitle>
+            <CardTitle className='py-2 font-serif leading-normal'>{post.title}</CardTitle>
           </Link>
         </CardHeader>
         <CardContent className='pb-0 px-0'>
