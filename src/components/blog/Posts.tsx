@@ -67,7 +67,7 @@ export default function Posts({
   )
 
   return (
-    <main className='flex min-h-screen flex-col px-4 xl:px-0 py-8 container mx-auto lg:max-w-7xl'>
+    <main className='flex min-h-screen flex-col px-4 xl:px-6 py-8 container mx-auto lg:max-w-7xl'>
       <div className='w-full flex flex-col lg:flex-row gap-4 justify-between mb-4 lg:mb-12 mt-8 lg:justify-center'>
         <div className='flex flex-col justify-center text-center gap-8 mb-8'>
           <h1 className='text-5xl font-bold font-serif'>
