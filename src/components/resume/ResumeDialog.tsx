@@ -10,10 +10,10 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Experience, Education, PersonalInfo, Resume } from '@/lib/types'
 import {
-  getResumeDataById,
   saveResumeData,
   deleteResumeData,
 } from '@/lib/resume'
+import { useResumeDataById } from '@/hooks/useResume'
 import { toast } from 'sonner'
 import EducationTab from './dialog/EducationTab'
 import PersonalInfoTab from './dialog/PersonalInfoTab'
@@ -52,56 +52,61 @@ export function ResumeDialog({
     if (open) successToastShownRef.current = false
   }, [open])
 
+  // Use SWR to fetch experience data
+  const { data: experienceData, isLoading: isLoadingExperience } = useResumeDataById<Experience>(
+    'experience',
+    open && experience?.id ? experience.id : null
+  )
+
   useEffect(() => {
-    const loadExperienceData = async () => {
-      if (open && experience?.id) {
-        setLoading(true)
-        try {
-          const data: any = await getResumeDataById('experience', experience.id)
-          const experienceData = data?.experience || experience
-
-          const formattedExperience = {
-            ...experienceData,
-            startDate: experienceData.startDate
-              ? formatDateForInput(experienceData.startDate)
-              : '',
-            endDate: experienceData.endDate
-              ? formatDateForInput(experienceData.endDate)
-              : '',
-          }
-
-          setInitialExperience(formattedExperience)
-        } catch (error) {
-          console.error('Failed to load experience:', error)
-
-          const formattedExperience = {
-            ...experience,
-            startDate: experience.startDate
-              ? formatDateForInput(experience.startDate)
-              : '',
-            endDate: experience.endDate
-              ? formatDateForInput(experience.endDate)
-              : '',
-          }
-          setInitialExperience(formattedExperience)
-        } finally {
-          setLoading(false)
+    if (open && experience?.id) {
+      if (experienceData) {
+        // Use data from SWR
+        const formattedExperience = {
+          ...experienceData,
+          startDate: experienceData.startDate
+            ? formatDateForInput(experienceData.startDate)
+            : '',
+          endDate: experienceData.endDate
+            ? formatDateForInput(experienceData.endDate)
+            : '',
         }
-      } else if (open) {
-        // Reset for new experience
-        setInitialExperience({
-          organization: '',
-          position: '',
-          location: '',
-          startDate: '',
-          endDate: '',
-          responsibilities: [''],
-        })
+        setInitialExperience(formattedExperience)
+        setLoading(false)
+      } else if (!isLoadingExperience) {
+        // Fallback to passed experience if SWR data not available
+        const formattedExperience = {
+          ...experience,
+          startDate: experience.startDate
+            ? formatDateForInput(experience.startDate)
+            : '',
+          endDate: experience.endDate
+            ? formatDateForInput(experience.endDate)
+            : '',
+        }
+        setInitialExperience(formattedExperience)
+        setLoading(false)
       }
+    } else if (open && !experience?.id) {
+      // Reset for new experience
+      setInitialExperience({
+        organization: '',
+        position: '',
+        location: '',
+        startDate: '',
+        endDate: '',
+        responsibilities: [''],
+      })
+      setLoading(false)
     }
+  }, [open, experience, experienceData, isLoadingExperience])
 
-    loadExperienceData()
-  }, [open, experience])
+  // Update loading state based on SWR
+  useEffect(() => {
+    if (open && experience?.id) {
+      setLoading(isLoadingExperience)
+    }
+  }, [open, experience?.id, isLoadingExperience])
 
   const handleFormSubmit = async (
     type: 'experience' | 'education' | 'personalInfo',

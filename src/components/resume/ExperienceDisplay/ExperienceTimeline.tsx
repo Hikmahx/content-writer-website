@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { fetchResumeData } from '@/lib/resume'
 import { toast } from 'sonner'
 import type { Education, Experience, Resume } from '@/lib/types'
 import { ExperienceItem } from './ExperienceItem'
@@ -14,6 +13,7 @@ interface ExperienceTimelineProps {
   onActiveYearChange?: (year: string) => void
   isAdmin?: boolean
   setResume: React.Dispatch<React.SetStateAction<Resume>>
+  isLoading?: boolean
 }
 
 export function ExperienceTimeline({
@@ -22,11 +22,11 @@ export function ExperienceTimeline({
   onActiveYearChange,
   isAdmin = false,
   setResume,
+  isLoading: loadingFromParent = false,
 }: ExperienceTimelineProps) {
   const [experiences, setExperiences] = useState<Experience[]>(
     initialExperiences || []
   )
-  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [activeYear, setActiveYear] = useState<string>('')
   const [connectedDots, setConnectedDots] = useState<Set<string>>(new Set())
@@ -36,23 +36,10 @@ export function ExperienceTimeline({
   const connectingLineRef = useRef<HTMLDivElement>(null)
   const dotRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
-  useEffect(() => {
-    setLoading(true)
-    fetchResumeData()
-      .then((data: any) => {
-        setExperiences(Array.isArray(data.experiences) ? data.experiences : [])
-        setLoading(false)
-      })
-      .catch(() => {
-        setError('Failed to load experiences')
-        setLoading(false)
-      })
-  }, [])
+  const loading = loadingFromParent
 
   useEffect(() => {
-    if (initialExperiences && initialExperiences.length >= 0) {
-      setExperiences(initialExperiences)
-    }
+    setExperiences(Array.isArray(initialExperiences) ? initialExperiences : [])
   }, [initialExperiences])
 
   const sortedExperiences = useMemo(() => {

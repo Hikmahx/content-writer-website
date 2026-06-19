@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Post } from './types'
+import { mutate } from 'swr'
 
 // Base API URL helper
 function getApiBaseUrl() {
@@ -99,7 +100,19 @@ export async function savePost(
       )
     }
 
-    return response.data as Post
+    const savedPost = response.data as Post
+
+    // Invalidate SWR cache for posts
+    if (typeof window !== 'undefined') {
+      // Invalidate all posts queries
+      await mutate((key) => typeof key === 'string' && key.includes('/posts'))
+      // Invalidate specific post if updating
+      if (postSlug) {
+        await mutate(`/api/posts/${postSlug}`)
+      }
+    }
+
+    return savedPost
   } catch (err) {
     console.error('Failed to save post:', err)
     throw err
@@ -114,6 +127,14 @@ export async function deletePost(postId: string): Promise<void> {
       throw new Error(
         `Failed to delete post: ${response.status} ${response.statusText}`
       )
+    }
+
+    // Invalidate SWR cache for posts
+    if (typeof window !== 'undefined') {
+      // Invalidate all posts queries
+      await mutate((key) => typeof key === 'string' && key.includes('/posts'))
+      // Invalidate specific post
+      await mutate(`/api/posts/${postId}`)
     }
   } catch (err) {
     console.error('Failed to delete post:', err)
