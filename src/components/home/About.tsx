@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-
+import { useSession } from 'next-auth/react'
 interface AboutProps {
   bio?: string | null
 }
 
 export function About({ bio }: AboutProps) {
+  const { data: session } = useSession()
+  
+  const isAdmin = session?.user?.role === 'ADMIN'
+
   return (
     <section className='bg-white relative text-center lg:text-start py-8 lg:py-16 px-4 sm:px-6 lg:px-8'>
       <div className="absolute inset-0 bg-[url('/about-bg.png')] bg-cover bg-center bg-no-repeat opacity-30"></div>
@@ -89,11 +93,13 @@ export function About({ bio }: AboutProps) {
                 </>
               )}
             </div>
-            <Link href='/about'>
-              <Button className='bg-black text-white cursor-pointer hover:text-black hover:bg-beige transition-all px-8 py-3 text-base'>
-                MORE DETAILS
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link href='/admin/about'>
+                <Button className='bg-black text-white cursor-pointer hover:text-black hover:bg-beige transition-all px-8 py-3 text-base'>
+                  UPDATE ABOUT ME
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </motion.div>

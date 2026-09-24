@@ -17,14 +17,11 @@ import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Toolbar from '@/components/admin/editor/Toolbar'
 import BubbleMenu from '@/components/admin/editor/BubbleMenu'
-import ImageUpload from '@/components/admin/editor/ImageUpload'
-import { CustomImage } from '@/components/admin/editor/CustomImageExtension'
 
 export default function AboutEditor() {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [showImageUpload, setShowImageUpload] = useState(false)
   const editorRef = useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
@@ -41,12 +38,6 @@ export default function AboutEditor() {
       TextStyle,
       Blockquote.configure({
         HTMLAttributes: { class: 'border-l-4 border-gray-300 pl-4 my-4' },
-      }),
-      CustomImage.configure({
-        HTMLAttributes: {
-          class: 'rounded-lg max-w-full cursor-pointer',
-          draggable: 'false',
-        },
       }),
       Dropcursor.configure({ width: 2, color: '#958DF1' }),
       Placeholder.configure({
@@ -159,7 +150,7 @@ export default function AboutEditor() {
           </div>
         ) : (
           <>
-            <Toolbar editor={editor} onImageUpload={() => setShowImageUpload(true)} />
+            <Toolbar editor={editor} onImageUpload={null} />
             {editor && <BubbleMenu editor={editor} />}
             <div
               ref={editorRef}
@@ -172,13 +163,6 @@ export default function AboutEditor() {
             </div>
           </>
         )}
-
-        <ImageUpload
-          open={showImageUpload}
-          onOpenChange={setShowImageUpload}
-          onImageInsert={() => {}}
-          editor={editor}
-        />
       </div>
     </div>
   )

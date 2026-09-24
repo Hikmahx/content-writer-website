@@ -16,7 +16,7 @@ import type { ComponentType } from 'react'
 
 interface ToolbarProps {
   editor: Editor | null
-  onImageUpload: () => void
+  onImageUpload: (() => void) | null
 }
 
 // Union type for actions
@@ -75,12 +75,16 @@ export default function Toolbar({ editor, onImageUpload }: ToolbarProps) {
       isActive: () => editor.isActive('bulletList'),
       onClick: () => editor.chain().focus().toggleBulletList().run(),
     },
-    {
-      type: 'button',
-      icon: ImageIcon,
-      isActive: () => false,
-      onClick: onImageUpload,
-    },
+    ...(onImageUpload
+      ? [
+          {
+            type: 'button' as const,
+            icon: ImageIcon,
+            isActive: () => false,
+            onClick: onImageUpload,
+          },
+        ]
+      : []),
     {
       type: 'button',
       icon: LinkIcon,
