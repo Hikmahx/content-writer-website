@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/utils/auth'
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 // AdminProfile is a singleton table (one row for the whole site), so we
 // always operate on the first record we find and create it lazily the
@@ -35,6 +36,8 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const bio = typeof body.bio === 'string' ? body.bio : ''
+
+    // Reject bios that are empty/spammy or absurdly long before they hit the DB
     const wordCount = bio.replace(/<[^>]*>/g, ' ').trim()
       ? bio.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length
       : 0
@@ -51,6 +54,9 @@ export async function PUT(request: NextRequest) {
       where: { id: current.id },
       data: { bio },
     })
+
+    // Regenerate the cached homepage now, instead of waiting for the next deploy
+    revalidatePath('/')
 
     return NextResponse.json({ bio: updated.bio }, { status: 200 })
   } catch (err: any) {
