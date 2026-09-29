@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus, UserPen } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
 
 export default function StoriesHeader() {
@@ -14,15 +14,6 @@ export default function StoriesHeader() {
         </p>
       </div>
       <div className='flex items-center gap-3'>
-        <Link href='/admin/about'>
-          <Button
-            variant='outline'
-            className='hover:bg-beige hover:text-foreground transition-all'
-          >
-            <UserPen className='w-4 h-4 mr-2' />
-            Edit &quot;About me&quot;
-          </Button>
-        </Link>
         <Link href='/admin/new'>
           <Button variant='default' className='bg-black text-white hover:bg-beige hover:text-foreground transition-all'>
             <Plus className='w-4 h-4 mr-2' />

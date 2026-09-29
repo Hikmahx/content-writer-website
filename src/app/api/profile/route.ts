@@ -35,6 +35,16 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const bio = typeof body.bio === 'string' ? body.bio : ''
+    const wordCount = bio.replace(/<[^>]*>/g, ' ').trim()
+      ? bio.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length
+      : 0
+
+    if (wordCount < 10 || wordCount > 1000) {
+      return NextResponse.json(
+        { error: 'Bio must contain between 10 and 1000 words' },
+        { status: 400 }
+      )
+    }
 
     const current = await getOrCreateProfile()
     const updated = await prisma.adminProfile.update({
