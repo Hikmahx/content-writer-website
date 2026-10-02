@@ -77,6 +77,18 @@ export interface Resume {
   personalInfo: PersonalInfo
 }
 
+export interface DraftExperience extends Omit<Experience, 'responsibilities'> {
+  responsibilitiesText: string
+}
+
+export interface ParsedResumeResponse {
+  personalInfo: PersonalInfo
+  experience: (Omit<Experience, 'responsibilities'> & {
+    responsibilities: string[]
+  })[]
+  education: Education[]
+}
+
 export interface Message {
   id: string
   content: string

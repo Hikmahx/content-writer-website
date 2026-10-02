@@ -90,7 +90,7 @@ export async function parseResumeText(text: string): Promise<ParsedResume> {
   }
 
   const groq = createGroq({ apiKey: process.env.GROQ_AI_KEY })
-  const model = groq(process.env.GROQ_RESUME_MODEL || 'llama-3.3-70b-versatile')
+  const model = groq(process.env.GROQ_RESUME_MODEL || 'openai/gpt-oss-120b')
 
   const { object } = await generateObject({
     model,
