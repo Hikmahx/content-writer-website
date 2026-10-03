@@ -60,7 +60,7 @@ export default function PersonalInfoTab({
       className='mt-0 flex-1 overflow-y-auto min-h-0'
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <div className='px-6 py-4 space-y-4'>
+        <div className='px-6 py-4 space-y-4 min-h-[50vh]'>
         <div className='grid grid-cols-2 gap-4'>
           <div>
             <Label htmlFor='firstName'>First Name *</Label>
