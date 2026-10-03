@@ -2,9 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Plus, Upload, UserCog } from 'lucide-react'
 import { ExperienceTimeline } from '@/components/resume/ExperienceDisplay/ExperienceTimeline'
 import { ResumeDialog } from '@/components/resume/ResumeDialog'
+import { ResumeUploadDialog } from '@/components/resume/upload/ResumeUploadDialog'
 import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
 import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
 import { useSession } from 'next-auth/react'
@@ -26,9 +33,7 @@ export default function ResumeInfo() {
     },
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingExperience, setEditingExperience] = useState<Experience | null>(
-    null
-  )
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [activeYear, setActiveYear] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -68,11 +73,12 @@ export default function ResumeInfo() {
     // })
 
     setIsDialogOpen(false)
-    setEditingExperience(null)
   }
 
-  const handleEditExperience = (exp: Experience) => {
-    setEditingExperience(exp)
+  // All experiences are editable inline once the dialog is open (the
+  // Experience tab lists every entry), so the pencil icon on a timeline
+  // item just needs to open the dialog.
+  const handleEditExperience = () => {
     setIsDialogOpen(true)
   }
 
@@ -120,13 +126,24 @@ export default function ResumeInfo() {
 
         <div className='fixed bottom-8 right-8 z-50 flex items-center gap-3'>
           {isAdmin && (
-            <Button
-              onClick={() => setIsDialogOpen(true)}
-              className='bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md print:hidden'
-            >
-              <Plus className='w-4 h-4 mr-2' />
-              Add/Update Data
-            </Button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button className='bg-beige hover:bg-beige/50 text-gray-800 hover:text-black px-4 py-2 rounded-md print:hidden'>
+                  <UserCog className='w-4 h-4' />
+                  <span className="hidden">Admin</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side='top' align='end' className='w-48'>
+                <DropdownMenuItem onClick={() => setIsUploadDialogOpen(true)}>
+                  <Upload className='w-4 h-4 mr-2' />
+                  Upload Resume
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
+                  <Plus className='w-4 h-4 mr-2' />
+                  Add/Update Data
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           <ResumeGenerator
             experiences={resume.experiences}
@@ -135,14 +152,18 @@ export default function ResumeInfo() {
           />
         </div>
 
+        <ResumeUploadDialog
+          open={isUploadDialogOpen}
+          onOpenChange={setIsUploadDialogOpen}
+          setResume={setResume}
+          onParsed={() => setIsDialogOpen(true)}
+        />
+
         <ResumeDialog
           open={isDialogOpen}
-          onOpenChange={(open) => {
-            setIsDialogOpen(open)
-            if (!open) setEditingExperience(null)
-          }}
+          onOpenChange={setIsDialogOpen}
           onExpSubmit={handleAddExperience}
-          experience={editingExperience}
+          experiences={resume.experiences}
           //   setResumeData={setResume}
           personalInfo={resume.personalInfo}
           education={resume.education}
