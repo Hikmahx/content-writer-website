@@ -157,8 +157,12 @@ export default function EducationTab({
   }
 
   return (
-    <TabsContent value='education' className='space-y-4'>
+    <TabsContent
+      value='education'
+      className='mt-0 flex-1 overflow-y-auto min-h-0'
+    >
       <form onSubmit={handleSubmit(onFormSubmit)}>
+        <div className='px-6 py-4'>
         {fields.map((field, index) => (
           <div key={field.id} className='border rounded-lg p-4 space-y-4 mb-4'>
             <div className='flex justify-between items-center'>
@@ -300,14 +304,15 @@ export default function EducationTab({
           type='button'
           variant='outline'
           onClick={handleAddEducation}
-          className='w-full bg-transparent mb-4'
+          className='w-full bg-transparent'
           disabled={loading}
         >
           <Plus className='w-4 h-4 mr-2' />
           Add Education
         </Button>
+        </div>
 
-        <div className='flex justify-end gap-2'>
+        <div className='sticky bottom-0 bg-background border-t px-6 py-4 flex justify-end gap-2'>
           <Button
             type='button'
             variant='outline'

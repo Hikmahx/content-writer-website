@@ -157,13 +157,16 @@ export function ResumeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
-        <DialogHeader>
+      <DialogContent className='max-w-4xl h-[500px] max-h-[85vh] p-0 gap-0 flex flex-col overflow-hidden'>
+        <DialogHeader className='px-6 pt-6 pb-2 shrink-0'>
           <DialogTitle>Manage Resume</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue='experience' className='w-full'>
-          <TabsList className='w-full p-0 bg-background justify-start border-b rounded-none'>
+        <Tabs
+          defaultValue='experience'
+          className='flex-1 flex flex-col overflow-hidden min-h-0'
+        >
+          <TabsList className='shrink-0 w-full p-0 bg-background justify-start border-b rounded-none px-6'>
             <TabsTrigger value='experience' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
               Experience ({experiences.length})
             </TabsTrigger>

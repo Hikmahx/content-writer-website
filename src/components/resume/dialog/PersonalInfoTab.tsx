@@ -55,8 +55,12 @@ export default function PersonalInfoTab({
   }
 
   return (
-    <TabsContent value='personal' className='space-y-4'>
-      <form onSubmit={handleSubmit(onFormSubmit)} className='space-y-4'>
+    <TabsContent
+      value='personal'
+      className='mt-0 flex-1 overflow-y-auto min-h-0'
+    >
+      <form onSubmit={handleSubmit(onFormSubmit)}>
+        <div className='px-6 py-4 space-y-4'>
         <div className='grid grid-cols-2 gap-4'>
           <div>
             <Label htmlFor='firstName'>First Name *</Label>
@@ -122,8 +126,9 @@ export default function PersonalInfoTab({
             placeholder='City, State, Country'
           />
         </div>
+        </div>
 
-        <div className='flex justify-end gap-2'>
+        <div className='sticky bottom-0 bg-background border-t px-6 py-4 flex justify-end gap-2'>
           <Button
             type='button'
             variant='outline'
