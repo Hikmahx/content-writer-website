@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,16 +9,11 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Experience, Education, PersonalInfo, Resume } from '@/lib/types'
-import {
-  getResumeDataById,
-  saveResumeData,
-  deleteResumeData,
-} from '@/lib/resume'
+import { saveResumeData, deleteResumeData } from '@/lib/resume'
 import { toast } from 'sonner'
 import EducationTab from './dialog/EducationTab'
 import PersonalInfoTab from './dialog/PersonalInfoTab'
 import ExperienceTab from './dialog/ExperienceTab'
-import { formatDateForInput } from '@/lib/utils/date'
 
 interface ResumeDialogProps {
   open: boolean
@@ -28,7 +23,7 @@ interface ResumeDialogProps {
     education: Education[]
     personalInfo: PersonalInfo
   }) => void
-  experience?: Experience | null
+  experiences: Experience[]
   personalInfo: PersonalInfo
   education: Education[]
   setResume: React.Dispatch<React.SetStateAction<Resume>>
@@ -38,102 +33,49 @@ export function ResumeDialog({
   open,
   onOpenChange,
   onExpSubmit,
-  experience,
+  experiences,
   personalInfo,
   education,
   setResume,
 }: ResumeDialogProps) {
   const [loading, setLoading] = useState(false)
-  const [initialExperience, setInitialExperience] =
-    useState<Partial<Experience> | null>(null)
   const successToastShownRef = useRef(false)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (open) successToastShownRef.current = false
   }, [open])
 
-  useEffect(() => {
-    const loadExperienceData = async () => {
-      if (open && experience?.id) {
-        setLoading(true)
-        try {
-          const data: any = await getResumeDataById('experience', experience.id)
-          const experienceData = data?.experience || experience
-
-          const formattedExperience = {
-            ...experienceData,
-            startDate: experienceData.startDate
-              ? formatDateForInput(experienceData.startDate)
-              : '',
-            endDate: experienceData.endDate
-              ? formatDateForInput(experienceData.endDate)
-              : '',
-          }
-
-          setInitialExperience(formattedExperience)
-        } catch (error) {
-          console.error('Failed to load experience:', error)
-
-          const formattedExperience = {
-            ...experience,
-            startDate: experience.startDate
-              ? formatDateForInput(experience.startDate)
-              : '',
-            endDate: experience.endDate
-              ? formatDateForInput(experience.endDate)
-              : '',
-          }
-          setInitialExperience(formattedExperience)
-        } finally {
-          setLoading(false)
-        }
-      } else if (open) {
-        // Reset for new experience
-        setInitialExperience({
-          organization: '',
-          position: '',
-          location: '',
-          startDate: '',
-          endDate: '',
-          responsibilities: [''],
-        })
-      }
-    }
-
-    loadExperienceData()
-  }, [open, experience])
-
   const handleFormSubmit = async (
     type: 'experience' | 'education' | 'personalInfo',
-    formData: Partial<Experience> | Education[] | Partial<PersonalInfo>
+    formData: Experience[] | Education[] | Partial<PersonalInfo>
   ) => {
     setLoading(true)
     try {
       let data: Resume
 
-      if (type === 'education') {
-        // Save each education entry
-        const educationArray = formData as Education[]
+      if (type === 'experience' || type === 'education') {
+        // Save each entry in the array individually
+        const entries = formData as (Experience | Education)[]
 
-        if (educationArray.length === 0) {
-          throw new Error('At least one education entry is required')
+        if (entries.length === 0) {
+          throw new Error(`At least one ${type} entry is required`)
         }
 
         let lastSavedData: Resume | null = null
 
-        for (const edu of educationArray) {
-          const id = edu.id
+        for (const entry of entries) {
+          const id = entry.id
           const isEdit = Boolean(id && id.trim() !== '')
 
           // Create a clean copy without empty ID for new entries
-          const educationData: Partial<Education> = { ...edu }
+          const entryData: Partial<Experience | Education> = { ...entry }
           if (!isEdit) {
-            delete educationData.id
+            delete entryData.id
           }
 
           lastSavedData = await saveResumeData(
-            educationData,
-            'education',
+            entryData,
+            type,
             isEdit ? id : undefined
           )
         }
@@ -141,18 +83,14 @@ export function ResumeDialog({
         data = lastSavedData as Resume
 
         if (!successToastShownRef.current) {
-          toast.success('Education entries saved successfully')
+          const label = type === 'experience' ? 'Experience' : 'Education'
+          toast.success(`${label} entries saved successfully`)
           successToastShownRef.current = true
         }
       } else {
-        // Handle single entries (experience, personalInfo)
-        const singleFormData = formData as
-          | Partial<Experience>
-          | Partial<PersonalInfo>
-        const id =
-          type === 'experience'
-            ? (experience as Experience)?.id
-            : (personalInfo as PersonalInfo)?.id
+        // Personal info: a single entity
+        const singleFormData = formData as Partial<PersonalInfo>
+        const id = (personalInfo as PersonalInfo)?.id
 
         const isEdit = Boolean(id)
         data = await saveResumeData(
@@ -162,8 +100,7 @@ export function ResumeDialog({
         )
 
         if (!successToastShownRef.current) {
-          const label = type === 'experience' ? 'Experience' : 'Personal info'
-          toast.success(`${label} ${isEdit ? 'updated' : 'added'} successfully`)
+          toast.success(`Personal info ${isEdit ? 'updated' : 'added'} successfully`)
           successToastShownRef.current = true
         }
       }
@@ -179,6 +116,26 @@ export function ResumeDialog({
       setLoading(false)
     }
   }
+
+  const handleDeleteExperience = async (id: string) => {
+    if (!id) return
+
+    setLoading(true)
+    try {
+      const data = await deleteResumeData('experience', id)
+      setResume(data)
+      toast.success('Experience deleted successfully')
+    } catch (err: any) {
+      console.error(err)
+      toast.error('Failed to delete experience', {
+        description: err?.message || 'An unexpected error occurred',
+      })
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleDeleteEducation = async (id: string) => {
     if (!id) return
 
@@ -199,33 +156,31 @@ export function ResumeDialog({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        onOpenChange(isOpen)
-        if (!isOpen) setInitialExperience(null)
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>
-            {experience ? 'Edit Experience' : 'Add New Experience'}
-          </DialogTitle>
+          <DialogTitle>Manage Resume</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue='experience' className='w-full'>
           <TabsList className='w-full p-0 bg-background justify-start border-b rounded-none'>
-            <TabsTrigger value='experience' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>Experience</TabsTrigger>
-            <TabsTrigger value='personal' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>Personal Info</TabsTrigger>
-            <TabsTrigger value='education' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>Education</TabsTrigger>
+            <TabsTrigger value='experience' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
+              Experience ({experiences.length})
+            </TabsTrigger>
+            <TabsTrigger value='personal' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
+              Personal Info
+            </TabsTrigger>
+            <TabsTrigger value='education' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
+              Education ({education.length})
+            </TabsTrigger>
           </TabsList>
 
           <ExperienceTab
-            initialData={initialExperience}
+            experiences={experiences}
             loading={loading}
-            experience={experience}
             onOpenChange={onOpenChange}
             onSubmit={(formData) => handleFormSubmit('experience', formData)}
+            onDeleteExperience={handleDeleteExperience}
           />
 
           <PersonalInfoTab
