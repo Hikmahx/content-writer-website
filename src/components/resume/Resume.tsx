@@ -155,6 +155,7 @@ export default function ResumeInfo() {
         <ResumeUploadDialog
           open={isUploadDialogOpen}
           onOpenChange={setIsUploadDialogOpen}
+          resume={resume}
           setResume={setResume}
           onParsed={() => setIsDialogOpen(true)}
         />
