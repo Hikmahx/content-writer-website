@@ -200,7 +200,7 @@ export default function ExperienceTab({
       className='mt-0 flex-1 overflow-y-auto min-h-0'
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <div className='px-6 py-4'>
+        <div className='px-6 py-4 min-h-[50vh]'>
         {fields.map((field, index) => (
           <div key={field.id} className='border rounded-lg p-4 space-y-4 mb-4'>
             <div className='flex justify-between items-center'>
