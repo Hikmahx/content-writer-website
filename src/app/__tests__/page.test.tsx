@@ -9,8 +9,8 @@ jest.mock('@/components/home/About', () => ({
   About: () => <div data-testid='about'>About Component</div>,
 }))
 
-jest.mock('@/components/home/Portfolio', () => ({
-  Portfolio: () => <div data-testid='portfolio'>Portfolio Component</div>,
+jest.mock('@/components/home/MyWork', () => ({
+  MyWork: () => <div data-testid='my-work'>My Work Component</div>,
 }))
 
 jest.mock('@/components/home/Services', () => ({
@@ -27,7 +27,7 @@ describe('HomePage', () => {
 
     expect(screen.getByTestId('hero')).toBeInTheDocument()
     expect(screen.getByTestId('about')).toBeInTheDocument()
-    expect(screen.getByTestId('portfolio')).toBeInTheDocument()
+    expect(screen.getByTestId('my-work')).toBeInTheDocument()
     expect(screen.getByTestId('services')).toBeInTheDocument()
     expect(screen.getByTestId('cta')).toBeInTheDocument()
   })
