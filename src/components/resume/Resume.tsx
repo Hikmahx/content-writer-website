@@ -13,7 +13,13 @@ import { ExperienceTimeline } from '@/components/resume/ExperienceDisplay/Experi
 import { ResumeDialog } from '@/components/resume/ResumeDialog'
 import { ResumeUploadDialog } from '@/components/resume/upload/ResumeUploadDialog'
 import { ResumeGenerator } from '@/components/resume/ResumeGenerator'
-import type { Education, Experience, PersonalInfo, Resume } from '@/lib/types'
+import type {
+  Education,
+  Experience,
+  ParsedResumeResponse,
+  PersonalInfo,
+  Resume,
+} from '@/lib/types'
 import { useSession } from 'next-auth/react'
 import { fetchResumeData } from '@/lib/resume'
 
@@ -34,6 +40,9 @@ export default function ResumeInfo() {
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
+  // Parsed resume data that only pre-fills the forms. The database isn't
+  // touched until the user saves each tab.
+  const [draft, setDraft] = useState<Partial<ParsedResumeResponse> | null>(null)
   const [activeYear, setActiveYear] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -155,14 +164,21 @@ export default function ResumeInfo() {
         <ResumeUploadDialog
           open={isUploadDialogOpen}
           onOpenChange={setIsUploadDialogOpen}
-          resume={resume}
-          setResume={setResume}
-          onParsed={() => setIsDialogOpen(true)}
+          onParsed={(parsed) => {
+            setDraft(parsed)
+            setIsDialogOpen(true)
+          }}
         />
 
         <ResumeDialog
           open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open)
+            // Closing the dialog discards any unsaved uploaded data
+            if (!open) setDraft(null)
+          }}
+          draft={draft}
+          setDraft={setDraft}
           onExpSubmit={handleAddExperience}
           experiences={resume.experiences}
           //   setResumeData={setResume}

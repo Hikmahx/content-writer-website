@@ -11,26 +11,21 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Sparkles, Upload, Loader2 } from 'lucide-react'
-import type { ParsedResumeResponse, Resume } from '@/lib/types'
-import { deleteResumeData } from '@/lib/resume'
+import type { ParsedResumeResponse } from '@/lib/types'
 
 type Step = 'upload' | 'parsing'
 
 interface ResumeUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  resume: Resume
-  setResume: React.Dispatch<React.SetStateAction<Resume>>
-  // Called once parsed data has been merged into resume state, so the
-  // caller can open the regular manage-resume dialog for review.
-  onParsed: () => void
+  // Called with the parsed data so the caller can pre-fill the manage-resume
+  // forms. Nothing is saved or deleted until the user clicks Save there.
+  onParsed: (parsed: ParsedResumeResponse) => void
 }
 
 export function ResumeUploadDialog({
   open,
   onOpenChange,
-  resume,
-  setResume,
   onParsed,
 }: ResumeUploadDialogProps) {
   const [step, setStep] = useState<Step>('upload')
@@ -58,54 +53,13 @@ export function ResumeUploadDialog({
         )
         const parsed = resp.data
 
-        // Uploading a resume is meant to replace what's on file, not add to
-        // it - so clear out the existing saved experience/education first.
-        try {
-          await Promise.all([
-            ...resume.experiences
-              .filter((exp) => exp.id)
-              .map((exp) => deleteResumeData('experience', exp.id as string)),
-            ...resume.education
-              .filter((edu) => edu.id)
-              .map((edu) => deleteResumeData('education', edu.id as string)),
-          ])
-        } catch (deleteErr) {
-          console.error(
-            'Failed to clear existing resume data before import:',
-            deleteErr
-          )
-          toast.error("Couldn't replace your existing resume entries", {
-            description: 'Please try again in a moment.',
-          })
-          setStep('upload')
-          return
-        }
-
-        // Replace local state with just the parsed items (as new, unsaved
-        // entries) - no separate review UI. The same Experience/Education/
-        // Personal Info tabs used for manual editing already let you
-        // review, edit, remove, and save arrays of entries, so we just hand
-        // off to them instead of duplicating that UI here.
-        setResume((prev) => ({
-          experiences: parsed.experience,
-          education: parsed.education,
-          personalInfo: {
-            ...prev.personalInfo,
-            // Only overwrite fields the parse actually found something for,
-            // so a blank AI miss never clobbers good existing data.
-            ...Object.fromEntries(
-              Object.entries(parsed.personalInfo).filter(([, v]) => !!v)
-            ),
-          },
-        }))
-
         toast.success('Resume parsed', {
           description:
-            'Your previous experience and education were replaced - review the details in each tab, then save.',
+            'The forms have been filled in - review each tab, then save. Nothing is saved until you do.',
         })
 
         handleClose(false)
-        onParsed()
+        onParsed(parsed)
       } catch (err: any) {
         toast.error('Could not parse resume', {
           description:
@@ -116,7 +70,7 @@ export function ResumeUploadDialog({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [resume, onParsed, setResume]
+    [onParsed]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

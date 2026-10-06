@@ -8,8 +8,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { Experience, Education, PersonalInfo, Resume } from '@/lib/types'
-import { saveResumeData, deleteResumeData } from '@/lib/resume'
+import type {
+  Experience,
+  Education,
+  PersonalInfo,
+  ParsedResumeResponse,
+  Resume,
+} from '@/lib/types'
+import { saveResumeData, deleteResumeData, replaceResumeData } from '@/lib/resume'
 import { toast } from 'sonner'
 import EducationTab from './dialog/EducationTab'
 import PersonalInfoTab from './dialog/PersonalInfoTab'
@@ -27,6 +33,11 @@ interface ResumeDialogProps {
   personalInfo: PersonalInfo
   education: Education[]
   setResume: React.Dispatch<React.SetStateAction<Resume>>
+  // Uploaded-resume data that pre-fills the forms (not yet saved)
+  draft: Partial<ParsedResumeResponse> | null
+  setDraft: React.Dispatch<
+    React.SetStateAction<Partial<ParsedResumeResponse> | null>
+  >
 }
 
 export function ResumeDialog({
@@ -37,8 +48,26 @@ export function ResumeDialog({
   personalInfo,
   education,
   setResume,
+  draft,
+  setDraft,
 }: ResumeDialogProps) {
   const [loading, setLoading] = useState(false)
+
+  // Forms show the uploaded data when there is a draft, otherwise saved data.
+  // Draft entries have no id, so saving them replaces what's in the database.
+  const draftExperiences = draft?.experience
+  const draftEducation = draft?.education
+  const formExperiences = draftExperiences ?? experiences
+  const formEducation = draftEducation ?? education
+  const formPersonalInfo: PersonalInfo = draft?.personalInfo
+    ? {
+        ...personalInfo,
+        // Only overwrite fields the parse found, keep the saved id
+        ...(Object.fromEntries(
+          Object.entries(draft!.personalInfo!).filter(([, v]) => !!v)
+        ) as Partial<PersonalInfo>),
+      }
+    : personalInfo
   const successToastShownRef = useRef(false)
 
   React.useEffect(() => {
@@ -61,26 +90,43 @@ export function ResumeDialog({
           throw new Error(`At least one ${type} entry is required`)
         }
 
-        let lastSavedData: Resume | null = null
+        const isImport =
+          type === 'experience' ? Boolean(draftExperiences) : Boolean(draftEducation)
 
-        for (const entry of entries) {
-          const id = entry.id
-          const isEdit = Boolean(id && id.trim() !== '')
+        if (isImport) {
+          // Uploaded resume: replace all saved entries of this type at once
+          data = await replaceResumeData(type, entries)
+          setDraft((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  [type === 'experience' ? 'experience' : 'education']:
+                    undefined,
+                }
+              : prev
+          )
+        } else {
+          let lastSavedData: Resume | null = null
 
-          // Create a clean copy without empty ID for new entries
-          const entryData: Partial<Experience | Education> = { ...entry }
-          if (!isEdit) {
-            delete entryData.id
+          for (const entry of entries) {
+            const id = entry.id
+            const isEdit = Boolean(id && id.trim() !== '')
+
+            // Create a clean copy without empty ID for new entries
+            const entryData: Partial<Experience | Education> = { ...entry }
+            if (!isEdit) {
+              delete entryData.id
+            }
+
+            lastSavedData = await saveResumeData(
+              entryData,
+              type,
+              isEdit ? id : undefined
+            )
           }
 
-          lastSavedData = await saveResumeData(
-            entryData,
-            type,
-            isEdit ? id : undefined
-          )
+          data = lastSavedData as Resume
         }
-
-        data = lastSavedData as Resume
 
         if (!successToastShownRef.current) {
           const label = type === 'experience' ? 'Experience' : 'Education'
@@ -99,14 +145,21 @@ export function ResumeDialog({
           isEdit ? id : undefined
         )
 
+        setDraft((prev) => (prev ? { ...prev, personalInfo: undefined } : prev))
+
         if (!successToastShownRef.current) {
           toast.success(`Personal info ${isEdit ? 'updated' : 'added'} successfully`)
           successToastShownRef.current = true
         }
       }
 
-      onOpenChange(false)
       setResume(data)
+      // Keep the dialog open while other uploaded tabs still await review
+      const stillPending =
+        (type !== 'experience' && draftExperiences) ||
+        (type !== 'education' && draftEducation) ||
+        (type !== 'personalInfo' && draft?.personalInfo)
+      if (!(draft && stillPending)) onOpenChange(false)
     } catch (err: any) {
       console.error(`Failed to save ${type}:`, err)
       toast.error(`Failed to save ${type}`, {
@@ -168,18 +221,18 @@ export function ResumeDialog({
         >
           <TabsList className='shrink-0 w-full p-0 bg-background justify-start border-b rounded-none px-6'>
             <TabsTrigger value='experience' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
-              Experience ({experiences.length})
+              Experience ({formExperiences.length})
             </TabsTrigger>
             <TabsTrigger value='personal' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
               Personal Info
             </TabsTrigger>
             <TabsTrigger value='education' className='rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary'>
-              Education ({education.length})
+              Education ({formEducation.length})
             </TabsTrigger>
           </TabsList>
 
           <ExperienceTab
-            experiences={experiences}
+            experiences={formExperiences}
             loading={loading}
             onOpenChange={onOpenChange}
             onSubmit={(formData) => handleFormSubmit('experience', formData)}
@@ -187,14 +240,14 @@ export function ResumeDialog({
           />
 
           <PersonalInfoTab
-            personalInfo={personalInfo}
+            personalInfo={formPersonalInfo}
             loading={loading}
             onOpenChange={onOpenChange}
             onSubmit={(formData) => handleFormSubmit('personalInfo', formData)}
           />
 
           <EducationTab
-            education={education}
+            education={formEducation}
             loading={loading}
             onOpenChange={onOpenChange}
             onSubmit={(formData) => handleFormSubmit('education', formData)}

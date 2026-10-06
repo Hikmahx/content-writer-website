@@ -10,7 +10,7 @@ function monthKey(date?: string | Date | null): string {
   return d.toISOString().slice(0, 7)
 }
 
-function dedupeBy<T>(items: T[], keyOf: (item: T) => string, score: (item: T) => number): T[] {
+function removeDuplicatesBy<T>(items: T[], keyOf: (item: T) => string, score: (item: T) => number): T[] {
   const seen = new Map<string, T>()
   for (const item of items) {
     const key = keyOf(item)
@@ -21,20 +21,20 @@ function dedupeBy<T>(items: T[], keyOf: (item: T) => string, score: (item: T) =>
   return Array.from(seen.values())
 }
 
-export function dedupeExperiences<T extends Pick<Experience, 'organization' | 'startDate' | 'responsibilities'>>(
+export function removeDuplicateExperiences<T extends Pick<Experience, 'organization' | 'startDate' | 'responsibilities'>>(
   items: T[]
 ): T[] {
-  return dedupeBy(
+  return removeDuplicatesBy(
     items,
     (e) => `${norm(e.organization)}|${monthKey(e.startDate)}`,
     (e) => e.responsibilities?.length || 0
   )
 }
 
-export function dedupeEducation<T extends Pick<Education, 'institution' | 'graduationDate' | 'major'>>(
+export function removeDuplicateEducation<T extends Pick<Education, 'institution' | 'graduationDate' | 'major'>>(
   items: T[]
 ): T[] {
-  return dedupeBy(
+  return removeDuplicatesBy(
     items,
     (e) => `${norm(e.institution)}|${monthKey(e.graduationDate)}`,
     (e) => (e.major ? 1 : 0)

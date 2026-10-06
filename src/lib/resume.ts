@@ -85,3 +85,17 @@ export async function deleteResumeData(
   if (res.status !== 200) throw new Error(`Failed to delete ${type}`)
   return fetchResumeData()
 }
+
+// Replaces every saved experience (or education) with the given entries.
+// Used when saving a form that was pre-filled from an uploaded resume.
+export async function replaceResumeData(
+  type: 'experience' | 'education',
+  entries: Partial<Experience | Education>[]
+): Promise<Resume> {
+  const res = await axios.post(`${getApiBaseUrl()}/resume/import`, {
+    type,
+    entries,
+  })
+  if (res.status !== 201) throw new Error(`Failed to replace ${type}`)
+  return fetchResumeData()
+}

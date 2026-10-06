@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/utils/auth'
 import { extractResumeText, parseResumeText } from '@/lib/resumeParse'
+import { removeDuplicateEducation, removeDuplicateExperiences } from '@/lib/resumeDuplicates'
 
 const MAX_FILE_SIZE = 8 * 1024 * 1024 // 8MB
 
@@ -50,7 +51,16 @@ export async function POST(request: NextRequest) {
 
     const parsed = await parseResumeText(text)
 
-    return NextResponse.json(parsed, { status: 200 })
+    // Drop duplicate entries (same company/school + same date) before they
+    // ever reach the form. Nothing is written to the database here.
+    return NextResponse.json(
+      {
+        ...parsed,
+        experience: removeDuplicateExperiences(parsed.experience),
+        education: removeDuplicateEducation(parsed.education),
+      },
+      { status: 200 }
+    )
   } catch (err: any) {
     if (err.message === 'Admin access required') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
