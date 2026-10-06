@@ -77,8 +77,11 @@ export interface Resume {
   personalInfo: PersonalInfo
 }
 
-export interface DraftExperience extends Omit<Experience, 'responsibilities'> {
-  responsibilitiesText: string
+export interface WorkItem {
+  title: string
+  description: string
+  href: string
+  external: boolean
 }
 
 export interface ParsedResumeResponse {
