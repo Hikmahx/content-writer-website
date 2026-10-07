@@ -15,11 +15,6 @@ const socialLinks = [
     label: 'Email',
   },
   {
-    href: 'https://medium.com/@sarahyousuph.sy',
-    icon: FaMedium,
-    label: 'Medium',
-  },
-  {
     href: 'https://www.upwork.com/freelancers/~0118c3507b9e418464',
     icon: FaUpwork,
     label: 'Upwork',
