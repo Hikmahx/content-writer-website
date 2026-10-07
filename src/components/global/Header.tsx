@@ -2,21 +2,17 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [activeLink, setActiveLink] = useState('/')
+  const pathname = usePathname()
   const { data: session } = useSession()
 
-  useEffect(() => {
-    setActiveLink(window.location.pathname)
-  }, [])
-
   const toggleMenu = () => setIsOpen(!isOpen)
-  const handleLinkClick = (href: string) => {
-    setActiveLink(href)
+  const handleLinkClick = () => {
     setIsOpen(false)
   }
 
@@ -31,9 +27,12 @@ export function Header() {
     navItems.push({ href: '/admin', label: 'Admin' })
   }
 
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
+
   const linkClasses = (href: string, extra = '') =>
     `transition-colors font-sans ${extra} ${
-      activeLink === href
+      isActive(href)
         ? 'text-black font-medium'
         : 'text-gray-700 hover:text-gray-500'
     }`
@@ -45,7 +44,7 @@ export function Header() {
           <Link
             href='/'
             className='text-xl font-semibold font-serif'
-            onClick={() => handleLinkClick('/')}
+            onClick={handleLinkClick}
           >
             SARAH YOUSUPH
           </Link>
@@ -57,7 +56,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={linkClasses(item.href)}
-                onClick={() => handleLinkClick(item.href)}
+                onClick={handleLinkClick}
               >
                 {item.label}
               </Link>
@@ -123,7 +122,7 @@ export function Header() {
                 style={{
                   transitionDelay: isOpen ? `${index * 100}ms` : '0ms',
                 }}
-                onClick={() => handleLinkClick(item.href)}
+                onClick={handleLinkClick}
               >
                 {item.label}
               </Link>
