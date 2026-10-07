@@ -26,7 +26,7 @@ export function Footer() {
     <footer className='w-full pb-12 print:hidden'>
       <div className='max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8'>
         <p className='text-sm text-muted-foreground'>
-          © 2025 Sarah Yousuph, all rights reserved. | Site by{' '}
+          © {new Date().getFullYear()} Sarah Yousuph, all rights reserved. | Site by{' '}
           <Link
             href='https://hikmah-yousuph.vercel.app/'
             className='text-gray-700 hover:text-beige underline'
