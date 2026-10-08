@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { FaEnvelope, FaInstagram, FaLinkedinIn } from 'react-icons/fa'
 import { FaUpwork } from 'react-icons/fa6'
+import { BsSubstack } from "react-icons/bs";
 import { FaMedium } from 'react-icons/fa6'
 
 const socialLinks = [
@@ -18,6 +19,11 @@ const socialLinks = [
     href: 'https://www.upwork.com/freelancers/~0118c3507b9e418464',
     icon: FaUpwork,
     label: 'Upwork',
+  },
+  {
+    href: 'https://substack.com/@sarahsplanet?r=129lex&utm_medium=ios&utm_source=profile',
+    icon: BsSubstack,
+    label: 'Substack',
   },
 ]
 
