@@ -29,7 +29,7 @@ export function ChatBubble() {
       )}
 
       <div
-        className={`fixed bottom-24 right-6 z-50 transition-all duration-500 ease-out ${
+        className={`min-w-[20rem] fixed bottom-24 right-6 z-50 transition-all duration-500 ease-out ${
           isOpen
             ? 'opacity-100 scale-100 translate-y-0'
             : 'opacity-0 scale-75 translate-y-8 pointer-events-none'
