@@ -29,11 +29,11 @@ export function ResumeGenerator({
       const start = new Date(startDate)
       const end = endDate ? new Date(endDate) : null
 
-      const startMonth = start.toLocaleDateString('en-US', { month: 'long' })
+      const startMonth = start.toLocaleDateString('en-US', { month: 'short' })
       const startYear = start.getFullYear()
 
       if (end) {
-        const endMonth = end.toLocaleDateString('en-US', { month: 'long' })
+        const endMonth = end.toLocaleDateString('en-US', { month: 'short' })
         const endYear = end.getFullYear()
         return `${startMonth} ${startYear} – ${endMonth} ${endYear}`
       }
