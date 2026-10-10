@@ -1,8 +1,7 @@
 import Link from 'next/link'
-import { FaEnvelope, FaInstagram, FaLinkedinIn } from 'react-icons/fa'
+import { FaEnvelope, FaLinkedinIn } from 'react-icons/fa'
 import { FaUpwork } from 'react-icons/fa6'
 import { BsSubstack } from "react-icons/bs";
-import { FaMedium } from 'react-icons/fa6'
 
 const socialLinks = [
   {
@@ -34,7 +33,7 @@ export function Footer() {
         <p className='text-sm text-muted-foreground'>
           © {new Date().getFullYear()} Sarah Yousuph, all rights reserved. | Site by{' '}
           <Link
-            href='https://hikmah-yousuph.vercel.app/'
+            href='https://hikmahyousuph.com'
             className='text-gray-700 hover:text-beige underline'
             target='_blank'
             rel='noopener noreferrer'
