@@ -1,4 +1,4 @@
-# Content Writer Website (Work In Progress)
+# Content Writer Website
 
 A full-stack content writer [website](https://sarah-yousuph.vercel.app): blog, admin area, portfolio, contact, resume builder, and CMS-style content management. This README summarizes the project, organized by feature and architecture.
 
