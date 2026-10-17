@@ -1,4 +1,34 @@
 import { z } from 'zod'
+import { countWords } from '@/lib/word-count'
+import {
+  HERO_TAGLINE_MIN_WORDS,
+  HERO_TAGLINE_MAX_WORDS,
+} from '@/lib/home-content'
+
+export function wordCountStringSchema(min: number, max: number) {
+  return z
+    .string()
+    .trim()
+    .min(1, 'This field is required')
+    .refine(
+      (value) => {
+        const wordCount = countWords(value)
+        return wordCount >= min && wordCount <= max
+      },
+      {
+        message: `Must be between ${min} and ${max} words`,
+      },
+    )
+}
+
+export const heroTaglineSchema = z.object({
+  heroTagline: wordCountStringSchema(
+    HERO_TAGLINE_MIN_WORDS,
+    HERO_TAGLINE_MAX_WORDS,
+  ),
+})
+
+export type HeroTaglineFormValues = z.infer<typeof heroTaglineSchema>
 
 export const experienceSchema = z.object({
   organization: z.string().min(1, 'Organization is required'),
@@ -17,7 +47,7 @@ export const experienceSchema = z.object({
           .filter((word) => word.length > 0).length
         return wordCount >= 10
       },
-      { message: 'Responsibilities must have at least 10 words total' }
+      { message: 'Responsibilities must have at least 10 words total' },
     ),
 })
 
