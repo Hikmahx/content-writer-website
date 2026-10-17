@@ -178,6 +178,7 @@ model PersonalInfo {
 model AdminProfile {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   bio             String?
+  heroTagline     String?
   profileImage    String?
   linkedinUrl     String?
   awards          String[]
